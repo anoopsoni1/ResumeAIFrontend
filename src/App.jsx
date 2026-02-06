@@ -103,7 +103,7 @@ function Hero() {
   cursorBlinkDuration={0.5}
   className="text-white font-bold text-6xl"
 />
-    <h3 className=" text-3xl font-semibold pt-2 text-amber-600 ">Build resumes that get interviews — not rejections.</h3>
+    <h3 className=" text-3xl font-semibold pt-2 text-orange-400 ">Build resumes that get interviews — not rejections.</h3>
       <p className="mt-6 max-w-2xl text-white text-lg">
         Optimize your resume with AI suggestions, beat ATS filters,
         and build stunning portfolios in minutes.
@@ -119,7 +119,7 @@ function Hero() {
 
 function Footer() {
   return (
-    <footer className="bg-black/70 text-white py-10">
+    <footer className="bg-black/70 text-white py-5">
       <div className="mx-auto px-4 text-center text-sm">
         © 2025 ResumeAI. All rights reserved.
       </div>

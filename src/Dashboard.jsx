@@ -12,6 +12,8 @@ import { useNavigate, NavLink, Link } from "react-router-dom";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
 import LiquidEther from "./LiquidEther";
+import FloatingLines from "./Lighting";
+import { useEffect  } from "react";
 
 
 function Topbar() {
@@ -80,12 +82,6 @@ function Topbar() {
                  className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
                >
                  Sign In
-               </Link>
-               <Link
-                 to="/register"
-                 className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-               >
-                 Get Started
                </Link>
              </div>
            )}
@@ -172,80 +168,117 @@ function StatCards() {
 
 
 export default function Dashboard() {
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+  
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const user = useSelector((state) => state.user.userData);
   const [theme ] = useState("dark");
 
   return (
-    <>
-    <div
-      className={`min-h-screen ${
-        theme === "dark" ? "bg-slate-950 text-white" : "bg-white text-black"
-      }`}
-    >
-
- <div className="absolute inset-0 z-0 pointer-events-none">
-        <LiquidEther
-          colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
-          mouseForce={50}
-          cursorSize={100}
-          isViscous
-          viscous={30}
-          iterationsViscous={32}
-          iterationsPoisson={32}
-          resolution={0.5}
-          isBounce={false}
-          autoDemo
-          autoSpeed={0.5}
-          autoIntensity={2.2}
-          takeoverDuration={0.25}
-          autoResumeDelay={3000}
-          autoRampDuration={0.6}
-          color0="#5227FF"
-          color1="#FF9FFC"
-          color2="#B19EEF"
-        />
-      </div>
-
-      <Topbar />
-
-      {user ? (
-        <main className="py-6">
-          <div className="mx-auto px-4">
-            <div className="rounded-2xl border border-yellow-100 p-6">
-              <h2 className="text-lg sm:text-xl font-bold">
-                <span className="text-amber-500">
-                  {user?.FirstName} {user?.LastName}
-                </span>
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                Your resume is performing well. Here are your latest stats and
-                quick actions.
-              </p>
-            </div>
-          </div>
-
-          <StatCards />
-        </main>
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      {size.width >= 768 ? (
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <LiquidEther
+            colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
+            mouseForce={50}
+            cursorSize={100}
+            isViscous
+            viscous={30}
+            iterationsViscous={32}
+            iterationsPoisson={32}
+            resolution={0.5}
+            isBounce={false}
+            autoDemo
+            autoSpeed={0.5}
+            autoIntensity={2.2}
+            takeoverDuration={0.25}
+            autoResumeDelay={3000}
+            autoRampDuration={0.6}
+            color0="#5227FF"
+            color1="#FF9FFC"
+            color2="#B19EEF"
+          />
+        </div>
       ) : (
-        <div className="flex min-h-screen items-center justify-center bg-black px-4 text-center">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white">
-              Welcome to ResumeAI Dashboard
-            </h1>
-            <p className="mt-4 text-sm sm:text-lg text-slate-300">
-              Please log in to access your dashboard.
-            </p>
-            <Link
-              to="/login"
-              className="mt-6 inline-block rounded-full bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700"
-            >
-              Go to Login
-            </Link>
-          </div>
+        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+          <FloatingLines 
+            enabledWaves={["top","middle","bottom"]}
+            lineCount={10}
+            lineDistance={5}
+            bendRadius={5}
+            bendStrength={-0.5}
+            interactive={true}
+            parallax={true}
+            mixBlendMode="screen"
+            topWavePosition={0}
+            middleWavePosition={0}
+            bottomWavePosition={-2}
+            animationSpeed={2}
+            mouseDamping={0.05}
+          />
         </div>
       )}
+
+      <div className={`absolute inset-0 z-1 ${size.width >= 768 ? 'bg-black/40' : 'bg-black/30'}`} />
+
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Topbar />
+        {user ? (
+          <main className="flex-1 py-6">
+            <div className="mx-auto px-4">
+              <div className="rounded-2xl border border-yellow-100 p-6">
+                <h2 className="text-lg sm:text-xl font-bold">
+                  <span className="text-amber-500">
+                    {user?.FirstName} {user?.LastName}
+                  </span>
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                  Your resume is performing well. Here are your latest stats and
+                  quick actions.
+                </p>
+              </div>
+            </div>
+
+            <StatCards />
+          </main>
+        ) : (
+          <div className="flex-1 flex items-center justify-center px-4 text-center">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white">
+                Welcome to ResumeAI Dashboard
+              </h1>
+              <p className="mt-4 text-sm sm:text-lg text-amber-500">
+                Please log in to access your dashboard.
+              </p>
+              <Link
+                to="/login"
+                className="mt-6 inline-block rounded-full bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-700"
+              >
+                Go to Login
+              </Link>
+            </div>
+          </div>
+        )}
+        <footer className="bg-black/70 text-white py-5 mt-auto">
+          <div className="mx-auto px-4 text-center text-sm">
+            © 2025 ResumeAI. All rights reserved.
+          </div>
+        </footer>
+      </div>
     </div>
-    <footer className="bg-black py-10 text-slate-300"> <div className="mx-auto px-4"> <div className="grid gap-8 md:grid-cols-5"> <div className="md:col-span-2"> <div className="flex items-center gap-2"> <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500"> <span className="text-lg font-semibold text-white">AI</span> </div> <span className="text-lg font-semibold tracking-tight text-white"> ResumeAI </span> </div> <p className="mt-3 max-w-sm text-sm text-white"> Transform your career with AI-assisted resume optimization and portfolio generation. </p> <div className="mt-4 flex gap-3 text-sm text-white"> <span className="cursor-pointer hover:text-white">Twitter</span> <span className="cursor-pointer hover:text-white">LinkedIn</span> <span className="cursor-pointer hover:text-white">GitHub</span> </div> </div> <div> <h4 className="text-sm font-semibold text-white">Product</h4> <ul className="mt-3 space-y-2 text-sm text-white"> <li>Features</li> <li>Pricing</li> <li>Templates</li> <li>Changelog</li> </ul> </div> <div> <h4 className="text-sm font-semibold text-white">Company</h4> <ul className="mt-3 space-y-2 text-sm text-white"> <li>About</li> <li>Blog</li> <li>Careers</li> <li>Contact</li> </ul> </div> <div> <h4 className="text-sm font-semibold text-white">Resources</h4> <ul className="mt-3 space-y-2 text-sm text-white"> <li>Documentation</li> <li>Resume Tips</li> <li>ATS Guide</li> <li>API</li> </ul> </div> </div> <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-4 text-xs text-white md:flex-row"> <span>© 2025 ResumeAI. All rights reserved.</span> </div> </div> </footer>
-    </>
   );
 }
