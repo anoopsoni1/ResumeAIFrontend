@@ -174,14 +174,14 @@ useEffect(() => {
       </div>
 </>
 ) : (
-  /* Mobile view: Lightning bolt with white core + purple/pink glow */
-  <div className="absolute inset-0 z-0 pointer-events-none min-h-screen mix-blend-screen">
+  /* Mobile view: Lightning background */
+  <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full  mix-blend-screen">
     <Lightning
-      hue={275}
+      hue={270}
       xOffset={0}
-      speed={0.4}
-      intensity={2.5}
-      size={1.4}
+      speed={0.6}
+      intensity={2.2}
+      size={1.5}
     />
   </div>
 )}

@@ -19,12 +19,11 @@ const Lightning = ({ hue = 230, xOffset = 0, speed = 1, intensity = 1, size = 1 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
+    const gl = canvas.getContext('webgl');
     if (!gl) {
       console.error('WebGL not supported');
       return;
     }
-    gl.clearColor(0.0, 0.0, 0.0, 0.0);
 
     const vertexShaderSource = `
       attribute vec2 aPosition;
@@ -42,46 +41,74 @@ const Lightning = ({ hue = 230, xOffset = 0, speed = 1, intensity = 1, size = 1 
       uniform float uSpeed;
       uniform float uIntensity;
       uniform float uSize;
+      
+      #define OCTAVE_COUNT 10
 
       vec3 hsv2rgb(vec3 c) {
-        vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-        return c.z * mix(vec3(1.0), rgb, c.y);
+          vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0,4.0,2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+          return c.z * mix(vec3(1.0), rgb, c.y);
       }
 
-      void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-        vec2 uv = fragCoord / iResolution.xy;
-        uv = 2.0 * uv - 1.0;
-        uv.x *= iResolution.x / iResolution.y;
-        uv.x += uXOffset;
+      float hash11(float p) {
+          p = fract(p * .1031);
+          p *= p + 33.33;
+          p *= p + p;
+          return fract(p);
+      }
 
-        float t = uv.y;
-        float curve = 0.45 * sin(t * 1.4) + 0.25 * sin(t * 2.8 + 0.5);
-        float centerX = curve * uSize;
-        float dist = abs(uv.x - centerX);
+      float hash12(vec2 p) {
+          vec3 p3 = fract(vec3(p.xyx) * .1031);
+          p3 += dot(p3, p3.yzx + 33.33);
+          return fract((p3.x + p3.y) * p3.z);
+      }
 
-        float coreWidth = 0.018;
-        float glowWidth = 0.25;
-        float core = 1.0 - smoothstep(0.0, coreWidth, dist);
-        float glow = exp(-dist * (8.0 / uIntensity)) * (0.6 + 0.2 * sin(iTime * uSpeed));
-        float outer = exp(-dist * (2.5 / uIntensity)) * 0.4;
+      mat2 rotate2d(float theta) {
+          float c = cos(theta);
+          float s = sin(theta);
+          return mat2(c, -s, s, c);
+      }
 
-        vec3 whiteCore = vec3(1.0, 1.0, 1.0);
-        vec3 purple = hsv2rgb(vec3(uHue / 360.0, 0.65, 0.95));
-        vec3 pink = hsv2rgb(vec3((uHue + 25.0) / 360.0, 0.5, 0.9));
-        vec3 glowColor = mix(purple, pink, 0.3 + 0.2 * sin(iTime * uSpeed * 0.5));
+      float noise(vec2 p) {
+          vec2 ip = floor(p);
+          vec2 fp = fract(p);
+          float a = hash12(ip);
+          float b = hash12(ip + vec2(1.0, 0.0));
+          float c = hash12(ip + vec2(0.0, 1.0));
+          float d = hash12(ip + vec2(1.0, 1.0));
+          
+          vec2 t = smoothstep(0.0, 1.0, fp);
+          return mix(mix(a, b, t.x), mix(c, d, t.x), t.y);
+      }
 
-        vec3 col = whiteCore * core + glowColor * glow + glowColor * outer * 0.6;
-        col *= (0.85 + 0.15 * sin(iTime * uSpeed * 2.0));
-        col *= uIntensity;
+      float fbm(vec2 p) {
+          float value = 0.0;
+          float amplitude = 0.5;
+          for (int i = 0; i < OCTAVE_COUNT; ++i) {
+              value += amplitude * noise(p);
+              p *= rotate2d(0.45);
+              p *= 2.0;
+              amplitude *= 0.5;
+          }
+          return value;
+      }
 
-        float verticalFade = 0.7 + 0.3 * (1.0 - abs(uv.y));
-        col *= verticalFade;
-
-        fragColor = vec4(col, min(1.0, (core + glow + outer) * 1.2));
+      void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
+          vec2 uv = fragCoord / iResolution.xy;
+          uv = 2.0 * uv - 1.0;
+          uv.x *= iResolution.x / iResolution.y;
+          uv.x += uXOffset;
+          
+          uv += 2.0 * fbm(uv * uSize + 0.8 * iTime * uSpeed) - 1.0;
+          
+          float dist = max(abs(uv.x), 0.001);
+          vec3 baseColor = hsv2rgb(vec3(uHue / 360.0, 0.7, 0.8));
+          vec3 col = baseColor * pow(mix(0.0, 0.07, hash11(iTime * uSpeed)) / dist, 1.0) * uIntensity;
+          col = pow(col, vec3(1.0));
+          fragColor = vec4(col, 1.0);
       }
 
       void main() {
-        mainImage(gl_FragColor, gl_FragCoord.xy);
+          mainImage(gl_FragColor, gl_FragCoord.xy);
       }
     `;
 
@@ -137,7 +164,6 @@ const Lightning = ({ hue = 230, xOffset = 0, speed = 1, intensity = 1, size = 1 
       resizeCanvas();
       if (canvas.width > 0 && canvas.height > 0) {
         gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform2f(iResolutionLocation, canvas.width, canvas.height);
         const currentTime = performance.now();
         gl.uniform1f(iTimeLocation, (currentTime - startTime) / 1000.0);
