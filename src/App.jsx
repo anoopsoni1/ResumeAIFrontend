@@ -7,8 +7,8 @@ import axios from "axios";
 import LiquidEther from "./LiquidEther";
 import TextType from './TextType';
 import {useState , useEffect} from "react"
-// import Lightning from "./FloatingLines.jsx" 
-import Lightning from "./Lighting.jsx";
+//  import {Hyperspeed} from './Lighting.jsx';
+import FloatingLines from './Lighting.jsx';
 
 function Navbar() {
   const user = useSelector((state) => state.user.userData);
@@ -174,15 +174,26 @@ useEffect(() => {
       </div>
 </>
 ) : (
-  /* Mobile view: Lightning background */
+
   <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full  mix-blend-screen">
-    <Lightning
-      hue={270}
-      xOffset={0}
-      speed={0.6}
-      intensity={2.2}
-      size={1.5}
-    />
+
+  <FloatingLines 
+    enabledWaves={["top","middle","bottom"]}
+    // Array - specify line count per wave; Number - same count for all waves
+    lineCount={10}
+    // Array - specify line distance per wave; Number - same distance for all waves
+    lineDistance={5}
+    bendRadius={5}
+    bendStrength={-0.5}
+    interactive={true}
+    parallax={true}
+    mixBlendMode="screen"
+    topWavePosition={0}
+    middleWavePosition={0}
+    bottomWavePosition={-2}
+    animationSpeed={2}
+    mouseDamping={0.05}
+  />
   </div>
 )}
 
