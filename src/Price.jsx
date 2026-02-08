@@ -5,7 +5,11 @@ import { useNavigate, NavLink, Link } from "react-router-dom";
 import { clearUser } from "./slice/user.slice";
 import axios from "axios";
 import LiquidEther from "./LiquidEther";
-
+import { useState,useEffect } from "react";
+import FloatingLines from "./Lighting";
+import { IoReorderThreeOutline } from "react-icons/io5";
+import { FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { RxCross2 } from "react-icons/rx";
 
 const plans = [
   {
@@ -42,6 +46,11 @@ const plans = [
 
 function PricingSection() {
   const user = useSelector((state) => state.user.userData);
+   const [size, setSize] = useState({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+    const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -57,36 +66,72 @@ function PricingSection() {
     } catch (error) {
       console.error("Logout failed", error);
     }
-  };
+  };  
+    useEffect(() => {
+      const handleResize = () => {
+        setSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+        setOpen(false)
+      };
+    
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+  
 
   return (
-    <>
+       <>
+       <div className="relative min-h-screen overflow-hidden bg-black">
      <div className="absolute inset-0 z-20 pointer-events-none">
-            <LiquidEther
-              colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
-              mouseForce={50}
-              cursorSize={100}
-              isViscous
-              viscous={30}
-              iterationsViscous={32}
-              iterationsPoisson={32}
-              resolution={0.5}
-              isBounce={false}
-              autoDemo
-              autoSpeed={0.5}
-              autoIntensity={2.2}
-              takeoverDuration={0.25}
-              autoResumeDelay={3000}
-              autoRampDuration={0.6}
-              color0="#5227FF"
-              color1="#FF9FFC"
-              color2="#B19EEF"
-            />
-          </div>
+            {size.width >= 768 ? (
+                  <div className="absolute inset-0 z-0 pointer-events-none">
+                    <LiquidEther
+                      colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
+                      mouseForce={50}
+                      cursorSize={100}
+                      isViscous
+                      viscous={30}
+                      iterationsViscous={32}
+                      iterationsPoisson={32}
+                      resolution={0.5}
+                      isBounce={false}
+                      autoDemo
+                      autoSpeed={0.5}
+                      autoIntensity={2.2}
+                      takeoverDuration={0.25}
+                      autoResumeDelay={3000}
+                      autoRampDuration={0.6}
+                      color0="#5227FF"
+                      color1="#FF9FFC"
+                      color2="#B19EEF"
+                    />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+                    <FloatingLines 
+                      enabledWaves={["top","middle","bottom"]}
+                      lineCount={10}
+                      lineDistance={5}
+                      bendRadius={5}
+                      bendStrength={-0.5}
+                      interactive={true}
+                      parallax={true}
+                      mixBlendMode="screen"
+                      topWavePosition={0}
+                      middleWavePosition={0}
+                      bottomWavePosition={-2}
+                      animationSpeed={2}
+                      mouseDamping={0.05}
+                    />
+                  </div>)
+                  }
+                  </div>
 
-      <div className="relative  min-h-screen bg-black">
-        <header className="sticky top-0 z-30 backdrop-blur-xl bg-black">
-          <div className="mx-auto flex items-center justify-between px-4 py-4">
+      <div className="relative  min-h-screen bg-black/70">
+        <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/60">
+          <div className="mx-auto flex items-center justify-between px-2 py-2">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
                 <FaFileMedical className="text-white" />
@@ -117,6 +162,8 @@ function PricingSection() {
               ))}
             </nav>
 
+   {size.width < 768 ?( 
+  <>
             {user ? (
               <button
                 onClick={handleLogout}
@@ -125,25 +172,61 @@ function PricingSection() {
                 Logout
               </button>
             ) : (
-              <div className="flex gap-3">
-                <Link
+             <>
+            {open && (
+        <div
+          className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
+          <ul className="py-2 text-white">
+
+          <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 cursor-pointer transition justify-between">
+            <div className="flex items-center gap-3"> <div className="bg-blue-700 h-9 w-9 place-items-center p-3 rounded-full flex text-white"><FaFileMedical /></div> <div className="text-white text-lg font-semibold">RESUME AI</div></div>
+             <div onClick={() => setOpen(false)} className=" text-2xl cursor-pointer"><RxCross2 color="red" size={30} /></div>
+            </li>
+
+            <li className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+              <FaUser /> Dashboard
+            </li>
+
+            <li className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+              <FaCog /> setting
+            </li>
+
+             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
+              <FaSignOutAlt /> Logout
+            </li>
+
+             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
+              <FaSignOutAlt /> Logout
+            </li>
+
+             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
+              <FaSignOutAlt /> Logout
+            </li>
+
+             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
+              <FaSignOutAlt /> Logout
+            </li>
+          </ul>
+        </div>
+      )}
+             <div className="flex gap-3 text-zinc-200"   onClick={() => setOpen(!open)}>
+             <IoReorderThreeOutline size={40} />
+             </div>
+             </>
+            )}
+           </>)
+            : 
+            (<> <Link
                   to="/login"
                   className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
                 >
                   Sign In
-                </Link>
-                <Link
-                  to="/register"
-                  className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
+                </Link></>)}
+           
           </div>
         </header>
 
-        <section className="py-16 md:py-20  relative z-10">
+        <section className="py-16 md:py-20  relative z-20">
           <div className="mx-auto max-w-6xl px-4 text-center">
             <h2 className="text-3xl font-extrabold text-white md:text-4xl">
               Simple, transparent pricing
@@ -205,6 +288,7 @@ function PricingSection() {
           </div>
         </section>
       </div>
+    </div>
     </>
   );
 }

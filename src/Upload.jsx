@@ -130,12 +130,6 @@ function Payal() {
               >
                 Sign In
               </Link>
-              <Link
-                to="/register"
-                className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-              >
-                Get Started
-              </Link>
             </div>
           )}
         </div>

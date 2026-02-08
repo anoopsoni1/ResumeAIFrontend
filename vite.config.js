@@ -18,8 +18,8 @@ export default defineConfig({
         background_color: '#ffffff',
         theme_color: '#0ea5e9',
         icons: [
-          { src: 'https://madgicaltechdom.com/wp-content/uploads/2024/04/How-AI-Helps-Filter-Resumes-According-to-Job-Descriptions.jpeg', sizes: '192x192', type: 'image/png' },
-          { src: 'https://madgicaltechdom.com/wp-content/uploads/2024/04/How-AI-Helps-Filter-Resumes-According-to-Job-Descriptions.jpeg', sizes: '512x512', type: 'image/png' }
+          { src: '/public/one.png', sizes: '192x192', type: 'image/png' },
+          { src: '/public/one.png', sizes: '512x512', type: 'image/png' }
         ]
       }
     })
