@@ -10,6 +10,11 @@ import FloatingLines from "./Lighting";
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
 import { RxCross2 } from "react-icons/rx";
+import { FaHome } from "react-icons/fa";
+import { GrDocumentUpload } from "react-icons/gr";
+import { IoMdContacts } from "react-icons/io";
+import { FaBook } from "react-icons/fa";
+import { FaSignInAlt } from "react-icons/fa";
 
 const plans = [
   {
@@ -163,15 +168,7 @@ function PricingSection() {
             </nav>
 
    {size.width < 768 ?( 
-  <>
-            {user ? (
-              <button
-                onClick={handleLogout}
-                className="rounded-full bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-              >
-                Logout
-              </button>
-            ) : (
+  
              <>
             {open && (
         <div
@@ -183,45 +180,55 @@ function PricingSection() {
              <div onClick={() => setOpen(false)} className=" text-2xl cursor-pointer"><RxCross2 color="red" size={30} /></div>
             </li>
 
-            <li className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-              <FaUser /> Dashboard
-            </li>
+            <Link to="/" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+            <FaHome /> Home
+            </Link>
 
-            <li className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-              <FaCog /> setting
-            </li>
+            <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+            <FaUser /> Dashboard
+            </Link>
 
-             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
-              <FaSignOutAlt /> Logout
-            </li>
+             <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+             <GrDocumentUpload /> Upload Resume
+            </Link>
 
-             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
-              <FaSignOutAlt /> Logout
-            </li>
+             <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+             <IoMdContacts /> Contact Us
+            </Link>
 
-             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
-              <FaSignOutAlt /> Logout
-            </li>
+             <Link to="/about" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+             <FaBook /> About Us
+            </Link>
 
-             <li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 cursor-pointer transition">
-              <FaSignOutAlt /> Logout
-            </li>
+            {user ? (
+              <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
+              <FaSignInAlt /> Logout
+             </Link>
+            ) : (
+              <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-700 cursor-pointer transition">
+              <FaSignInAlt /> Login
+             </Link>
+            )}
+
           </ul>
         </div>
       )}
              <div className="flex gap-3 text-zinc-200"   onClick={() => setOpen(!open)}>
              <IoReorderThreeOutline size={40} />
              </div>
-             </>
-            )}
-           </>)
+             </> )
             : 
-            (<> <Link
-                  to="/login"
-                  className="rounded-full bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-                >
-                  Sign In
-                </Link></>)}
+            (<> 
+            {user ? (
+              <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
+              <FaSignInAlt /> Logout
+             </Link>
+            ) : (
+              <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-700 cursor-pointer transition">
+              <FaSignInAlt /> Login
+             </Link>
+            )}
+            </>)}
            
           </div>
         </header>
