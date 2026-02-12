@@ -36,6 +36,8 @@ const dispatch = useDispatch() ;
       })
 
          const data = await res.json() ;
+       
+         localStorage.setItem("accessToken", data.data.accessToken);
         dispatch(setUser(data.data.user));
          alert("Login Succesfully")
           navigate("/dashboard")

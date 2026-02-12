@@ -3,7 +3,7 @@ import { Upload, FileText, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setResumeText } from "./slice/Resume.slice";
 import { FaFileMedical } from "react-icons/fa";
-import { Link , NavLink} from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
@@ -15,6 +15,9 @@ import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import FloatingLines from './Lighting.jsx';
 import LiquidEther from './LiquidEther';
+import { FaDollarSign } from "react-icons/fa";
+import axios from "axios";
+import { clearUser } from "./slice/user.slice";
 
 // const fade = {
 //   hidden: { opacity: 0 },
@@ -69,6 +72,7 @@ function Payal() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
   const fileInputRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -99,12 +103,24 @@ function Payal() {
     setMessage("");
 
     try {
+      const accessToken = localStorage.getItem("accessToken");
+      const headers = {};
+      if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+
       const res = await fetch("http://localhost:5000/api/v1/user/upload", {
         method: "POST",
+        credentials: "include", 
+        headers,
         body: formData,
       });
 
       const data = await res.json();
+
+      if (res.status === 401) {
+        dispatch(clearUser());
+        navigate("/login");
+        return;
+      }
 
       if (res.ok) {
         dispatch(setResumeText(data.data.resumeText));
@@ -180,9 +196,9 @@ function Payal() {
   <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full  mix-blend-screen">
 
   <FloatingLines 
-    enabledWaves={["top","middle","bottom"]}
+    enabledWaves={["top","middle","bottom","left","right"]}
     // Array - specify line count per wave; Number - same count for all waves
-    lineCount={10}
+    lineCount={5}
     // Array - specify line distance per wave; Number - same distance for all waves
     lineDistance={5}
     bendRadius={5}
@@ -254,6 +270,10 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
 
   <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
   <GrDocumentUpload /> Upload Resume
+ </Link>
+
+ <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+  <FaDollarSign /> Price
  </Link>
 
   <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
@@ -387,7 +407,7 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
       </motion.div>
 
       <motion.div className=" w-full">
-        <motion.h1 variants={fadeUp} className="text-2xl sm:text-3xl md:text-4xl text-white font-bold mb-4 sm:mb-6 px-2">
+        <motion.h1 variants={fadeUp} className="text-2xl  sm:text-3xl md:text-4xl sm:text-white text-amber-200 font-semibold mb-4 sm:mb-6 px-2">
           Made for students, professionals, and job seekers to land interviews
           faster.
         </motion.h1>

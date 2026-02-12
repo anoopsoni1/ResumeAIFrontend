@@ -16,6 +16,12 @@ import Home from './App.jsx'
 import PricingSection from './Price.jsx'
 // import ResumeExactTemplate from './Template.jsx'
 import ResumePremiumTemplate from './Template.jsx'
+import Payment from './Payment.jsx'
+import PaymentResult from './Paymentresult.jsx'
+import ResumeEditor from './Editor.jsx'
+// import Profile from './Profile.jsx'
+import Contact from './Contact.jsx'
+import About from './About.jsx'
 
 const route = createBrowserRouter([
   {
@@ -24,8 +30,8 @@ const route = createBrowserRouter([
   },
 
  {
-      path : "/dashboard" ,
-       element : <Dashboard />
+    path : "/dashboard" ,
+    element : <Dashboard />
  } ,
  {
   path : "/login" ,
@@ -54,7 +60,27 @@ const route = createBrowserRouter([
  {
   path : "/price",
   element : <PricingSection />
- }
+ },
+ {
+  path : "/payment",
+  element : <Payment />
+ },
+ {
+  path : "/payment-success",
+  element : <PaymentResult />
+ },
+ {
+  path : "/editor",
+  element : <ResumeEditor />
+ },
+ {
+  path: "/contact",
+  element: <Contact />,
+ },
+ {
+  path: "/about",
+  element: <About />,
+ },
 
 ])
 

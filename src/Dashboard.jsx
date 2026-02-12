@@ -10,7 +10,7 @@ import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, NavLink, Link } from "react-router-dom";
 import axios from "axios";
-import { clearUser } from "./slice/user.slice";
+import { clearUser, setUser } from "./slice/user.slice";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 import { useEffect  } from "react";
@@ -22,6 +22,10 @@ import { IoMdContacts } from "react-icons/io";
 import { FaBook } from "react-icons/fa";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
+
+const API_BASE =
+  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
+  "http://localhost:5000";
 
 function Topbar() {
   const user = useSelector((state) => state.user.userData);
@@ -35,11 +39,16 @@ function Topbar() {
 
   const handleLogout = async () => {
     try {
+      const accessToken = localStorage.getItem("accessToken");
       await axios.post(
-        "https://shoesbackend-4.onrender.com/api/v1/user/logout",
+        `${API_BASE}/api/v1/user/logout`,
         {},
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        }
       );
+      localStorage.removeItem("accessToken");
       dispatch(clearUser());
       navigate("/login");
     } catch (error) {
@@ -242,6 +251,11 @@ export default function Dashboard() {
     height: window.innerHeight,
   });
   
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.user.userData);
+  const [authChecking, setAuthChecking] = useState(true);
+
   useEffect(() => {
     const handleResize = () => {
       setSize({
@@ -254,8 +268,58 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const user = useSelector((state) => state.user.userData);
+  // Authentication + authorization: validate session with protected endpoint.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkAuth() {
+      setAuthChecking(true);
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+
+        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (res.status === 401) {
+            dispatch(clearUser());
+            if (!cancelled) navigate("/login");
+          }
+          return;
+        }
+
+        const currentUser = data?.user || data?.data?.user;
+        if (currentUser) dispatch(setUser(currentUser));
+      } finally {
+        if (!cancelled) setAuthChecking(false);
+      }
+    }
+
+    checkAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, navigate]);
+
   const [theme ] = useState("dark");
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+          <p className="text-white font-semibold">Checking session…</p>
+          <p className="mt-1 text-sm text-slate-300">
+            Verifying authentication with the server.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
@@ -320,6 +384,55 @@ export default function Dashboard() {
                   quick actions.
                 </p>
               </div>
+
+              {user?.Premium ? (
+                <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-emerald-300">
+                        Premium active
+                      </p>
+                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                        You have access to all premium features.
+                      </p>
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                    >
+                      View profile
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-amber-300">
+                        Premium not active
+                      </p>
+                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                        Upgrade to unlock premium templates, AI optimizations,
+                        and more.
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <Link
+                        to="/price"
+                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                      >
+                        Upgrade
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                      >
+                        View profile
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <StatCards />
