@@ -14,6 +14,7 @@ import { FaHome } from "react-icons/fa";
 import { GrDocumentUpload } from "react-icons/gr";
 import { IoMdContacts } from "react-icons/io";
 import { FaBook } from "react-icons/fa";
+import { LuDollarSign } from "react-icons/lu";
 import { FaSignInAlt } from "react-icons/fa";
 
 const plans = [
@@ -44,7 +45,7 @@ const plans = [
       "Priority support",
       "Export to PDF/Word",
     ],
-    cta: "Start Free Trial",
+    cta: "Start Now",
   },
 ];
 
@@ -192,6 +193,10 @@ function PricingSection() {
              <GrDocumentUpload /> Upload Resume
             </Link>
 
+             <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+             <LuDollarSign /> Price
+            </Link>
+
              <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
              <IoMdContacts /> Contact Us
             </Link>
@@ -280,7 +285,8 @@ function PricingSection() {
                     ))}
                   </ul>
 
-                  <button
+                  <Link
+                    to={plan.cta === "Start Now" ? "/payment" : "/upload"}
                     className={`mt-6 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                       plan.highlight
                         ? "bg-indigo-600 text-white hover:bg-indigo-700"
@@ -288,7 +294,7 @@ function PricingSection() {
                     }`}
                   >
                     {plan.cta}
-                  </button>
+                  </Link>
                 </div>
               ))}
             </div>

@@ -22,10 +22,9 @@ import { IoMdContacts } from "react-icons/io";
 import { FaBook } from "react-icons/fa";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
+import { LuDollarSign } from "react-icons/lu";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE ="http://localhost:5000";
 
 function Topbar() {
   const user = useSelector((state) => state.user.userData);
@@ -69,8 +68,8 @@ function Topbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 backdrop-blur-xl bg-black">
-         <div className="mx-auto flex items-center justify-between px-4 py-4">
+    <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/60">
+         <div className="mx-auto flex items-center justify-between px-2 py-2">
            <div className="flex items-center gap-2">
              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
                <FaFileMedical className="text-white" />
@@ -124,6 +123,10 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
 
   <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
   <GrDocumentUpload /> Upload Resume
+ </Link>
+
+ <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+  <LuDollarSign /> Price
  </Link>
 
   <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">

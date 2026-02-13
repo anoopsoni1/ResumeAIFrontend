@@ -12,6 +12,7 @@ import { FaHome, FaSignInAlt, FaUser } from "react-icons/fa";
 import { GrDocumentUpload } from "react-icons/gr";
 import { IoMdContacts } from "react-icons/io";
 import { FaBook } from "react-icons/fa";
+import { LuDollarSign } from "react-icons/lu";
 import { HiMail, HiLocationMarker, HiPhone } from "react-icons/hi";
 
 const API_BASE =
@@ -57,14 +58,14 @@ function Topbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 backdrop-blur-xl bg-black">
-      <div className="mx-auto flex items-center justify-between px-4 py-4">
-        <Link to="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/60">
+      <div className="mx-auto flex items-center justify-between px-2 py-2">
+        <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
             <FaFileMedical className="text-white" />
           </div>
           <span className="text-lg font-semibold text-white">RESUME AI</span>
-        </Link>
+        </div>
 
         <nav className="hidden md:flex gap-8 text-white">
           {[
@@ -110,6 +111,9 @@ function Topbar() {
                   </Link>
                   <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
                     <GrDocumentUpload /> Upload Resume
+                  </Link>
+                  <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
+                    <LuDollarSign /> Price
                   </Link>
                   <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
                     <IoMdContacts /> Contact Us
@@ -159,10 +163,15 @@ export default function Contact() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    subject: "",
     message: "",
+    phone: "",
   });
   const [status, setStatus] = useState({ type: "", text: "" });
+
+  const handleMail = async () => {
+    const response = await axios.post(`${API_BASE}/api/v1/user/mail`, form);
+    return response.data;
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -176,10 +185,15 @@ export default function Contact() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus({ type: "info", text: "Thanks! We'll get back to you soon." });
-    setForm({ name: "", email: "", subject: "", message: "" });
+    try {
+      await handleMail();
+      setStatus({ type: "info", text: "Thanks! We'll get back to you soon." });
+      setForm({ name: "", email: "", subject: "", message: "", phone: "" });
+    } catch (error) {
+      setStatus({ type: "error", text: "Failed to send. Please try again." });
+    }
   };
 
   return (
@@ -234,7 +248,7 @@ export default function Contact() {
         <Topbar />
 
         <main className="flex-1 py-8 px-4">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto ">
             <div className="text-center mb-10">
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
                 Get in <span className="text-amber-500">Touch</span>
@@ -310,15 +324,15 @@ export default function Contact() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Subject</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-1">PhoneNumber</label>
                       <input
-                        type="text"
-                        name="subject"
+                        type="number"
+                        name="PhoneNumber"
                         value={form.subject}
                         onChange={handleChange}
                         required
                         className="w-full rounded-xl border border-slate-500/50 bg-white/5 px-4 py-3 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                        placeholder="How can we help?"
+                        placeholder="+91 99999999"
                       />
                     </div>
                     <div>

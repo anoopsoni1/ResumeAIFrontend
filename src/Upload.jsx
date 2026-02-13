@@ -15,7 +15,7 @@ import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import FloatingLines from './Lighting.jsx';
 import LiquidEther from './LiquidEther';
-import { FaDollarSign } from "react-icons/fa";
+import { LuDollarSign } from "react-icons/lu";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
 
@@ -216,14 +216,14 @@ function Payal() {
 )}
 
       <div className="relative z-10">
-      <header className="sticky top-0 z-30 backdrop-blur-xl ">
-        <div className="mx-auto flex items-center justify-between px-4 py-4">
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/60">
+        <div className="mx-auto flex items-center justify-between px-2 py-2">
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
               <FaFileMedical className="text-white" />
             </div>
             <span className="text-lg font-semibold text-white">
-            ResumeAI
+              RESUME AI
             </span>
           </div>
   
@@ -273,7 +273,7 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
  </Link>
 
  <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-  <FaDollarSign /> Price
+  <LuDollarSign /> Price
  </Link>
 
   <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">

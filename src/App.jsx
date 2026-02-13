@@ -17,6 +17,7 @@ import { IoMdContacts } from "react-icons/io";
 import { FaBook } from "react-icons/fa";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
+import { LuDollarSign } from "react-icons/lu";
 
 function Navbar() {
   const user = useSelector((state) => state.user.userData);
@@ -110,6 +111,10 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
 
   <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
   <GrDocumentUpload /> Upload Resume
+ </Link>
+
+  <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
+  <LuDollarSign /> Price
  </Link>
 
   <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
