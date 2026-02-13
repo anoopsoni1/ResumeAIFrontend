@@ -16,9 +16,7 @@ import { RxCross2 } from "react-icons/rx";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 const PAYMENT_AMOUNT = 100;
 

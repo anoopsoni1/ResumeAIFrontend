@@ -107,7 +107,7 @@ function Payal() {
       const headers = {};
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      const res = await fetch("http://localhost:5000/api/v1/user/upload", {
+      const res = await fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/upload", {
         method: "POST",
         credentials: "include", 
         headers,
@@ -137,7 +137,7 @@ function Payal() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/v1/user/logout",
+        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
         {},
         { withCredentials: true }
       );

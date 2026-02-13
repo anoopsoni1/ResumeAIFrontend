@@ -63,7 +63,7 @@ function PricingSection() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "https://shoesbackend-4.onrender.com/api/v1/user/logout",
+        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
         {},
         { withCredentials: true }
       );

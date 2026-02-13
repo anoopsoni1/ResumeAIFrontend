@@ -16,7 +16,7 @@ function PaymentResult() {
 
     const payment = async () => {
       try {
-        const res = await fetch("https://shoesbackend-4.onrender.com/api/v1/user/verifypayment", {
+        const res = await fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/verifypayment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ order_id }),
@@ -38,7 +38,7 @@ function PaymentResult() {
     paymentStatus: "Success",
          };
       
- const response =  await fetch("https://shoesbackend-4.onrender.com/api/v1/user/saveorder", {
+ const response =  await fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/saveorder", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(orderPayload),

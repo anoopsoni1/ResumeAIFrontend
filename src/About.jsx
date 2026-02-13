@@ -16,9 +16,7 @@ import { LuDollarSign } from "react-icons/lu";
 import { FiTarget, FiZap, FiGlobe } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 function Topbar() {
   const user = useSelector((state) => state.user.userData);

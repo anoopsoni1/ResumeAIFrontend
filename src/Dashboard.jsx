@@ -24,7 +24,7 @@ import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { LuDollarSign } from "react-icons/lu";
 
-const API_BASE ="http://localhost:5000";
+const API_BASE ="https://resumeaibackend-oqcl.onrender.com";
 
 function Topbar() {
   const user = useSelector((state) => state.user.userData);

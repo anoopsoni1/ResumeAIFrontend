@@ -14,9 +14,7 @@ import { clearUser, setUser } from "./slice/user.slice";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 function Topbar() {
   const user = useSelector((state) => state.user.userData);
