@@ -2,33 +2,21 @@ import React, { useState, useEffect } from "react";
 import { load } from "@cashfreepayments/cashfree-js";
 import { Loader2, CreditCard, ShieldCheck } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
-import { FaFileMedical } from "react-icons/fa";
-import { FaHome, FaSignInAlt, FaUser } from "react-icons/fa";
-import { GrDocumentUpload } from "react-icons/gr";
-import { IoMdContacts } from "react-icons/io";
-import { FaBook } from "react-icons/fa";
-import { LuDollarSign } from "react-icons/lu";
-import { IoReorderThreeOutline } from "react-icons/io5";
-import { RxCross2 } from "react-icons/rx";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
+import AppHeader from "./AppHeader";
+import AppFooter from "./AppFooter";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 const PAYMENT_AMOUNT = 100;
 
 function Topbar() {
-  const user = useSelector((state) => state.user.userData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [size, setSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -49,111 +37,7 @@ function Topbar() {
     }
   };
 
-  useEffect(() => {
-    const handleResize = () => {
-      setSize({ width: window.innerWidth, height: window.innerHeight });
-      setOpen(false);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return (
-    <header className="sticky top-0 z-30 backdrop-blur-xl bg-black">
-      <div className="mx-auto flex items-center justify-between px-4 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
-            <FaFileMedical className="text-white" />
-          </div>
-          <span className="text-lg font-semibold text-white">RESUME AI</span>
-        </Link>
-
-        <nav className="hidden md:flex gap-8 text-white">
-          {[
-            { to: "/", label: "Home" },
-            { to: "/dashboard", label: "Dashboard" },
-            { to: "/price", label: "Price" },
-            { to: "/about", label: "About" },
-            { to: "/contact", label: "Contact" },
-          ].map(({ to, label }) => (
-            <NavLink
-              key={label}
-              to={to}
-              className={({ isActive }) =>
-                isActive ? "text-orange-500 font-semibold" : "hover:text-orange-500"
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {size.width < 768 ? (
-          <>
-            {open && (
-              <div className="absolute right-0 top-0 w-full bg-black rounded-2xl shadow-xl z-10">
-                <ul className="py-2 text-white">
-                  <li className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-blue-700 h-9 w-9 place-items-center p-3 rounded-full flex text-white">
-                        <FaFileMedical />
-                      </div>
-                      <span className="text-white text-lg font-semibold">RESUME AI</span>
-                    </div>
-                    <div onClick={() => setOpen(false)} className="text-2xl cursor-pointer">
-                      <RxCross2 color="red" size={30} />
-                    </div>
-                  </li>
-                  <Link to="/" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <FaHome /> Home
-                  </Link>
-                  <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <FaUser /> Dashboard
-                  </Link>
-                  <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <GrDocumentUpload /> Upload Resume
-                  </Link>
-                  <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <LuDollarSign /> Price
-                  </Link>
-                  <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <IoMdContacts /> Contact Us
-                  </Link>
-                  <Link to="/about" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 cursor-pointer transition">
-                    <FaBook /> About Us
-                  </Link>
-                  {user ? (
-                    <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
-                      <FaSignInAlt /> Logout
-                    </Link>
-                  ) : (
-                    <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-400 cursor-pointer transition">
-                      <FaSignInAlt /> Login
-                    </Link>
-                  )}
-                </ul>
-              </div>
-            )}
-            <div className="flex gap-3 text-zinc-200" onClick={() => setOpen(!open)}>
-              <IoReorderThreeOutline size={40} />
-            </div>
-          </>
-        ) : (
-          <>
-            {user ? (
-              <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
-                <FaSignInAlt /> Logout
-              </Link>
-            ) : (
-              <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-400 cursor-pointer transition">
-                <FaSignInAlt /> Login
-              </Link>
-            )}
-          </>
-        )}
-      </div>
-    </header>
-  );
+  return <AppHeader onLogout={handleLogout} />;
 }
 
 export default function Payment() {
@@ -333,11 +217,7 @@ export default function Payment() {
           )}
         </main>
 
-        <footer className="bg-black/70 text-white py-5 mt-auto">
-          <div className="mx-auto px-4 text-center text-sm">
-            © 2025 ResumeAI. All rights reserved.
-          </div>
-        </footer>
+        <AppFooter />
       </div>
     </div>
   );

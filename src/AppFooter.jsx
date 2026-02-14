@@ -1,0 +1,13 @@
+/**
+ * Shared footer matching Templates.jsx for larger screens.
+ * Simple one-liner: border-t, max-w-6xl, text-zinc-500, copyright.
+ */
+export default function AppFooter() {
+  return (
+    <footer className="relative z-10 border-t border-white/10 py-6 mt-12">
+      <div className="mx-auto max-w-6xl px-4 text-center text-sm text-zinc-500">
+        © 2025 ResumeAI. All rights reserved.
+      </div>
+    </footer>
+  );
+}

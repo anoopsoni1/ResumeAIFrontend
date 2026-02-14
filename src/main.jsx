@@ -22,6 +22,7 @@ import ResumeEditor from './Editor.jsx'
 // import Profile from './Profile.jsx'
 import Contact from './Contact.jsx'
 import About from './About.jsx'
+import TemplatesPage from './Templates.jsx'
 
 const route = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const route = createBrowserRouter([
   {
   path : "/Template" ,
   element : <ResumePremiumTemplate />
+ },
+ {
+  path: "/templates",
+  element: <TemplatesPage />
  },
  {
   path : "/price",

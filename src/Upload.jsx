@@ -2,22 +2,15 @@ import { useEffect, useState, useRef } from "react";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setResumeText } from "./slice/Resume.slice";
-import { FaFileMedical } from "react-icons/fa";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { IoReorderThreeOutline } from "react-icons/io5";
-import { RxCross2 } from "react-icons/rx";
-import { FaHome } from "react-icons/fa";
-import { GrDocumentUpload } from "react-icons/gr";
-import { IoMdContacts } from "react-icons/io";
-import { FaBook } from "react-icons/fa";
-import { FaSignInAlt } from "react-icons/fa";
-import { FaUser } from "react-icons/fa";
 import FloatingLines from './Lighting.jsx';
 import LiquidEther from './LiquidEther';
 import { LuDollarSign } from "react-icons/lu";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
+import AppHeader from "./AppHeader";
+import AppFooter from "./AppFooter";
 
 // const fade = {
 //   hidden: { opacity: 0 },
@@ -216,105 +209,7 @@ function Payal() {
 )}
 
       <div className="relative z-10">
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-black/60">
-        <div className="mx-auto flex items-center justify-between px-2 py-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600">
-              <FaFileMedical className="text-white" />
-            </div>
-            <span className="text-lg font-semibold text-white">
-              RESUME AI
-            </span>
-          </div>
-  
-          <nav className="hidden md:flex gap-8 text-white">
-            {[
-              { to: "/", label: "Home" },
-              { to: "/dashboard", label: "Dashboard" },
-              { to: "/price", label: "Price" },
-              { to: "/about", label: "About" },
-            ].map(({ to, label }) => (
-              <NavLink
-                key={label}
-                to={to}
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-orange-500 font-semibold"
-                    : "hover:text-orange-500"
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-  
-          {size.width < 768 ?( 
-  <>
- {open && (
-<div
-className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
-<ul className="py-2 text-white">
-
-<li className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 cursor-pointer transition justify-between">
- <div className="flex items-center gap-3"> <div className="bg-blue-700 h-9 w-9 place-items-center p-3 rounded-full flex text-white"><FaFileMedical /></div> <div className="text-white text-lg font-semibold">RESUME AI</div></div>
-  <div onClick={() => setOpen(false)} className=" text-2xl cursor-pointer"><RxCross2 color="red" size={30} /></div>
- </li>
-
- <Link to="/" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
- <FaHome /> Home
- </Link>
-
- <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
- <FaUser /> Dashboard
- </Link>
-
-  <Link to="/upload" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-  <GrDocumentUpload /> Upload Resume
- </Link>
-
- <Link to="/price" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-  <LuDollarSign /> Price
- </Link>
-
-  <Link to="/contact" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-  <IoMdContacts /> Contact Us
- </Link>
-
-  <Link to="/about" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition">
-  <FaBook /> About Us
- </Link>
-
- {user ? (
-   <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
-   <FaSignInAlt /> Logout
-  </Link>
- ) : (
-   <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-700 cursor-pointer transition">
-   <FaSignInAlt /> Login
-  </Link>
- )}
-</ul>
-</div>
-)}
-<div className="flex gap-3 text-zinc-200"   onClick={() => setOpen(!open)}>
-<IoReorderThreeOutline size={40} />
- </div>
-</> )
- : 
- (<> 
- {user ? (
-   <Link onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-red-500 cursor-pointer transition">
-   <FaSignInAlt /> Logout
-  </Link>
- ) : (
-   <Link to="/login" className="flex items-center gap-3 px-4 py-3 text-blue-700 cursor-pointer transition">
-   <FaSignInAlt /> Login
-  </Link>
- )}
- </>)}
-        </div>
-      </header>
-      
+        <AppHeader onLogout={handleLogout} />
       <div className="relative z-10">
       <div className="min-h-[90vh]  flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="flex items-center justify-center gap-4 w-full mb-8 sm:mb-12">
@@ -335,7 +230,7 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
           viewport={{ once: true }}
           className="w-full max-w-2xl rounded-2xl backdrop-blur-xl shadow-xl p-4 sm:p-6 md:p-8"
         >
-          <form onSubmit={handleUpload} className="space-y-4 sm:space-y-6">
+          <form onSubmit={handleUpload} className="space-y-4 sm:space-y-6 grid gap-4">
             <label>
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -361,10 +256,10 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 disabled={loading}
-                className="w-full bg-indigo-500 hover:bg-indigo-700 text-white py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base"
+                className="w-full bg-indigo-500 hover:bg-indigo-700 text-white py-2.5  sm:py-3 rounded-xl font-semibold text-sm sm:text-base"
               >
                 {loading ? (
-                  <span className="flex gap-2 justify-center items-center">
+                  <span className="flex gap-2  justify-center items-center">
                     <Loader2 className="animate-spin w-4 h-4 sm:w-5 sm:h-5" /> <span>Uploading...</span>
                   </span>
                 ) : (
@@ -429,65 +324,7 @@ className="absolute right-0 top-0  w-full bg-black  rounded-2xl shadow-xl z-10">
     </motion.div>
     </div>
 
-       <footer className=" py-8 sm:py-10 text-slate-300 relative z-10">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 sm:gap-8">
-          <div className="col-span-2 sm:col-span-3 md:col-span-2">
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-indigo-500">
-                <span className="text-base sm:text-lg font-semibold text-white">AI</span>
-              </div>
-              <span className="text-base sm:text-lg font-semibold tracking-tight text-white">
-                ResumeAI
-              </span>
-            </div>
-            <p className="mt-2 sm:mt-3 max-w-sm text-xs sm:text-sm text-white mb-4 sm:mb-0">
-              Transform your career with AI-assisted resume optimization and
-              portfolio generation.
-            </p>
-            <div className="mt-4 flex gap-3 sm:gap-4 text-xs sm:text-sm text-white">
-              <span className="cursor-pointer hover:text-indigo-400 transition-colors">Twitter</span>
-              <span className="cursor-pointer hover:text-indigo-400 transition-colors">LinkedIn</span>
-              <span className="cursor-pointer hover:text-indigo-400 transition-colors">GitHub</span>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3">Product</h4>
-            <ul className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-white">
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Features</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Pricing</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Templates</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Changelog</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3">Company</h4>
-            <ul className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-white">
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">About</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Blog</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Careers</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Contact</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 sm:mb-3">Resources</h4>
-            <ul className="mt-2 sm:mt-3 space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-white">
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Documentation</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">Resume Tips</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">ATS Guide</li>
-              <li className="hover:text-indigo-400 cursor-pointer transition-colors">API</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-6 sm:mt-8 flex flex-col items-center justify-between gap-3 border-t border-slate-800 pt-4 sm:pt-6 text-xs sm:text-sm text-white md:flex-row">
-          <span className="text-center md:text-left">© 2025 ResumeAI. All rights reserved.</span>
-        </div>
-      </div>
-    </footer>
+<AppFooter />
     </div>
     </div>
     
