@@ -16,7 +16,7 @@ function Navbar() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/v1/user/logout",
+        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
         {},
         { withCredentials: true }
       );

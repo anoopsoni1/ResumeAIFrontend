@@ -4,9 +4,7 @@ import { FaFileMedical } from "react-icons/fa";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -142,9 +140,9 @@ export default function Register() {
         <main className="flex-1 flex justify-center items-center px-4 py-8">
           <form
             onSubmit={handleSubmit}
-            className="bg-white shadow-lg p-8 rounded-xl w-full max-w-md"
+            className=" shadow-lg p-8 rounded-xl w-full max-w-md"
           >
-            <h2 className="text-2xl font-bold mb-6 text-center">
+            <h2 className="text-2xl font-bold mb-6 text-center text-white">
               Create Account
             </h2>
 
@@ -160,22 +158,25 @@ export default function Register() {
               placeholder="First Name"
               value={form.FirstName}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
             />
             <input
               name="LastName"
               placeholder="Last Name"
               value={form.LastName}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
-            />
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
+              />
             <input
               name="email"
               type="email"
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
             />
             <input
               name="password"
@@ -183,8 +184,9 @@ export default function Register() {
               placeholder="Password"
               value={form.password}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
-            />
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
+              />
 
             <button
               type="submit"
@@ -193,9 +195,9 @@ export default function Register() {
               Register
             </button>
 
-            <p className="mt-4 text-center text-sm">
+            <p className="mt-4 text-center text-sm text-white">
               Already have an account?{" "}
-              <Link to="/login" className="text-blue-600 underline">
+              <Link to="/login" className="text-blue-600 underline font-bold">
                 Login
               </Link>
             </p>

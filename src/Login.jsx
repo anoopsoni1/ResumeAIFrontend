@@ -6,9 +6,7 @@ import { FaFileMedical } from "react-icons/fa";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:5000";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 export default function Login() {
   const [email, setemail] = useState("");
@@ -143,9 +141,9 @@ export default function Login() {
         <main className="flex-1 flex justify-center items-center px-4 py-8">
           <form
             onSubmit={handleSubmit}
-            className="bg-white shadow-lg p-8 rounded-xl w-full max-w-md"
+            className=" shadow-lg p-8 rounded-xl w-full max-w-md"
           >
-            <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center text-white">Login</h2>
 
             {error && (
               <p className="text-red-600 text-center mb-3">{error}</p>
@@ -157,7 +155,8 @@ export default function Login() {
               placeholder="Email"
               value={email}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
             />
             <input
               name="password"
@@ -165,7 +164,8 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={handleChange}
-              className="w-full mb-3 p-3 border rounded"
+              className="w-full mb-3 p-3 border rounded border-gray-300 outline-none placeholder:text-white text-white"
+              required
             />
 
             <button
@@ -175,7 +175,7 @@ export default function Login() {
               Login
             </button>
 
-            <p className="mt-4 text-center text-sm">
+            <p className="mt-4 text-center text-sm text-white">
               Don't have an account?{" "}
               <Link to="/register" className="text-blue-600 underline">
                 Register
