@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import Dashboard from './Dashboard.jsx'
-import {createBrowserRouter, RouterProvider} from "react-router-dom"
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom"
 import Login from './Login.jsx'
 import Register from './Register.jsx'
 import { Provider } from 'react-redux'
@@ -15,14 +15,16 @@ import Home from './App.jsx'
 // import AtsResumeTemplate from "./Template.jsx"
 import PricingSection from './Price.jsx'
 // import ResumeExactTemplate from './Template.jsx'
-import ResumePremiumTemplate from './Template.jsx'
+// import ResumePremiumTemplate from './Template.jsx'
 import Payment from './Payment.jsx'
 import PaymentResult from './Paymentresult.jsx'
-import ResumeEditor from './Editor.jsx'
+// import ResumeEditor from './Editor.jsx'
 // import Profile from './Profile.jsx'
 import Contact from './Contact.jsx'
 import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
+import TemplatesDesignPage from './TemplatesDesign.jsx'
+import PortfolioPage from './Portfolio.jsx'
 
 const route = createBrowserRouter([
   {
@@ -54,13 +56,13 @@ const route = createBrowserRouter([
   path : "/atsscore" ,
   element : <AtsChecker />
  },
-  {
-  path : "/Template" ,
-  element : <ResumePremiumTemplate />
- },
  {
   path: "/templates",
-  element: <TemplatesPage />
+  element: <Outlet />,
+  children: [
+    { index: true, element: <TemplatesPage /> },
+    { path: "design", element: <TemplatesDesignPage /> },
+  ],
  },
  {
   path : "/price",
@@ -75,16 +77,16 @@ const route = createBrowserRouter([
   element : <PaymentResult />
  },
  {
-  path : "/editor",
-  element : <ResumeEditor />
- },
- {
   path: "/contact",
   element: <Contact />,
  },
  {
   path: "/about",
   element: <About />,
+ },
+ {
+  path: "/portfolio",
+  element: <PortfolioPage />,
  },
 
 ])

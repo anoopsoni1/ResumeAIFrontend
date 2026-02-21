@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
-import { FileText, Layout, Sparkles } from "lucide-react";
+import { FileText, Layout, Lock, Sparkles } from "lucide-react";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 import AppHeader from "./AppHeader";
@@ -44,7 +44,7 @@ function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
 }
 
-function TemplateCard({ template, onSelect }) {
+function TemplateCard({ template, onSelect, isLocked }) {
   const accentColors = {
     indigo: "border-indigo-500/50 bg-indigo-500/10 hover:bg-indigo-500/20",
     slate: "border-slate-500/50 bg-slate-500/10 hover:bg-slate-500/20",
@@ -54,7 +54,7 @@ function TemplateCard({ template, onSelect }) {
   const btnColors = {
     indigo: "bg-indigo-600 hover:bg-indigo-700",
     slate: "bg-slate-600 hover:bg-slate-700",
-    gray: "bg-gray-600 hover:bg-gray-700",
+    gray: "bg-gray-800 hover:bg-gray-700",
     orange: "bg-orange-600 hover:bg-orange-700",
   };
   const accent = accentColors[template.accent] || accentColors.indigo;
@@ -62,8 +62,13 @@ function TemplateCard({ template, onSelect }) {
 
   return (
     <div
-      className={`rounded-2xl border p-6 transition-all duration-300 ${accent} backdrop-blur-sm flex flex-col`}
+      className={`rounded-2xl border p-6 transition-all duration-300 ${accent} backdrop-blur-sm flex flex-col relative ${isLocked ? "opacity-90" : ""}`}
     >
+      {isLocked && (
+        <div className="absolute top-4 right-4 rounded-full bg-amber-500/20 p-1.5 border border-amber-400/40" title="Premium template">
+          <Lock className="h-4 w-4 text-amber-400" />
+        </div>
+      )}
       <div className="mb-4 flex items-center gap-3">
         <div className="rounded-lg bg-white/10 p-2">
           <Layout className="h-6 w-6 text-white" />
@@ -74,12 +79,22 @@ function TemplateCard({ template, onSelect }) {
       <div className="rounded-lg bg-black/30 p-4 mb-6 min-h-[80px] flex items-center justify-center border border-white/10">
         <span className="text-sm font-medium text-white/80">{template.preview}</span>
       </div>
-      <button
-        onClick={() => onSelect(template.id)}
-        className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white transition ${btn}`}
-      >
-        Use this template
-      </button>
+      {isLocked ? (
+        <Link
+          to="/price"
+          className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white transition text-center flex items-center justify-center gap-2 ${btn}`}
+        >
+          <Lock className="h-4 w-4" />
+          Upgrade to unlock
+        </Link>
+      ) : (
+        <button
+          onClick={() => onSelect(template.id)}
+          className={`w-full rounded-lg py-2.5 text-sm font-semibold text-white transition ${btn}`}
+        >
+          Use this template
+        </button>
+      )}
     </div>
   );
 }
@@ -87,6 +102,8 @@ function TemplateCard({ template, onSelect }) {
 export default function TemplatesPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userData);
+  const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -101,7 +118,7 @@ export default function TemplatesPage() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/v1/user/logout",
+        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
         {},
         { withCredentials: true }
       );
@@ -181,11 +198,12 @@ export default function TemplatesPage() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {TEMPLATES.map((template) => (
+            {TEMPLATES.map((template, index) => (
               <TemplateCard
                 key={template.id}
                 template={template}
                 onSelect={handleSelectTemplate}
+                isLocked={!isPremium && index > 0}
               />
             ))}
           </div>
