@@ -25,7 +25,7 @@ import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 import { registerSW } from 'virtual:pwa-register'
 
 const updateSW = registerSW({
