@@ -74,7 +74,7 @@ const route = createBrowserRouter([
   path: "/templates",
   element: <Outlet />,
   children: [
-    { index: true, element: <TemplatesPage /> },
+     { index: true, element: <TemplatesPage /> },
     { path: "design", element: <TemplatesDesignPage /> },
   ],
  },

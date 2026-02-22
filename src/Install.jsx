@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { MdDownloadForOffline } from "react-icons/md";
-import { IoClose } from "react-icons/io5";
+import { motion, AnimatePresence } from "framer-motion";
+import { Download, X } from "lucide-react";
+
+const STORAGE_KEY = "resumeai_pwa_dismissed";
 
 const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -10,7 +12,7 @@ const InstallPrompt = () => {
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      const dismissed = localStorage.getItem("solemate_pwa_dismissed");
+      const dismissed = localStorage.getItem(STORAGE_KEY);
       if (!dismissed) setVisible(true);
     };
 
@@ -21,9 +23,7 @@ const InstallPrompt = () => {
   useEffect(() => {
     let timer;
     if (visible) {
-      timer = setTimeout(() => {
-        setVisible(false);
-      }, 10000);
+      timer = setTimeout(() => setVisible(false), 10000);
     }
     return () => clearTimeout(timer);
   }, [visible]);
@@ -32,52 +32,75 @@ const InstallPrompt = () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      console.log("User installed SoleMate");
-    } else {
-      console.log("User dismissed install");
-      localStorage.setItem("solemate_pwa_dismissed", "true");
+    if (outcome !== "accepted") {
+      localStorage.setItem(STORAGE_KEY, "true");
     }
-
     setVisible(false);
     setDeferredPrompt(null);
   };
 
   const handleClose = () => {
     setVisible(false);
-    localStorage.setItem("solemate_pwa_dismissed", "true");
+    localStorage.setItem(STORAGE_KEY, "true");
   };
 
-  if (!visible) return null;
-
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-linear-to-r from-yellow-300 to-yellow-600 text-black px-5 py-4 rounded-3xl shadow-xl flex items-center gap-4 z-50 w-[90%] sm:w-auto sm:min-w-[400px] justify-between backdrop-blur-lg border border-yellow-200 animate-slideUp">
-      <div className="flex items-center gap-3">
-        <MdDownloadForOffline size={32} className="text-black" />
-        <div>
-          <p className="font-bold text-lg">Install SoleMate</p>
-          <p className="text-sm text-black/80 font-medium">
-            Get quick access to your favorite shoes anytime.
-          </p>
-        </div>
-      </div>
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="fixed bottom-6 left-1/2 z-50 w-[90%] max-w-md -translate-x-1/2"
+        >
+          <div className="relative overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900/95 shadow-xl shadow-indigo-500/10 backdrop-blur-xl">
+            {/* subtle gradient accent */}
+            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-indigo-500/60 to-transparent" />
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleInstall}
-          className="px-4 py-2 rounded-2xl bg-black text-yellow-400 font-semibold shadow-md hover:scale-105 transition-transform"
-        >
-          Install
-        </button>
-        <button
-          onClick={handleClose}
-          className="p-2 rounded-full hover:bg-black/10 transition-colors"
-        >
-          <IoClose size={20} />
-        </button>
-      </div>
-    </div>
+            <div className="flex items-start gap-4 p-4 sm:p-5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600/20 text-indigo-400">
+                <Download className="h-5 w-5" aria-hidden />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-white">Install ResumeAI</p>
+                <p className="mt-0.5 text-sm text-slate-300">
+                  Add to your home screen for quick access and a smoother experience.
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleInstall}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+                  >
+                    <Download className="h-4 w-4" aria-hidden />
+                    Install
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="rounded-full px-4 py-2.5 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-slate-900"
+                  >
+                    Not now
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleClose}
+                className="shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-white focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-slate-900"
+                aria-label="Dismiss"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
