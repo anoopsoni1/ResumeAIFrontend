@@ -25,7 +25,7 @@ import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
-
+import { Analytics } from "@vercel/analytics/next"
 import { registerSW } from 'virtual:pwa-register'
 
 const updateSW = registerSW({
@@ -109,6 +109,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
  <RouterProvider  router={route} />
+ <Analytics />
  </Provider>
   </StrictMode>,
 )
