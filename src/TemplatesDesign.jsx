@@ -75,7 +75,7 @@ function SteveDesignPreview({ onSelect }) {
     >
       <div className="flex flex-col h-[280px] sm:h-[320px]">
         {/* Top nav - full width */}
-        <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-white to-[#f5f3f8] border-b border-[#2C294F]/20">
+        <div className="flex items-center justify-between px-3 py-2 bg-linear-to-r from-white to-[#f5f3f8] border-b border-[#2C294F]/20">
           <div className="w-5 h-5 rounded-full border-2 border-[#2C294F] flex items-center justify-center text-[#2C294F] text-[8px] font-bold">
             S
           </div>
@@ -88,7 +88,7 @@ function SteveDesignPreview({ onSelect }) {
         </div>
         <div className="flex flex-1 min-h-0">
           {/* Left - light gradient + hero text */}
-          <div className="w-[55%] bg-gradient-to-br from-white to-[#f0eef5] flex flex-col p-3 relative overflow-hidden">
+          <div className="w-[55%] bg-linear-to-br from-white to-[#f0eef5] flex flex-col p-3 relative overflow-hidden">
             <span className="absolute left-0 top-1/2 -translate-y-1/2 text-[#e8e4f0] text-[8px] font-bold -rotate-90 origin-center whitespace-nowrap select-none">
               DESIGNER
             </span>

@@ -26,6 +26,20 @@ import TemplatesPage from './Templates.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
 
+import { registerSW } from 'virtual:pwa-register'
+
+const updateSW = registerSW({
+  onNeedRefresh() {
+    if (confirm("New content available. Reload?")) {
+      updateSW()
+    }
+  },
+  onOfflineReady() {
+    console.log("App ready to work offline")
+  },
+})
+
+
 const route = createBrowserRouter([
   {
     path : "/" ,

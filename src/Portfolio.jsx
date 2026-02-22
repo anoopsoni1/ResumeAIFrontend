@@ -334,7 +334,7 @@ export default function DynamicPortfolio() {
                   key={i}
                   variants={scaleIn}
                   custom={i}
-                  className="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-200 bg-white/[0.05] border border-white/[0.08] hover:border-indigo-400/50 hover:bg-indigo-500/10 cursor-default select-none transition-all"
+                  className="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-200 bg-white/5 border border-white/8 hover:border-indigo-400/50 hover:bg-indigo-500/10 cursor-default select-none transition-all"
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
                 >

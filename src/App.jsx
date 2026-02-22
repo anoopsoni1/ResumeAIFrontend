@@ -8,6 +8,7 @@ import TextType from './TextType';
 import FloatingLines from './Lighting.jsx';
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import InstallPrompt from "./Install.jsx";
 
 function Navbar() {
   const dispatch = useDispatch();
@@ -137,6 +138,7 @@ useEffect(() => {
       <div className="relative z-10">
         <Navbar />
         <Hero />
+        <InstallPrompt />
         <AppFooter />
       </div>
 
