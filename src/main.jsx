@@ -27,6 +27,7 @@ import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
 import { Analytics } from "@vercel/analytics/react"
 import { registerSW } from 'virtual:pwa-register'
+import { ToastProvider } from './context/ToastContext'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -108,8 +109,10 @@ const route = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
- <RouterProvider  router={route} />
- <Analytics />
- </Provider>
+      <ToastProvider>
+        <RouterProvider router={route} />
+        <Analytics />
+      </ToastProvider>
+    </Provider>
   </StrictMode>,
 )

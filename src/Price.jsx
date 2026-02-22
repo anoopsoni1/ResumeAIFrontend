@@ -109,8 +109,8 @@ function PricingSection() {
                   <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
                     <FloatingLines 
                       enabledWaves={["top","middle","bottom"]}
-                      lineCount={10}
-                      lineDistance={5}
+                      lineCount={5}
+                      lineDistance={10}
                       bendRadius={5}
                       bendStrength={-0.5}
                       interactive={true}
