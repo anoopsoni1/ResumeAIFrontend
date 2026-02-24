@@ -19,7 +19,7 @@ import PricingSection from './Price.jsx'
 import Payment from './Payment.jsx'
 import PaymentResult from './Paymentresult.jsx'
 // import ResumeEditor from './Editor.jsx'
-// import Profile from './Profile.jsx'
+import Profile from './Profile.jsx'
 import Contact from './Contact.jsx'
 import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
@@ -28,6 +28,9 @@ import PortfolioPage from './Portfolio.jsx'
 import { Analytics } from "@vercel/analytics/react"
 import { registerSW } from 'virtual:pwa-register'
 import { ToastProvider } from './context/ToastContext'
+import UpPage from './up.jsx'
+import AdminDashboard from './AdminDashboard.jsx'
+import Makeadminpage from './Makeadminpage.jsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -100,8 +103,24 @@ const route = createBrowserRouter([
   element: <About />,
  },
  {
+  path: "/dashboard/profile",
+  element: <Profile />,
+ },
+ {
   path: "/portfolio",
   element: <PortfolioPage />,
+ },
+ {
+  path: "/up",
+  element: <UpPage />,
+ },
+ {
+  path: "/admin-dashboard",
+  element: <AdminDashboard />,
+ },
+ {
+  path: "/make-admin",
+  element: <Makeadminpage />,
  },
 
 ])

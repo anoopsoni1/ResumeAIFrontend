@@ -137,7 +137,26 @@ function AtsChecker() {
 
       if (!res.ok) throw new Error(data?.message || "Failed to calculate ATS score");
 
-      setResult(data.data);
+      const resultData = data.data || data;
+      setResult(resultData);
+
+      // Save or update ATS score in backend (upsert: create on first time, update on retry)
+      const score = resultData?.score;
+      if (typeof score === "number") {
+        const saveRes = await fetch(`${API_BASE}/api/v1/user/create-atsscore`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          body: JSON.stringify({ score }),
+        });
+        if (!saveRes.ok) {
+          const saveJson = await saveRes.json().catch(() => ({}));
+          console.warn("ATS score save failed:", saveJson?.message || saveRes.status);
+        }
+      }
     } catch (err) {
       setError(err?.message || "Failed to calculate ATS score");
     } finally {

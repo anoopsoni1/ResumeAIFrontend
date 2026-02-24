@@ -132,7 +132,29 @@ function AiResumeEditor() {
 
       setEditedText(data.data?.editedText || "");
       localStorage.setItem("EditedResumeText", data.data?.editedText || "");
-          dispatch(setEditedResumeText(data));
+      dispatch(setEditedResumeText(data));
+
+      // Save/update optimize count (first time = create, retry = update via upsert)
+      try {
+        const getRes = await fetch(`${API_BASE}/api/v1/user/get-optimize`, {
+          credentials: "include",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        });
+        const getJson = await getRes.json().catch(() => ({}));
+        const currentNumber = getRes.ok && getJson?.data?.number != null ? getJson.data.number : 0;
+        const nextNumber = currentNumber + 1;
+        await fetch(`${API_BASE}/api/v1/user/create-optimize`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          body: JSON.stringify({ number: nextNumber }),
+        });
+      } catch (_) {
+        // non-blocking: optimize save failed, AI edit still succeeded
+      }
     } catch (err) {
       setError(err?.message || "AI editing failed");
     } finally {

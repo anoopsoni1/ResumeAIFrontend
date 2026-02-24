@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaFileMedical } from "react-icons/fa";
-import { FaUserPlus } from "react-icons/fa";
+import { FaFileMedical, FaUserPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
 import AppHeader from "./AppHeader";
@@ -33,6 +32,7 @@ const item = {
 export default function Register() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 768,
@@ -219,17 +219,28 @@ export default function Register() {
                 </label>
                 <label className="block">
                   <span className="sr-only">Password</span>
-                  <input
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={handleChange}
-                    disabled={loading}
-                    autoComplete="new-password"
-                    className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 disabled:opacity-60"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={form.password}
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="new-password"
+                      className="w-full px-4 py-3.5 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 disabled:opacity-60"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((p) => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </label>
               </motion.div>
 

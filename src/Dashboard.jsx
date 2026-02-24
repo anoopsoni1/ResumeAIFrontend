@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiUserPlus } from "react-icons/fi";
 import { MdAutoAwesome, MdWbSunny } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,16 +39,18 @@ function Topbar() {
   return <AppHeader onLogout={handleLogout} />;
 }
 
-function StatCards() {
+function StatCards({ atsScore, optimizeCount }) {
+  const atsDisplay = atsScore != null && typeof atsScore === "number" ? `${atsScore}%` : "—";
+  const optimizeDisplay = optimizeCount != null && typeof optimizeCount === "number" ? String(optimizeCount) : "—";
   return (
     <div className="mt-6 px-4">
       <div className="mx-auto  grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { icon: <FiTarget />, label: "ATS Score", value: "87%" },
+            { icon: <FiTarget />, label: "ATS Score", value: atsDisplay },
             { icon: <AiOutlineFileText />, label: "Resume Status", value: "Optimized" },
-            { icon: <FiZap />, label: "Applications", value: "24" },
+            { icon: <FiZap />, label: "AI Optimizes", value: optimizeDisplay },
           ].map((item, i) => (
             <div
               key={i}
@@ -78,6 +80,7 @@ function StatCards() {
               icon: <MdAutoAwesome />,
               title: "Optimize Resume",
               desc: "Improve your ATS score and keywords.",
+              link: "/aiedit",
             },
             {
               icon: <FiGlobe />,
@@ -126,6 +129,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
   const [authChecking, setAuthChecking] = useState(true);
+  const [atsScore, setAtsScore] = useState(null);
+  const [optimizeCount, setOptimizeCount] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -176,6 +181,65 @@ export default function Dashboard() {
       cancelled = true;
     };
   }, [dispatch, navigate]);
+
+  // Fetch ATS score for dashboard when user is logged in
+  useEffect(() => {
+    if (!user) {
+      setAtsScore(null);
+      return;
+    }
+    let cancelled = false;
+    async function fetchAtsScore() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const res = await fetch(`${API_BASE}/api/v1/user/get-atsscore`, {
+          credentials: "include",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        });
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (res.ok && json?.data != null) {
+          const score = json.data?.score;
+          setAtsScore(typeof score === "number" ? score : null);
+        } else {
+          setAtsScore(null);
+        }
+      } catch {
+        if (!cancelled) setAtsScore(null);
+      }
+    }
+    fetchAtsScore();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  // Fetch optimize count for dashboard when user is logged in
+  useEffect(() => {
+    if (!user) {
+      setOptimizeCount(null);
+      return;
+    }
+    let cancelled = false;
+    async function fetchOptimize() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const res = await fetch(`${API_BASE}/api/v1/user/get-optimize`, {
+          credentials: "include",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        });
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (res.ok && json?.data != null && typeof json.data.number === "number") {
+          setOptimizeCount(json.data.number);
+        } else {
+          setOptimizeCount(null);
+        }
+      } catch {
+        if (!cancelled) setOptimizeCount(null);
+      }
+    }
+    fetchOptimize();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const [theme ] = useState("dark");
 
@@ -268,7 +332,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <Link
-                      to="/profile"
+                      to="/dashboard/profile"
                       className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
                     >
                       View profile
@@ -295,7 +359,7 @@ export default function Dashboard() {
                         Upgrade
                       </Link>
                       <Link
-                        to="/profile"
+                        to="/dashboard/profile"
                         className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
                       >
                         View profile
@@ -304,9 +368,53 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+
+              {/* Up page link - for all logged-in users */}
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-white">Extra tools</p>
+                    <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                      Templates and more.
+                    </p>
+                  </div>
+                  <Link
+                    to="/up"
+                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                  >
+                    Open Up page →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Admin-only: All Users & Make Admin */}
+              {user?.isAdmin && (
+                <div className="mt-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-5">
+                  <p className="text-sm font-semibold text-indigo-300">Admin</p>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-300 mb-4">
+                    Manage users and admins.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <Link
+                      to="/admin-dashboard"
+                      className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                    >
+                      <FiUsers className="w-4 h-4" />
+                      All Users
+                    </Link>
+                    <Link
+                      to="/make-admin"
+                      className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15 border border-indigo-400/50"
+                    >
+                      <FiUserPlus className="w-4 h-4" />
+                      Make Admin
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <StatCards />
+            <StatCards atsScore={atsScore} optimizeCount={optimizeCount} />
           </main>
         ) : (
           <div className="flex-1 flex items-center justify-center px-4 text-center">
