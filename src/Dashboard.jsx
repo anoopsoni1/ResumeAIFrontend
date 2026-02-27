@@ -348,23 +348,25 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Up page link - for all logged-in users */}
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-white">Extra tools</p>
-                    <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                      Templates and more.
-                    </p>
+              {/* Up page link - only for admins (extra tools) */}
+              {user?.isAdmin && (
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Extra tools</p>
+                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                        Templates and more.
+                      </p>
+                    </div>
+                    <Link
+                      to="/up"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                    >
+                      Open Up page →
+                    </Link>
                   </div>
-                  <Link
-                    to="/up"
-                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-                  >
-                    Open Up page →
-                  </Link>
                 </div>
-              </div>
+              )}
 
               {/* Video call interviews */}
               <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">

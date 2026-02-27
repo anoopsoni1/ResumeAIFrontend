@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { motion } from "framer-motion";
 import { FaFileMedical } from "react-icons/fa";
 import { IoReorderThreeOutline } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
@@ -88,13 +89,15 @@ export default function AppHeader({ onLogout }) {
       }`}
     >
       <div className="mx-auto flex items-center justify-between px-4 py-4">
-        <Link
-          to="/"
-          className="flex items-center gap-2 group transition-transform duration-300 hover:scale-105 active:scale-100"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110 shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/30">
-            <FaFileMedical className="text-white transition-transform duration-300 group-hover:scale-110" />
-          </div>
+        <Link to="/" className="flex items-center gap-2 group">
+          <motion.div
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 shadow-lg shadow-indigo-500/20"
+            whileHover={{ scale: 1.1, rotate: 6, boxShadow: "0 10px 30px -5px rgba(79, 70, 229, 0.4)" }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+          >
+            <FaFileMedical className="text-white" />
+          </motion.div>
           <span className="text-lg font-semibold text-white transition-colors duration-200 group-hover:text-indigo-200">
             RESUME AI
           </span>
@@ -203,31 +206,40 @@ export default function AppHeader({ onLogout }) {
                 </ul>
               </div>
             )}
-            <button
+            <motion.button
               type="button"
-              className={`flex gap-3 text-zinc-200 p-1 rounded-lg transition-all duration-300 ease-out active:scale-95 hover:bg-white/5 hover:rotate-90 ${open ? "rotate-90 scale-90 opacity-80" : ""}`}
+              className={`flex gap-3 text-zinc-200 p-1 rounded-lg hover:bg-white/5 ${open ? "rotate-90 scale-90 opacity-80" : ""}`}
               onClick={() => (open ? closeMenu() : openMenu())}
               aria-label={open ? "Close menu" : "Open menu"}
+              whileTap={{ scale: 0.92 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               <IoReorderThreeOutline size={40} />
-            </button>
+            </motion.button>
           </>
         ) : (
           <>
             {user && typeof onLogout === "function" ? (
-              <button
+              <motion.button
                 type="button"
                 onClick={onLogout}
-                className="text-red-400 hover:text-red-300 transition-all duration-200 font-medium hover:scale-105 active:scale-100 px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+                className="text-red-400 hover:text-red-300 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
                 Logout
-              </button>
+              </motion.button>
             ) : (
-              <Link
-                to="/login"
-                className="text-white hover:text-orange-500 transition-all duration-200 font-medium hover:scale-105 active:scale-100 px-3 py-1.5 rounded-lg hover:bg-orange-500/10 inline-block"
-              >
-                Login
+              <Link to="/login">
+                <motion.span
+                  className="inline-block text-white hover:text-orange-500 font-medium px-3 py-1.5 rounded-lg hover:bg-orange-500/10"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                >
+                  Login
+                </motion.span>
               </Link>
             )}
           </>

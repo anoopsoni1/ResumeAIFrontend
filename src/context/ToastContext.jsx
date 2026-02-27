@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, XCircle, X } from "lucide-react";
 
 const ToastContext = createContext(null);
 
-const TOAST_DURATION_MS = 4000;
+const TOAST_DURATION_MS = 4500;
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
@@ -32,7 +33,7 @@ export function ToastProvider({ children }) {
 function ToastContainer({ toasts, removeToast }) {
   return (
     <div
-      className="fixed top-4 right-4 z-100 flex flex-col gap-2 pointer-events-none w-full max-w-sm sm:max-w-md px-4 sm:px-0"
+      className="fixed top-4 right-4 z-9999 flex flex-col gap-3 pointer-events-none w-full max-w-sm sm:max-w-md px-4 sm:px-0"
       aria-live="polite"
     >
       <AnimatePresence mode="popLayout">
@@ -46,26 +47,66 @@ function ToastContainer({ toasts, removeToast }) {
 
 function ToastItem({ toast, onClose }) {
   const isError = toast.type === "error";
+  const progressRef = useRef(null);
+  const startTime = useRef(Date.now());
 
   useEffect(() => {
     const t = setTimeout(onClose, TOAST_DURATION_MS);
     return () => clearTimeout(t);
   }, [onClose]);
 
+  useEffect(() => {
+    const el = progressRef.current;
+    if (!el) return;
+    startTime.current = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime.current;
+      const pct = Math.min(100, (elapsed / TOAST_DURATION_MS) * 100);
+      el.style.transform = `scaleX(${1 - pct / 100})`;
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  const Icon = isError ? XCircle : CheckCircle2;
+  const iconCls = isError ? "text-red-400" : "text-emerald-400";
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 80, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      exit={{ opacity: 0, x: 80, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-      className={`pointer-events-auto rounded-xl shadow-lg border px-4 py-3 backdrop-blur-xl ${
+      initial={{ opacity: 0, x: 100, scale: 0.9, filter: "blur(4px)" }}
+      animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, x: 100, scale: 0.9, filter: "blur(4px)" }}
+      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      className={`pointer-events-auto rounded-2xl shadow-2xl border overflow-hidden backdrop-blur-xl ${
         isError
-          ? "bg-red-500/15 border-red-500/30 text-red-200"
-          : "bg-emerald-500/15 border-emerald-500/30 text-emerald-200"
+          ? "bg-red-950/80 border-red-500/40 text-red-100 shadow-red-500/10"
+          : "bg-emerald-950/80 border-emerald-500/40 text-emerald-100 shadow-emerald-500/10"
       }`}
     >
-      <p className="text-sm font-medium">{toast.message}</p>
+      <div className="flex items-start gap-3 px-4 py-3.5">
+        <motion.span
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25, delay: 0.05 }}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${isError ? "bg-red-500/20" : "bg-emerald-500/20"}`}
+        >
+          <Icon className={`h-5 w-5 ${iconCls}`} />
+        </motion.span>
+        <p className="text-sm font-medium flex-1 pt-0.5 pr-1">{toast.message}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="shrink-0 p-1.5 rounded-lg opacity-70 hover:opacity-100 hover:bg-white/10 transition-all duration-200 -mt-0.5 -mr-0.5"
+          aria-label="Dismiss"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div
+        ref={progressRef}
+        className={`h-1 w-full origin-left rounded-b-2xl ${isError ? "bg-red-500/50" : "bg-emerald-500/50"}`}
+        style={{ transform: "scaleX(1)" }}
+      />
     </motion.div>
   );
 }
