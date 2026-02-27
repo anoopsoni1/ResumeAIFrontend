@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useDispatch} from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +8,7 @@ import { clearUser } from "./slice/user.slice";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import PortfolioHTMLDownload from "./Download";
+import LightPillar from "./LiquidEther.jsx";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
@@ -143,6 +144,17 @@ export default function DynamicPortfolio() {
     "";
 
   const data = useMemo(() => parseResume(resumeText), [resumeText]);
+  const [size, setSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 768,
+    height: typeof window !== "undefined" ? window.innerHeight : 1024,
+  });
+
+  useEffect(() => {
+    const handleResize = () =>
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -165,8 +177,13 @@ export default function DynamicPortfolio() {
 
   if (!data) {
     return (
-
-      <div className="min-h-screen bg-[#07070c] text-white flex flex-col">
+      <div className="relative min-h-screen overflow-hidden bg-[#07070c]">
+        {size.width >= 768 && (
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
+          </div>
+        )}
+      <div className="relative z-10 min-h-screen bg-[#07070c] text-white flex flex-col">
         <AppHeader onLogout={handleLogout} />
         <motion.div
           initial={{ opacity: 0 }}
@@ -189,12 +206,18 @@ export default function DynamicPortfolio() {
         </motion.div>
         <AppFooter />
       </div>
+      </div>
     );
   }
 
   return (
     <PortfolioHTMLDownload>
       <div className="min-h-screen bg-[#07070c] text-white overflow-hidden relative">
+        {size.width >= 768 && (
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
+          </div>
+        )}
         {/* Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(99,102,241,0.12),transparent_50%)]" />

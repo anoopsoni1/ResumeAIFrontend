@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import LightPillar from "./LiquidEther.jsx";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 const TEMPLATES_API = `${API_BASE}/api/v1/user/templates`;
@@ -52,6 +53,17 @@ export default function UpPage() {
   const [error, setError] = useState("");
   const [createName, setCreateName] = useState("");
   const [createFile, setCreateFile] = useState(null);
+  const [size, setSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 768,
+    height: typeof window !== "undefined" ? window.innerHeight : 1024,
+  });
+
+  useEffect(() => {
+    const handleResize = () =>
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const loadTemplates = async () => {
     setLoading(true);
@@ -118,7 +130,13 @@ export default function UpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white p-6">
+    <div className="relative min-h-screen overflow-hidden bg-zinc-900">
+      {size.width >= 768 && (
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
+        </div>
+      )}
+      <div className="relative z-10 min-h-screen text-white p-6">
       <h1 className="text-2xl font-bold mb-6">Templates (up.jsx)</h1>
 
       {error && (
@@ -222,6 +240,7 @@ export default function UpPage() {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

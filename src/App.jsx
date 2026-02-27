@@ -9,6 +9,9 @@ import FloatingLines from './Lighting.jsx';
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import InstallPrompt from "./Install.jsx";
+import LightPillar from "./LiquidEther.jsx";
+import PrismaticBurst from "./Lighting.jsx";
+import Particles from "./Lighting.jsx";
 
 function Navbar() {
   const dispatch = useDispatch();
@@ -86,54 +89,39 @@ useEffect(() => {
   
 {size.width>= 768 ? (<>
   <div className="absolute inset-0 z-0 pointer-events-none">
-        <LiquidEther
-          colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
-          mouseForce={50}
-          cursorSize={100}
-          isViscous
-          viscous={30}
-          iterationsViscous={32}
-          iterationsPoisson={32}
-          resolution={0.5}
-          isBounce={false}
-          autoDemo
-          autoSpeed={0.5}
-          autoIntensity={2.2}
-          takeoverDuration={0.25}
-          autoResumeDelay={3000}
-          autoRampDuration={0.6}
-          color0="#5227FF"
-          color1="#FF9FFC"
-          color2="#B19EEF"
-        />
+  <LightPillar
+    topColor="#5227FF"
+    bottomColor="#FF9FFC"
+    intensity={1}
+    rotationSpeed={0.3}
+    glowAmount={0.002}
+    pillarWidth={3}
+    pillarHeight={0.4}
+    noiseIntensity={0.5}
+    pillarRotation={25}
+    interactive={false}
+    mixBlendMode="screen"
+    quality="high"
+/>
       </div>
 </>
 ) : (
 
   <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full  mix-blend-screen">
 
-  <FloatingLines 
-    enabledWaves={["top","middle","bottom"]}
-    // Array - specify line count per wave; Number - same count for all waves
-    lineCount={5}
-    // Array - specify line distance per wave; Number - same distance for all waves
-    lineDistance={10}
-    bendRadius={5}
-    bendStrength={-0.5}
-    interactive={true}
-    parallax={true}
-    mixBlendMode="screen"
-    topWavePosition={0}
-    middleWavePosition={0}
-    bottomWavePosition={-2}
-    animationSpeed={2}
-    mouseDamping={0.05}
-  />
+<Particles
+    particleColors={["#ffffff"]}
+    particleCount={200}
+    particleSpread={10}
+    speed={0.1}
+    particleBaseSize={100}
+    moveParticlesOnHover
+    alphaParticles={false}
+    disableRotation={false}
+    pixelRatio={1}
+/>
   </div>
 )}
-
-    
-
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? 'bg-black/40' : 'bg-black/30'}`} />
       <div className="relative z-10">
         <Navbar />

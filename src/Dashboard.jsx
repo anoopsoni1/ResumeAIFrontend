@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiUserPlus } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiUserPlus, FiVideo } from "react-icons/fi";
 import { MdAutoAwesome, MdWbSunny } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +8,8 @@ import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
+import LightPillar from "./LiquidEther.jsx";
+import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
@@ -260,43 +262,20 @@ export default function Dashboard() {
     <div className="relative min-h-screen overflow-hidden bg-black">
       {size.width >= 768 ? (
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <LiquidEther
-            colors={["#5227FF", "#FF9FFC", "#B19EEF"]}
-            mouseForce={50}
-            cursorSize={100}
-            isViscous
-            viscous={30}
-            iterationsViscous={32}
-            iterationsPoisson={32}
-            resolution={0.5}
-            isBounce={false}
-            autoDemo
-            autoSpeed={0.5}
-            autoIntensity={2.2}
-            takeoverDuration={0.25}
-            autoResumeDelay={3000}
-            autoRampDuration={0.6}
-            color0="#5227FF"
-            color1="#FF9FFC"
-            color2="#B19EEF"
-          />
+          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
         </div>
       ) : (
         <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <FloatingLines 
-            enabledWaves={["top","middle","bottom"]}
-            lineCount={10}
-            lineDistance={5}
-            bendRadius={5}
-            bendStrength={-0.5}
-            interactive={true}
-            parallax={true}
-            mixBlendMode="screen"
-            topWavePosition={0}
-            middleWavePosition={0}
-            bottomWavePosition={-2}
-            animationSpeed={2}
-            mouseDamping={0.05}
+          <Particles
+            particleColors={["#ffffff"]}
+            particleCount={200}
+            particleSpread={10}
+            speed={0.1}
+            particleBaseSize={100}
+            moveParticlesOnHover
+            alphaParticles={false}
+            disableRotation={false}
+            pixelRatio={1}
           />
         </div>
       )}
@@ -383,6 +362,27 @@ export default function Dashboard() {
                     className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                   >
                     Open Up page →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Video call interviews */}
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-white flex items-center gap-2">
+                      <FiVideo className="w-4 h-4 text-indigo-400" />
+                      Video call interviews
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                      Schedule and view interview recordings and AI reports.
+                    </p>
+                  </div>
+                  <Link
+                    to="/dashboard/interviews"
+                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                  >
+                    Open interviews →
                   </Link>
                 </div>
               </div>

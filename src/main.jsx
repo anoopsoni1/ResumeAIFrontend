@@ -31,6 +31,11 @@ import { ToastProvider } from './context/ToastContext'
 import UpPage from './up.jsx'
 import AdminDashboard from './AdminDashboard.jsx'
 import Makeadminpage from './Makeadminpage.jsx'
+import VideoCallInterviews from './VideoCallInterviews.jsx'
+import VideoCallInterviewCreate from './VideoCallInterviewCreate.jsx'
+import VideoCallInterviewDetail from './VideoCallInterviewDetail.jsx'
+import LiveInterviewCall from './LiveInterviewCall.jsx'
+import AIInterviewCall from './AIInterviewCall.jsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -121,6 +126,26 @@ const route = createBrowserRouter([
  {
   path: "/make-admin",
   element: <Makeadminpage />,
+ },
+ {
+  path: "/dashboard/interviews",
+  element: <VideoCallInterviews />,
+ },
+ {
+  path: "/dashboard/interviews/new",
+  element: <VideoCallInterviewCreate />,
+ },
+ {
+  path: "/dashboard/interviews/:id",
+  element: <VideoCallInterviewDetail />,
+ },
+ {
+  path: "/dashboard/interviews/:id/call",
+  element: <LiveInterviewCall />,
+ },
+ {
+  path: "/dashboard/interviews/:id/ai-call",
+  element: <AIInterviewCall />,
  },
 
 ])

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, CreditCard, Truck, Home } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { clearUser, setUser } from "./slice/user.slice";
+import LightPillar from "./LiquidEther.jsx";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
@@ -14,6 +15,17 @@ function PaymentResult() {
   const [status, setStatus] = useState("Verifying...");
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState(null);
+  const [size, setSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 768,
+    height: typeof window !== "undefined" ? window.innerHeight : 1024,
+  });
+
+  useEffect(() => {
+    const handleResize = () =>
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Authentication: validate session with profile endpoint, redirect if 401
   useEffect(() => {
@@ -144,7 +156,13 @@ function PaymentResult() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 p-4">
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      {size.width >= 768 && (
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
+        </div>
+      )}
+      <div className="relative z-10 flex justify-center items-center min-h-screen p-4">
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg text-center animate-fadeIn">
         <CreditCard className="mx-auto mb-4 text-blue-500 w-16 h-16" />
         <h2 className="text-2xl font-bold mb-2">Payment Status</h2>
@@ -196,6 +214,7 @@ function PaymentResult() {
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
