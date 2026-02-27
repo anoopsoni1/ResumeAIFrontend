@@ -4,17 +4,13 @@ import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { FiVideo, FiPhoneOff, FiMic, FiMicOff, FiVideoOff, FiMessageCircle } from "react-icons/fi";
-import LightPillar from "./LiquidEther.jsx";
+import Particles from "./Lighting.jsx";
+
 
 // Socket.IO from CDN (index.html) as window.io – no npm package required
 const getSocketIO = () => (typeof window !== "undefined" ? window.io : null);
 
-const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://resumeaibackend-oqcl.onrender.com");
-
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },

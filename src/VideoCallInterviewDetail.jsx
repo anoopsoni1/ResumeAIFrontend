@@ -5,17 +5,12 @@ import { clearUser, setUser } from "./slice/user.slice";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { FiVideo, FiCalendar, FiUser, FiAward } from "react-icons/fi";
 import gsap from "gsap";
-import LiquidEther from "./LiquidEther";
 import LightPillar from "./LiquidEther.jsx";
-import FloatingLines from "./Lighting";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = import.meta.env.VITE_API_URL
-  || (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://resumeaibackend-oqcl.onrender.com");
+const API_BASE ="https://resumeaibackend-oqcl.onrender.com"
 
 function VideoCallInterviewDetail() {
   const dispatch = useDispatch();

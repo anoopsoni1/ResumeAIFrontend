@@ -23,6 +23,8 @@ import Profile from './Profile.jsx'
 import Contact from './Contact.jsx'
 import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
+import TemplateDesignModeSelect from './TemplateDesignModeSelect.jsx'
+import ResumeDesignPage from './ResumeDesignPage.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
 import { Analytics } from "@vercel/analytics/react"
@@ -83,8 +85,10 @@ const route = createBrowserRouter([
   path: "/templates",
   element: <Outlet />,
   children: [
-     { index: true, element: <TemplatesPage /> },
-    { path: "design", element: <TemplatesDesignPage /> },
+    { index: true, element: <TemplatesPage /> },
+    { path: "design", element: <TemplateDesignModeSelect /> },
+    { path: "resumedesign", element: <ResumeDesignPage /> },
+    { path: "portfoliodesign", element: <TemplatesDesignPage /> },
   ],
  },
  {

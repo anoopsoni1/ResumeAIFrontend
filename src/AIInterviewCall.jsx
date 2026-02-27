@@ -7,11 +7,7 @@ import gsap from "gsap";
 import { useToast } from "./context/ToastContext";
 import LightPillar from "./LiquidEther.jsx";
 
-const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://resumeaibackend-oqcl.onrender.com");
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 const DURATION_MINUTES = 15; // max time; user can end anytime
 

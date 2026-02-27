@@ -7,7 +7,6 @@ import LiquidEther from "./LiquidEther";
 import LightPillar from "./LiquidEther.jsx";
 import FloatingLines from "./Lighting";
 import Particles from "./Lighting.jsx";
-import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { useToast } from "./context/ToastContext";

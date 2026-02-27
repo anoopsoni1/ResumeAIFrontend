@@ -154,14 +154,20 @@ function PricingSection() {
                   </ul>
 
                   <Link
-                    to={plan.cta === "Start Now" ? "/payment" : "/upload"}
+                    to={
+                      user?.Premium
+                        ? "/dashboard"
+                        : plan.cta === "Start Now"
+                          ? "/payment"
+                          : "/upload"
+                    }
                     className={`mt-6 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                       plan.highlight
                         ? "bg-indigo-600 text-white hover:bg-indigo-700"
                         : "bg-slate-200 text-slate-900 hover:bg-slate-300"
                     }`}
                   >
-                    {plan.cta}
+                    {user?.Premium && plan.cta === "Start Now" ? "Go to Dashboard" : plan.cta}
                   </Link>
                 </div>
               ))}

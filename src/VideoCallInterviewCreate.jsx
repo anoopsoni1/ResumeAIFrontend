@@ -12,7 +12,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "http://localhost:5000"
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 function VideoCallInterviewCreate() {
   const dispatch = useDispatch();

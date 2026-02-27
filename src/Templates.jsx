@@ -132,8 +132,7 @@ export default function TemplatesPage() {
   };
 
   const handleSelectTemplate = (templateId) => {
-    localStorage.setItem("selectedTemplate", templateId);
-    navigate("/upload");
+    navigate("/templates/design", { state: { templateId } });
   };
 
   return (

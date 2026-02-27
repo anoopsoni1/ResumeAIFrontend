@@ -50,6 +50,13 @@ export default function Payment() {
     height: window.innerHeight,
   });
   const user = useSelector((state) => state.user.userData);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.Premium) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user?.Premium, navigate]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -144,6 +151,17 @@ export default function Payment() {
                 className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition"
               >
                 Go to Login
+              </Link>
+            </div>
+          ) : user.Premium ? (
+            <div className="rounded-2xl border border-amber-500/30 bg-black/60 p-8 max-w-md w-full text-center">
+              <p className="text-amber-400 font-semibold mb-2">You already have Premium</p>
+              <p className="text-slate-400 text-sm mb-4">No need to pay again. Enjoy all premium features.</p>
+              <Link
+                to="/dashboard"
+                className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-700 transition"
+              >
+                Go to Dashboard
               </Link>
             </div>
           ) : (
