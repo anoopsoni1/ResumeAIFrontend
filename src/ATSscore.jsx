@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, CheckCircle, XCircle, FileText, Briefcase, Target, Sparkles } from "lucide-react";
 import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import LiquidEther from "./LiquidEther";
@@ -204,98 +204,129 @@ function AtsChecker() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <Topbar />
 
-        <main className="flex-1 py-8 px-4">
-          <div className="mx-auto ">
-            <div className="rounded-2xl border border-slate-200/50 bg-black/60 p-6 sm:p-8">
-              <div className="mb-8 text-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                  ATS Resume <span className="text-amber-500">Score Checker</span>
+        <main className="flex-1 py-8 sm:py-10 px-4 sm:px-6">
+          <div className="mx-auto max-w-5xl">
+            <div className="rounded-2xl border border-white/15 bg-zinc-900/80 backdrop-blur-sm shadow-xl shadow-black/20 p-6 sm:p-8">
+              <header className="mb-8 text-center">
+                <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 border border-amber-400/25 px-4 py-2 text-amber-300 text-sm font-medium mb-4">
+                  <Target className="h-4 w-4" /> ATS analysis
+                </div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  ATS Resume <span className="text-amber-400">Score Checker</span>
                 </h1>
-                <p className="mt-2 text-sm sm:text-base text-slate-400">
-                  Compare your resume with a job description
+                <p className="mt-3 text-slate-400 text-sm sm:text-base max-w-md mx-auto">
+                  Compare your resume with a job description and see matched and missing keywords.
                 </p>
-              </div>
+              </header>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="mb-2 font-semibold text-slate-300 text-sm">Resume Text</h3>
+                <div className="flex flex-col">
+                  <label className="mb-2 flex items-center gap-2 font-medium text-slate-300 text-sm">
+                    <FileText className="h-4 w-4 text-amber-400/80" />
+                    Resume Text
+                  </label>
                   <textarea
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your resume text here"
-                    className="h-72 w-full resize-none rounded-xl border border-slate-500/50 bg-white/5 p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
-                     disabled={true}
-                    
+                    placeholder="Paste your resume text here or use text from your upload"
+                    className="min-h-[280px] w-full resize-y rounded-xl border border-white/20 bg-white/5 p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 overflow-y-auto leading-relaxed"
+                    disabled
                   />
+                  <p className="mt-1.5 text-xs text-slate-500">From your last upload. Edit in Optimize with AI.</p>
                 </div>
 
-                <div>
-                  <h3 className="mb-2 font-semibold text-slate-300 text-sm">Job Description</h3>
+                <div className="flex flex-col">
+                  <label className="mb-2 flex items-center gap-2 font-medium text-slate-300 text-sm">
+                    <Briefcase className="h-4 w-4 text-amber-400/80" />
+                    Job Description
+                  </label>
                   <textarea
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     placeholder="Paste the job description here"
-                    className="h-72 w-full resize-none rounded-xl border border-slate-500/50 bg-white/5 p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-amber-500/50 focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                    className="min-h-[280px] w-full resize-y rounded-xl border border-white/20 bg-white/5 p-4 text-sm text-slate-200 placeholder-slate-500 focus:border-amber-500/50 focus:outline-none focus:ring-2 focus:ring-amber-500/30 overflow-y-auto leading-relaxed"
                   />
                 </div>
               </div>
 
               {error && (
-                <p className="mt-4 text-center font-medium text-red-400 text-sm">{error}</p>
+                <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 flex items-center gap-2 text-red-300 text-sm">
+                  <XCircle className="h-4 w-4 shrink-0" /> {error}
+                </div>
               )}
 
               {result && (
-                <div className="mt-10 rounded-xl border border-slate-200/50 bg-black/40 p-6">
-                  <div className="mb-6 text-center">
-                    <p className="text-slate-400 text-sm">ATS Match Score</p>
-                    <p className="text-5xl font-bold text-emerald-400">{result.score}%</p>
+                <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+                  <div className="flex flex-col items-center mb-6">
+                    <p className="text-slate-400 text-sm font-medium uppercase tracking-wider">ATS Match Score</p>
+                    <div className="mt-2 flex items-baseline gap-2">
+                      <span className="text-5xl sm:text-6xl font-bold text-emerald-400 tabular-nums">{result.score}</span>
+                      <span className="text-2xl text-slate-500">%</span>
+                    </div>
+                    <div className="mt-3 h-2 w-48 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-700"
+                        style={{ width: `${Math.min(100, result.score || 0)}%` }}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="mb-2 flex items-center gap-2 font-semibold text-slate-300 text-sm">
-                        <CheckCircle size={18} className="text-emerald-400" />
+                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
+                      <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-200 text-sm">
+                        <CheckCircle size={18} className="text-emerald-400 shrink-0" />
                         Matched Keywords
                       </h4>
-                      <ul className="list-disc list-inside text-sm text-slate-400">
+                      <ul className="flex flex-wrap gap-2">
                         {(result.matchedKeywords && result.matchedKeywords.length > 0)
-                          ? result.matchedKeywords.map((k, i) => <li key={i}>{k}</li>)
-                          : <li>No data</li>}
+                          ? result.matchedKeywords.map((k, i) => (
+                              <li key={i} className="rounded-md bg-emerald-500/20 px-2.5 py-1 text-xs text-emerald-200">
+                                {k}
+                              </li>
+                            ))
+                          : <li className="text-slate-500 text-sm">None</li>}
                       </ul>
                     </div>
 
-                    <div>
-                      <h4 className="mb-2 flex items-center gap-2 font-semibold text-slate-300 text-sm">
-                        <XCircle size={18} className="text-red-400" />
+                    <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
+                      <h4 className="mb-3 flex items-center gap-2 font-semibold text-slate-200 text-sm">
+                        <XCircle size={18} className="text-red-400 shrink-0" />
                         Missing Keywords
                       </h4>
-                      <ul className="list-disc list-inside text-sm text-slate-400">
+                      <ul className="flex flex-wrap gap-2">
                         {(result.missingKeywords && result.missingKeywords.length > 0)
-                          ? result.missingKeywords.map((k, i) => <li key={i}>{k}</li>)
-                          : <li>No data</li>}
+                          ? result.missingKeywords.map((k, i) => (
+                              <li key={i} className="rounded-md bg-red-500/20 px-2.5 py-1 text-xs text-red-200">
+                                {k}
+                              </li>
+                            ))
+                          : <li className="text-slate-500 text-sm">None</li>}
                       </ul>
                     </div>
                   </div>
 
                   {result.summary && (
-                    <p className="mt-6 text-center text-sm text-slate-400">{result.summary}</p>
+                    <p className="mt-6 text-center text-sm text-slate-400 leading-relaxed max-w-2xl mx-auto">{result.summary}</p>
                   )}
                 </div>
               )}
 
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
                 <button
                   onClick={handleCheckATS}
                   disabled={loading}
-                  className="flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 sm:px-8 font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   {loading ? (
                     <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Analyzing...
+                      <Loader2 size={20} className="animate-spin" />
+                      Analyzing…
                     </>
                   ) : (
-                    "Check ATS Score"
+                    <>
+                      <Target size={20} />
+                      Check ATS Score
+                    </>
                   )}
                 </button>
 
@@ -303,15 +334,17 @@ function AtsChecker() {
                   <Link
                     to="/edit-resume"
                     state={{ extractedText: resumeText }}
-                    className="flex h-12 items-center justify-center rounded-xl bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-700"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/25 bg-white/5 px-6 sm:px-8 font-semibold text-slate-200 transition hover:bg-indigo-600 hover:border-indigo-500 hover:text-white active:scale-[0.98]"
                   >
+                    <Sparkles size={20} />
                     Optimize with AI
                   </Link>
                 ) : (
                   <button
                     disabled
-                    className="flex h-12 items-center justify-center rounded-xl bg-slate-600 px-8 font-semibold text-slate-400 cursor-not-allowed"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-6 sm:px-8 font-semibold text-slate-500 cursor-not-allowed"
                   >
+                    <Sparkles size={20} />
                     Optimize with AI
                   </button>
                 )}

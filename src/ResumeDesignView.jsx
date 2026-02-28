@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, FileText, Printer, Download } from "lucide-react";
+import { ArrowLeft, FileText, Printer, Download, Phone, Mail } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { getResumeContentForView } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
+import { clearUser } from "./slice/user.slice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom"; 
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
+function Topbar({ onLogout }) {
+  return <AppHeader onLogout={onLogout} />;
+}
 export default function ResumeDesignView() {
   const { id } = useParams();
   const [template, setTemplate] = useState(null);
@@ -16,7 +22,19 @@ export default function ResumeDesignView() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+
+const handleLogout = async () => {
+  try {
+    await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
+    dispatch(clearUser());
+    navigate("/login");
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+};
   useEffect(() => {
     if (!id) {
       setLoading(false);
@@ -65,7 +83,7 @@ export default function ResumeDesignView() {
   if (loading || detailLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-        <AppHeader />
+        <Topbar onLogout={handleLogout} />
         <main className="flex-1 flex items-center justify-center px-4">
           <p className="text-zinc-400">Loading…</p>
         </main>
@@ -77,7 +95,7 @@ export default function ResumeDesignView() {
   if (error || !template) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-        <AppHeader />
+        <Topbar onLogout={handleLogout} />
         <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
           <p className="text-amber-400">{error || "Template not found"}</p>
           <Link
@@ -95,7 +113,7 @@ export default function ResumeDesignView() {
   if (!data) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-        <AppHeader />
+        <Topbar onLogout={handleLogout} />
         <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
           <FileText className="text-zinc-500" size={48} />
           <p className="text-zinc-400 text-center max-w-md">
@@ -129,7 +147,7 @@ export default function ResumeDesignView() {
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white flex flex-col">
-      <AppHeader />
+      {/* <Topbar onLogout={handleLogout} /> */}
 
       {/* Toolbar: only on screen, hidden in print */}
       <div className="print:hidden border-b border-white/10 bg-zinc-900/95 sticky top-0 z-20">
@@ -163,86 +181,103 @@ export default function ResumeDesignView() {
         </div>
       </div>
 
-      {/* Full resume document */}
+      {/* Full resume document: two-column layout (your design) */}
       <main className="flex-1 py-8 sm:py-12 px-4">
         <article
-          className="resume-document max-w-4xl mx-auto bg-white text-zinc-800 shadow-2xl rounded-lg overflow-hidden print:shadow-none print:rounded-none"
-          style={{ minHeight: "80vh" }}
+          className="resume-document max-w-4xl mx-auto bg-white text-black shadow-2xl rounded-lg overflow-hidden print:shadow-none print:rounded-none flex min-h-[80vh]"
         >
-          {/* Design badge (template name) - subtle */}
-          <div className="px-8 pt-6 pb-2 border-b border-zinc-200 print:border-zinc-300">
-            <p className="text-xs text-zinc-400 uppercase tracking-wider">
-              Resume · {template.name}
-            </p>
-          </div>
+          {/* Left column: grey - Contact, Education, Skills */}
+          <aside className="w-[36%] min-w-[200px] bg-zinc-200 print:bg-zinc-200 p-6 flex flex-col">
+            <section className="mb-6">
+              <div className="space-y-2 text-sm text-black">
+                {data.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone size={14} className="shrink-0 text-black" />
+                    <a href={`tel:${data.phone}`}>{data.phone}</a>
+                  </div>
+                )}
+                {data.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail size={14} className="shrink-0 text-black" />
+                    <a href={`mailto:${data.email}`} className="break-all">{data.email}</a>
+                  </div>
+                )}
+              </div>
+            </section>
 
-          {/* Header: Name, role, contact */}
-          <header className="px-8 pt-6 pb-6 text-center border-b border-zinc-200 print:border-zinc-300">
-            <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 tracking-tight">
-              {data.name}
-            </h1>
-            <p className="mt-1 text-lg text-zinc-600 font-medium">{data.role}</p>
-            <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-zinc-600">
-              {data.email && (
-                <a href={`mailto:${data.email}`} className="hover:text-indigo-600">
-                  {data.email}
-                </a>
-              )}
-              {data.phone && (
-                <a href={`tel:${data.phone}`} className="hover:text-indigo-600">
-                  {data.phone}
-                </a>
-              )}
-            </div>
-          </header>
-
-          <div className="px-8 py-6 sm:py-8 space-y-6">
-            {/* Summary */}
-            {data.summary && (
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
-                  Summary
+            {data.education && (
+              <section className="mb-6">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-3">
+                  Education
                 </h2>
-                <p className="text-zinc-700 leading-relaxed">{data.summary}</p>
+                <p className="text-sm text-black leading-relaxed whitespace-pre-wrap">{data.education}</p>
               </section>
             )}
 
-            {/* Skills */}
             {data.skills?.length > 0 && (
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
+              <section className="flex-1">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-3">
                   Skills
                 </h2>
-                <p className="text-zinc-700 leading-relaxed">
-                  {data.skills.join(" · ")}
-                </p>
+                <ul className="space-y-1 text-sm text-black list-disc list-inside">
+                  {data.skills.map((s, i) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
               </section>
             )}
 
-            {/* Experience */}
+            {data.languageProficiency && (
+              <section className="mt-6">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-3">
+                  Languages
+                </h2>
+                <p className="text-sm text-black leading-relaxed whitespace-pre-wrap">{data.languageProficiency}</p>
+              </section>
+            )}
+          </aside>
+
+          {/* Right column: white - Name, Role, Summary, Experience, Projects */}
+          <div className="flex-1 p-8 bg-white">
+            <header className="border-b border-black pb-4 mb-6">
+              <h1 className="text-2xl font-bold uppercase tracking-wide text-zinc-600">
+                {data.name || "Your Name"}
+              </h1>
+              <p className="text-lg font-semibold uppercase tracking-wide text-zinc-600 mt-0.5">
+                {data.role || "Your Role"}
+              </p>
+            </header>
+
+            {data.summary && (
+              <section className="mb-6">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-3">
+                  Professional Summary
+                </h2>
+                <p className="text-sm text-black leading-relaxed">{data.summary}</p>
+              </section>
+            )}
+
             {data.experience?.length > 0 && (
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
+              <section className="mb-6">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-4">
                   Experience
                 </h2>
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {data.experience.map((entry, i) => {
                     const lines = entry.split("\n").map((l) => l.trim()).filter(Boolean);
                     const roleTitle = lines[0] || "Role";
                     const bullets = lines.slice(1);
                     return (
                       <div key={i}>
-                        <h3 className="font-semibold text-zinc-900">{roleTitle}</h3>
+                        <h3 className="text-base font-bold text-black">{roleTitle}</h3>
                         {bullets.length > 0 ? (
-                          <ul className="mt-2 space-y-1 text-zinc-700 text-sm list-disc list-inside">
+                          <ul className="mt-2 space-y-1.5 text-sm text-black list-disc list-inside pl-0">
                             {bullets.map((bullet, j) => (
-                              <li key={j}>{bullet}</li>
+                              <li key={j} className="leading-snug">{bullet}</li>
                             ))}
                           </ul>
                         ) : (
-                          <pre className="mt-2 text-zinc-700 text-sm whitespace-pre-wrap font-sans">
-                            {entry}
-                          </pre>
+                          <p className="mt-2 text-sm text-black whitespace-pre-wrap">{entry}</p>
                         )}
                       </div>
                     );
@@ -251,43 +286,16 @@ export default function ResumeDesignView() {
               </section>
             )}
 
-            {/* Projects */}
             {data.projects?.length > 0 && (
               <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-1 mb-3">
                   Projects
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {data.projects.map((project, i) => (
-                    <p key={i} className="text-zinc-700 text-sm leading-relaxed whitespace-pre-wrap">
-                      {project}
-                    </p>
+                    <p key={i} className="text-sm text-black leading-relaxed whitespace-pre-wrap">{project}</p>
                   ))}
                 </div>
-              </section>
-            )}
-
-            {/* Education */}
-            {data.education && (
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
-                  Education
-                </h2>
-                <p className="text-zinc-700 text-sm leading-relaxed whitespace-pre-wrap">
-                  {data.education}
-                </p>
-              </section>
-            )}
-
-            {/* Language proficiency */}
-            {data.languageProficiency && (
-              <section>
-                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-700 border-b-2 border-indigo-600 pb-1 mb-3">
-                  Language Proficiency
-                </h2>
-                <p className="text-zinc-700 text-sm leading-relaxed whitespace-pre-wrap">
-                  {data.languageProficiency}
-                </p>
               </section>
             )}
           </div>
@@ -302,8 +310,7 @@ export default function ResumeDesignView() {
           .resume-document { box-shadow: none !important; }
         }
       `}</style>
-
-      <AppFooter />
+      <AppFooter  />
     </div>
   );
 }

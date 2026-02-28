@@ -24,9 +24,11 @@ export async function fetchDetailForResume() {
     if (!res.ok || !json?.data) return null;
 
     const d = json.data;
+    const nameStr = d.name != null ? String(d.name).trim() : "";
+    const roleStr = d.role != null ? String(d.role).trim() : "";
     return {
-      name: d.name || "Your Name",
-      role: d.role || "Your Role",
+      name: nameStr || "Your Name",
+      role: roleStr || "Your Role",
       summary: d.summary || "",
       skills: Array.isArray(d.skills) ? d.skills : [],
       experience: Array.isArray(d.experience) ? d.experience : [],
@@ -52,6 +54,7 @@ export async function fetchEditedResumeText() {
     const res = await fetch(`${API_BASE}/get-edited-resume`, {
       credentials: "include",
       headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
     });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) return null;
@@ -62,10 +65,24 @@ export async function fetchEditedResumeText() {
   }
 }
 
+/** Return true if detail has real content (not just defaults with nothing else). */
+function detailHasContent(d) {
+  if (!d) return false;
+  const nameOk = (d.name || "").trim() && (d.name || "").trim() !== "Your Name";
+  const roleOk = (d.role || "").trim() && (d.role || "").trim() !== "Your Role";
+  const hasSummary = (d.summary || "").trim().length > 0;
+  const hasSkills = Array.isArray(d.skills) && d.skills.some((s) => (s || "").trim());
+  const hasExperience = Array.isArray(d.experience) && d.experience.some((e) => (e || "").trim());
+  const hasProjects = Array.isArray(d.projects) && d.projects.some((p) => (p || "").trim());
+  const hasEducation = (d.education || "").trim().length > 0;
+  return nameOk || roleOk || hasSummary || hasSkills || hasExperience || hasProjects || hasEducation;
+}
+
 /**
- * Get resume/portfolio content: prefers saved edited resume text (upload flow), else saved details (add-details flow).
- * @param {import("./parseResume.js").parseResume} parseResume - Parser function to convert raw text to structured data.
- * @returns {Promise<{ name, role, summary, skills, experience, projects, education, languageProficiency, email, phone } | null>}
+ * Get resume/portfolio content. Both flows supported:
+ * - When user saves edited text: resume/portfolio use that text (so saving updates the view).
+ * - When user has no saved edited text: use saved details from Add details.
+ * We prefer edited text when present so that "Save to account" on Edit Resume page actually updates resume/portfolio.
  */
 export async function getResumeContentForView(parseResume) {
   const editedText = await fetchEditedResumeText();
@@ -73,5 +90,7 @@ export async function getResumeContentForView(parseResume) {
     const parsed = parseResume(editedText);
     if (parsed) return parsed;
   }
-  return fetchDetailForResume();
+  const detail = await fetchDetailForResume();
+  if (detail && detailHasContent(detail)) return detail;
+  return detail || null;
 }

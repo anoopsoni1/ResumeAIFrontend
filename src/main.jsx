@@ -27,7 +27,7 @@ import ResumeDesignPage from './ResumeDesignPage.jsx'
 import ResumeDesignView from './ResumeDesignView.jsx'
 import PortfolioDesignView from './PortfolioDesignView.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
-import PortfolioPage from './Portfolio.jsx'
+// import PortfolioPage from './Portfolio.jsx'
 import { Analytics } from "@vercel/analytics/react"
 import { registerSW } from 'virtual:pwa-register'
 import { ToastProvider } from './context/ToastContext'
@@ -123,10 +123,6 @@ const route = createBrowserRouter([
  {
   path: "/dashboard/profile",
   element: <Profile />,
- },
- {
-  path: "/portfolio",
-  element: <PortfolioPage />,
  },
  {
   path: "/up",

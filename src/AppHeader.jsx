@@ -12,7 +12,8 @@ import { LuDollarSign } from "react-icons/lu";
 import { FaSignInAlt } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { FileText } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser, clearUser } from "./slice/user.slice";
 
 const MENU_ITEMS = [
   { to: "/", label: "Home", icon: FaHome },
@@ -36,6 +37,7 @@ const NAV_LINKS = [
 const MENU_ANIM_DURATION_MS = 300;
 
 export default function AppHeader({ onLogout }) {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userData);
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -45,6 +47,40 @@ export default function AppHeader({ onLogout }) {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  // So we show Logout on the page that had the bug: use localStorage when Redux user is missing
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  const storedUserJson = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  const storedUser = storedUserJson ? (() => { try { return JSON.parse(storedUserJson); } catch { return null; } })() : null;
+  const isLoggedIn = !!user || !!(token && storedUser);
+
+  // Restore Redux user from localStorage or profile when we have token but no user (fixes one page showing Login)
+  useEffect(() => {
+    if (user) return;
+    if (!token) return;
+    const fromStorage = (() => { try { return JSON.parse(localStorage.getItem("user") || "null"); } catch { return null; } })();
+    if (fromStorage && typeof fromStorage === "object") {
+      dispatch(setUser(fromStorage));
+      return;
+    }
+    let cancelled = false;
+    fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/profile", {
+      method: "GET",
+      credentials: "include",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json().catch(() => ({})))
+      .then((data) => {
+        if (cancelled) return;
+        const currentUser = data?.user || data?.data?.user;
+        if (currentUser) dispatch(setUser(currentUser));
+        else if (data?.statusCode === 401 || data?.statuscode === 401) {
+          dispatch(clearUser());
+          localStorage.removeItem("accessToken");
+        }
+      });
+    return () => { cancelled = true; };
+  }, [user, token, dispatch]);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
@@ -185,7 +221,7 @@ export default function AppHeader({ onLogout }) {
                       transitionProperty: "opacity, transform",
                     }}
                   >
-                    {user && typeof onLogout === "function" ? (
+                    {isLoggedIn && typeof onLogout === "function" ? (
                       <button
                         type="button"
                         onClick={() => { onLogout(); closeMenu(); }}
@@ -219,7 +255,7 @@ export default function AppHeader({ onLogout }) {
           </>
         ) : (
           <>
-            {user && typeof onLogout === "function" ? (
+            {isLoggedIn && typeof onLogout === "function" ? (
               <motion.button
                 type="button"
                 onClick={onLogout}
