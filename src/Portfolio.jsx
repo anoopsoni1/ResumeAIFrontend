@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { useDispatch} from "react-redux";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Mail, Phone, Download, Sparkles } from "lucide-react";
@@ -9,6 +9,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import PortfolioHTMLDownload from "./Download";
 import LightPillar from "./LiquidEther.jsx";
+import { getResumeContentForView } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
@@ -42,16 +43,25 @@ export default function DynamicPortfolio() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const resumeText =
-    localStorage.getItem("EditedResumeText") ||
-    localStorage.getItem("extractedtext") ||
-    "";
-
-  const data = useMemo(() => parseResume(resumeText), [resumeText]);
+  const [data, setData] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(true);
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 768,
     height: typeof window !== "undefined" ? window.innerHeight : 1024,
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setDetailLoading(true);
+      const content = await getResumeContentForView(parseResume);
+      if (!cancelled) {
+        setData(content);
+        setDetailLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const handleResize = () =>
@@ -79,6 +89,20 @@ export default function DynamicPortfolio() {
     }
   };
 
+  if (detailLoading) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-[#07070c]">
+        <div className="relative z-10 min-h-screen bg-[#07070c] text-white flex flex-col">
+          <AppHeader onLogout={handleLogout} />
+          <main className="flex-1 flex items-center justify-center px-6">
+            <p className="text-slate-500">Loading…</p>
+          </main>
+          <AppFooter />
+        </div>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div className="relative min-h-screen overflow-hidden bg-[#07070c]">
@@ -87,29 +111,39 @@ export default function DynamicPortfolio() {
             <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
           </div>
         )}
-      <div className="relative z-10 min-h-screen bg-[#07070c] text-white flex flex-col">
-        <AppHeader onLogout={handleLogout} />
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex-1 flex items-center justify-center px-6"
-        >
-          <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-400/20 mb-5">
-              <Sparkles className="text-indigo-400" size={28} />
+        <div className="relative z-10 min-h-screen bg-[#07070c] text-white flex flex-col">
+          <AppHeader onLogout={handleLogout} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex items-center justify-center px-6"
+          >
+            <div className="text-center max-w-md">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-400/20 mb-5">
+                <Sparkles className="text-indigo-400" size={28} />
+              </div>
+              <h2 className="text-lg font-semibold text-slate-200 mb-2">No portfolio yet</h2>
+              <p className="text-slate-500 text-sm mb-4">
+                Your portfolio is built from your saved details or from an uploaded & edited resume. Add details or upload and edit first.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <Link
+                  to="/add-details"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+                >
+                  Add details
+                </Link>
+                <Link
+                  to="/edit-resume"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white"
+                >
+                  Upload & edit resume
+                </Link>
+              </div>
             </div>
-            <h2 className="text-lg font-semibold text-slate-200 mb-2">No portfolio yet</h2>
-            <motion.p
-              animate={{ opacity: [0.6, 1, 0.6] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              className="text-slate-500 text-sm"
-            >
-              Upload a resume to generate your portfolio
-            </motion.p>
-          </div>
-        </motion.div>
-        <AppFooter />
-      </div>
+          </motion.div>
+          <AppFooter />
+        </div>
       </div>
     );
   }

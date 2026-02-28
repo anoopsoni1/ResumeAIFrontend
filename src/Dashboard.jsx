@@ -42,78 +42,139 @@ function Topbar() {
 }
 
 function StatCards({ atsScore, optimizeCount }) {
-  const atsDisplay = atsScore != null && typeof atsScore === "number" ? `${atsScore}%` : "—";
+  const hasAts = atsScore != null && typeof atsScore === "number";
+  const atsDisplay = hasAts ? `${atsScore}%` : "—";
   const optimizeDisplay = optimizeCount != null && typeof optimizeCount === "number" ? String(optimizeCount) : "—";
+  const atsColor = hasAts
+    ? atsScore >= 70
+      ? "text-emerald-400"
+      : atsScore >= 50
+        ? "text-amber-400"
+        : "text-rose-400"
+    : "text-slate-400";
+
+  const stats = [
+    {
+      icon: <FiTarget className="w-5 h-5" />,
+      label: "ATS Score",
+      value: atsDisplay,
+      sub: hasAts ? "Last check" : "Check your score",
+      link: "/atsscore",
+      valueClass: atsColor,
+    },
+    {
+      icon: <AiOutlineFileText className="w-5 h-5" />,
+      label: "Resume Status",
+      value: "Optimized",
+      sub: "Ready for applications",
+      link: "/templates/resumedesign",
+      valueClass: "text-emerald-400",
+    },
+    {
+      icon: <FiZap className="w-5 h-5" />,
+      label: "AI Optimizes",
+      value: optimizeDisplay,
+      sub: optimizeDisplay !== "—" ? "Times used" : "Not used yet",
+      link: "/edit-resume",
+      valueClass: "text-white",
+    },
+  ];
+
+  const actions = [
+    {
+      icon: <FiTarget className="w-6 h-6" />,
+      title: "Check ATS Score",
+      desc: "Analyze your resume and get an ATS score with keyword insights.",
+      link: "/atsscore",
+    },
+    {
+      icon: <AiOutlineFileText className="w-6 h-6" />,
+      title: "Upload & edit resume",
+      desc: "Upload a PDF/DOCX, then edit and improve with AI.",
+      link: "/upload",
+    },
+    {
+      icon: <FiTarget className="w-6 h-6" />,
+      title: "Add details for resume or portfolio",
+      desc: "Build your resume or portfolio by filling in your details.",
+      link: "/add-details",
+    },
+    {
+      icon: <MdAutoAwesome className="w-6 h-6" />,
+      title: "Edit or optimize resume",
+      desc: "Edit your saved text and improve with AI.",
+      link: "/edit-resume",
+    },
+    {
+      icon: <FiGlobe className="w-6 h-6" />,
+      title: "Choose portfolio design",
+      desc: "Pick a template and view your portfolio.",
+      link: "/templates/portfoliodesign",
+    },
+  ];
+
   return (
-    <div className="mt-6 px-4">
-      <div className="mx-auto  grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { icon: <FiTarget />, label: "ATS Score", value: atsDisplay },
-            { icon: <AiOutlineFileText />, label: "Resume Status", value: "Optimized" },
-            { icon: <FiZap />, label: "AI Optimizes", value: optimizeDisplay },
-          ].map((item, i) => (
-            <div
+    <div className="mt-8 px-4  mx-auto">
+      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 px-1">
+        Your stats
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map((item, i) => {
+          const Card = item.link ? Link : "div";
+          const cardProps = item.link ? { to: item.link } : {};
+          return (
+            <Card
               key={i}
-              className="rounded-2xl border border-slate-200 bg-black p-4 hover:border-amber-500 transition"
+              {...cardProps}
+              className="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200"
             >
-              <div className="flex items-center gap-2 text-slate-400">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="flex items-start justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400 group-hover:border-amber-500/30 group-hover:text-amber-400/90 transition-colors">
                   {item.icon}
                 </div>
-                <span className="text-xs">{item.label}</span>
+                {item.link && (
+                  <span className="text-xs font-medium text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    View →
+                  </span>
+                )}
               </div>
-              <div className="mt-3 text-xl font-bold text-white">
+              <p className="mt-4 text-xs font-medium text-slate-400 uppercase tracking-wider">
+                {item.label}
+              </p>
+              <p className={`mt-1 text-2xl font-bold tabular-nums ${item.valueClass}`}>
                 {item.value}
-              </div>
-            </div>
-          ))}
-        </div>
+              </p>
+              <p className="mt-1 text-xs text-slate-500">{item.sub}</p>
+            </Card>
+          );
+        })}
+      </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            {
-              icon: <AiOutlineFileText />,
-              title: "Upload New Resume",
-              desc: "Start fresh with a new resume upload.",
-            },
-            {
-              icon: <MdAutoAwesome />,
-              title: "Optimize Resume",
-              desc: "Improve your ATS score and keywords.",
-              link: "/aiedit",
-            },
-            {
-              icon: <FiGlobe />,
-              title: "Update Portfolio",
-              desc: "Customize your online presence.",
-              link: "/upload",
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-slate-200 bg-black p-5 hover:border-amber-500 hover:shadow-md transition"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                {item.icon}
-              </div>
-              <h3 className="mt-4 text-sm font-semibold text-white">
-                {item.title}
-              </h3>
-              <p className="mt-1 text-xs text-amber-500">{item.desc}</p>
-              {item.link ? (
-                <Link to={item.link} className="mt-3 inline-block text-xs font-semibold text-indigo-600">
-                  Get Started →
-                </Link>
-              ) : (
-                <button className="mt-3 text-xs font-semibold text-indigo-600">
-                  Get Started →
-                </button>
-              )}
+      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mt-10 mb-4 px-1">
+        Quick actions
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {actions.map((item, i) => (
+          <Link
+            key={i}
+            to={item.link}
+            className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400 group-hover:border-amber-500/30 group-hover:text-amber-400/90 transition-colors">
+              {item.icon}
             </div>
-          ))}
-        </div>
+            <h4 className="mt-4 text-base font-semibold text-white group-hover:text-amber-50/90 transition-colors">
+              {item.title}
+            </h4>
+            <p className="mt-2 text-sm text-slate-400 leading-snug">
+              {item.desc}
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-400 group-hover:text-amber-400 group-hover:gap-2.5 transition-all">
+              Get Started
+              <span className="text-lg leading-none">→</span>
+            </span>
+          </Link>
+        ))}
       </div>
     </div>
   );
@@ -285,61 +346,60 @@ export default function Dashboard() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <Topbar />
         {user ? (
-          <main className="flex-1 py-6">
-            <div className="mx-auto px-4">
-              <div className="rounded-2xl border border-yellow-100 p-6">
-                <h2 className="text-lg sm:text-xl font-bold">
-                  <span className="text-amber-500">
+          <main className="flex-1 py-8 pb-12">
+            <div className="mx-auto px-4 ">
+              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">
+                  Welcome back,{" "}
+                  <span className="text-amber-400">
                     {user?.FirstName} {user?.LastName}
                   </span>
                 </h2>
-                <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                  Your resume is performing well. Here are your latest stats and
-                  quick actions.
+                <p className="mt-2 text-sm text-slate-400 max-w-xl">
+                  Your resume is performing well. Here are your latest stats and quick actions.
                 </p>
               </div>
 
               {user?.Premium ? (
-                <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-emerald-500/60 p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-emerald-300">
+                      <p className="text-sm font-semibold text-emerald-400">
                         Premium active
                       </p>
-                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                      <p className="mt-1 text-xs sm:text-sm text-slate-400">
                         You have access to all premium features.
                       </p>
                     </div>
                     <Link
                       to="/dashboard/profile"
-                      className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                      className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                     >
                       View profile
                     </Link>
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-amber-300">
+                      <p className="text-sm font-semibold text-amber-400">
                         Premium not active
                       </p>
-                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                        Upgrade to unlock premium templates, AI optimizations,
-                        and more.
+                      <p className="mt-1 text-xs sm:text-sm text-slate-400">
+                        Upgrade to unlock premium templates, AI optimizations, and more.
                       </p>
                     </div>
                     <div className="flex gap-3">
                       <Link
                         to="/price"
-                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
                       >
                         Upgrade
                       </Link>
                       <Link
                         to="/dashboard/profile"
-                        className="inline-flex items-center justify-center rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                        className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                       >
                         View profile
                       </Link>
@@ -350,17 +410,17 @@ export default function Dashboard() {
 
               {/* Up page link - only for admins (extra tools) */}
               {user?.isAdmin && (
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-white">Extra tools</p>
-                      <p className="mt-1 text-xs sm:text-sm text-slate-300">
+                      <p className="mt-1 text-xs sm:text-sm text-slate-400">
                         Templates and more.
                       </p>
                     </div>
                     <Link
                       to="/up"
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
                     >
                       Open Up page →
                     </Link>
@@ -368,32 +428,62 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Video call interviews */}
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-black/50 p-5">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-white flex items-center gap-2">
-                      <FiVideo className="w-4 h-4 text-indigo-400" />
-                      Video call interviews
-                    </p>
-                    <p className="mt-1 text-xs sm:text-sm text-slate-300">
-                      Schedule and view interview recordings and AI reports.
-                    </p>
+              {/* Video call interviews - premium only */}
+              {user?.Premium ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-amber-500/30 transition-colors">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400">
+                        <FiVideo className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">
+                          Video call interviews
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Schedule and view interview recordings and AI reports.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/dashboard/interviews"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                    >
+                      Open interviews →
+                    </Link>
                   </div>
-                  <Link
-                    to="/dashboard/interviews"
-                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-                  >
-                    Open interviews →
-                  </Link>
                 </div>
-              </div>
+              ) : (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-amber-400/80">
+                        <FiVideo className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-amber-400">
+                          Video call interviews
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Unlock AI-powered video interviews and reports with Premium.
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/price"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                    >
+                      Upgrade to unlock →
+                    </Link>
+                  </div>
+                </div>
+              )}
 
               {/* Admin-only: All Users & Make Admin */}
               {user?.isAdmin && (
-                <div className="mt-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-5">
-                  <p className="text-sm font-semibold text-indigo-300">Admin</p>
-                  <p className="mt-1 text-xs sm:text-sm text-slate-300 mb-4">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-indigo-500/60 p-5">
+                  <p className="text-sm font-semibold text-indigo-400">Admin</p>
+                  <p className="mt-1 text-xs sm:text-sm text-slate-400 mb-4">
                     Manage users and admins.
                   </p>
                   <div className="flex flex-wrap gap-3">

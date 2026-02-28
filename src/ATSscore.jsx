@@ -299,9 +299,10 @@ function AtsChecker() {
                   )}
                 </button>
 
-                {result ? (
+                {resumeText.trim() ? (
                   <Link
-                    to="/aiedit"
+                    to="/edit-resume"
+                    state={{ extractedText: resumeText }}
                     className="flex h-12 items-center justify-center rounded-xl bg-indigo-600 px-8 font-semibold text-white transition hover:bg-indigo-700"
                   >
                     Optimize with AI

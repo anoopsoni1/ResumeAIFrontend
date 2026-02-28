@@ -3,10 +3,8 @@ import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
-import { Sparkles } from "lucide-react";
-import LiquidEther from "./LiquidEther";
+import { Sparkles, Check, Eye, LayoutGrid, ArrowLeft, Layers } from "lucide-react";
 import LightPillar from "./LiquidEther.jsx";
-import FloatingLines from "./Lighting";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -18,6 +16,21 @@ function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
 }
 
+function CardSkeleton() {
+  return (
+    <div className="rounded-xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-sm animate-pulse">
+      <div className="h-[160px] sm:h-[200px] md:h-[220px] bg-white/10" />
+      <div className="p-3 space-y-2 border-t border-white/10">
+        <div className="h-3.5 w-2/3 rounded bg-white/10" />
+        <div className="h-3 w-1/2 rounded bg-white/5" />
+      </div>
+      <div className="p-2.5 flex gap-2 border-t border-white/10">
+        <div className="h-8 flex-1 rounded-lg bg-white/10" />
+        <div className="h-8 flex-1 rounded-lg bg-white/5" />
+      </div>
+    </div>
+  );
+}
 
 /**
  * Design template: API portfolio image — shows template from backend (name + image).
@@ -25,13 +38,13 @@ function Topbar({ onLogout }) {
 function ApiTemplatePreview({ template, onSelect, index = 0 }) {
   const { _id, name, image } = template;
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.98 }}
-      className="rounded-xl sm:rounded-2xl border border-white/20 overflow-hidden bg-black shadow-xl hover:border-emerald-500/50 hover:shadow-emerald-500/20 transition-all duration-300 min-h-[200px] flex flex-col"
+      className="group rounded-xl border border-white/15 overflow-hidden bg-zinc-900/80 backdrop-blur-sm shadow-lg shadow-black/20 hover:border-emerald-400/40 hover:shadow-emerald-500/15 transition-all duration-300 flex flex-col"
     >
       <div
         role="button"
@@ -40,37 +53,40 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
         onClick={() => onSelect?.(_id)}
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect?.(_id)}
       >
-        <div className="flex h-[220px] sm:h-[280px] md:h-[320px] bg-zinc-900 shrink-0 overflow-hidden">
+        <div className="relative flex h-[160px] sm:h-[200px] md:h-[220px] bg-zinc-800 shrink-0 overflow-hidden">
           <motion.img
             src={image}
             alt={name}
-            className="w-full h-full object-cover object-top"
+            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.4 }}
           />
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
         </div>
-        <div className="px-3 py-3 sm:px-4 sm:py-3 border-t border-white/10 bg-white/5 flex-1 flex flex-col justify-center">
-          <p className="text-white font-medium text-sm truncate">{name}</p>
-          <p className="text-zinc-400 text-xs mt-0.5">Portfolio template</p>
+        <div className="px-3 py-2.5 border-t border-white/10 bg-white/5 flex flex-col justify-center">
+          <p className="text-white font-semibold text-xs truncate">{name}</p>
+          <p className="text-zinc-500 text-[11px] mt-0.5 flex items-center gap-1">
+            <LayoutGrid className="h-2.5 w-2.5" /> Portfolio template
+          </p>
         </div>
       </div>
-      <div className="px-3 py-2 border-t border-white/10 bg-white/5 flex gap-2">
+      <div className="px-2.5 py-2 border-t border-white/10 bg-white/5 flex gap-1.5">
         <button
           type="button"
           onClick={() => onSelect?.(_id)}
-          className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500"
+          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-emerald-500 active:scale-[0.98] transition-all"
         >
-          Use this template
+          <Check className="h-3.5 w-3.5" /> Use this template
         </button>
         <Link
           to={`/templates/portfoliodesign/${_id}`}
-          className="flex-1 rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-center text-zinc-300 hover:text-white hover:border-emerald-500/50"
+          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-emerald-400/50 hover:bg-white/5 transition-all"
         >
-          View full portfolio
+          <Eye className="h-3.5 w-3.5" /> View full
         </Link>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }
 
@@ -162,49 +178,69 @@ export default function TemplatesDesignPage() {
       <div className="relative z-10">
         <Topbar onLogout={handleLogout} />
 
-        <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 min-h-[60vh]">
-          <div className="mb-8 sm:mb-10 flex flex-col items-center text-center px-1">
-            <div className="mb-2 sm:mb-3 flex items-center gap-2 rounded-full bg-indigo-500/20 px-3 py-1.5 sm:px-4 text-indigo-400">
-              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium">Design templates</span>
+        <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 md:py-20 min-h-[60vh]">
+          <header className="mb-10 sm:mb-14 flex flex-col items-center text-center">
+            <div className="mb-4 flex items-center gap-2 rounded-full bg-emerald-500/15 border border-emerald-400/20 px-4 py-2 text-emerald-300">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span className="text-sm font-medium">Design templates</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1]">
               Choose a design
             </h1>
-            <p className="mt-2 sm:mt-3 max-w-xl text-sm sm:text-base md:text-lg text-zinc-400">
-              Pick a layout for your portfolio or resume. Each design is a template you can use.
+            <p className="mt-4 max-w-lg text-base sm:text-lg text-zinc-400 leading-relaxed">
+              Pick a layout for your portfolio. Each design uses your saved details—add them first if you haven’t.
             </p>
-          </div>
+          </header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
             {portfolioLoading && (
-              <div className="col-span-full flex justify-center py-12 sm:py-16">
-                <p className="text-zinc-400 text-sm sm:text-base">Loading portfolio templates…</p>
-              </div>
+              <>
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+              </>
             )}
             {portfolioError && (
-              <div className="col-span-full rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-200 text-sm">
+              <div className="col-span-full rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-sm px-5 py-4 text-amber-200 text-sm flex items-center gap-3">
+                <span className="shrink-0 w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">!</span>
                 {portfolioError}
               </div>
             )}
-            {!portfolioLoading && portfolioImages.length === 0 && (
-              <div className="col-span-full text-center py-12 text-zinc-400 text-sm sm:text-base">
-                No portfolio templates yet.
+            {!portfolioLoading && portfolioImages.length === 0 && !portfolioError && (
+              <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 rounded-2xl border border-white/10 bg-white/5 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-4">
+                  <Layers className="h-7 w-7 text-zinc-500" />
+                </div>
+                <p className="text-zinc-400 text-sm sm:text-base">No portfolio templates available yet.</p>
+                <p className="text-zinc-500 text-sm mt-1">Check back later or try another category.</p>
               </div>
             )}
             {!portfolioLoading &&
-              portfolioImages.map((template) => (
+              portfolioImages.map((template, index) => (
                 <ApiTemplatePreview
                   key={template._id}
                   template={template}
                   onSelect={handleSelectApiTemplate}
+                  index={index}
                 />
               ))}
           </div>
-          <div className="mt-10 sm:mt-12 flex flex-wrap justify-center gap-3 sm:gap-4">
-            <Link to="/templates/design" className="text-sm text-zinc-400 hover:text-white transition py-2 px-1 min-h-[44px] flex items-center justify-center">← Change type</Link>
-            <Link to="/templates" className="text-sm text-zinc-400 hover:text-white transition py-2 px-1 min-h-[44px] flex items-center justify-center">Back to templates</Link>
-          </div>
+
+          <nav className="mt-12 sm:mt-16 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
+            <Link
+              to="/templates/design"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:border-white/30 hover:bg-white/10 transition-all"
+            >
+              <ArrowLeft className="h-4 w-4" /> Change type
+            </Link>
+            <span className="hidden sm:inline w-px h-4 bg-white/20" aria-hidden />
+            <Link
+              to="/templates"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:border-white/30 hover:bg-white/10 transition-all"
+            >
+              Back to templates
+            </Link>
+          </nav>
         </main>
 
         <AppFooter />

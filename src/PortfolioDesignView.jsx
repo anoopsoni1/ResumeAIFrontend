@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import { ArrowLeft, Sparkles, Mail, Phone, Download, ChevronRight, Linkedin } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import PortfolioHTMLDownload from "./Download";
+import { getResumeContentForView } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
@@ -20,18 +20,11 @@ const NAV_LINKS = [
 
 export default function PortfolioDesignView() {
   const { id } = useParams();
-  const resumeTextFromRedux = useSelector((state) => state.resume?.resumeText);
-  const resumeText =
-    localStorage.getItem("EditedResumeText") ||
-    localStorage.getItem("extractedtext") ||
-    resumeTextFromRedux ||
-    "";
-
   const [template, setTemplate] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const data = useMemo(() => parseResume(resumeText), [resumeText]);
 
   useEffect(() => {
     if (!id) {
@@ -57,15 +50,28 @@ export default function PortfolioDesignView() {
     return () => { cancelled = true; };
   }, [id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setDetailLoading(true);
+      const content = await getResumeContentForView(parseResume);
+      if (!cancelled) {
+        setData(content);
+        setDetailLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const firstName = data?.name?.split(/\s+/)[0] || "Portfolio";
   const initials = data?.name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
 
-  if (loading) {
+  if (loading || detailLoading) {
     return (
       <div className="min-h-screen bg-white text-neutral-800 flex flex-col">
         <AppHeader />
         <main className="flex-1 flex items-center justify-center px-4">
-          <p className="text-neutral-500">Loading template…</p>
+          <p className="text-neutral-500">Loading…</p>
         </main>
         <AppFooter />
       </div>
@@ -99,15 +105,20 @@ export default function PortfolioDesignView() {
             <Sparkles className="text-emerald-600" size={28} />
           </div>
           <p className="text-neutral-500 text-center max-w-md">
-            No portfolio content found. Upload or edit your resume first, then view it with this
-            template.
+            Portfolio is built from your saved details or from an uploaded & edited resume. Add details or upload and edit first.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
-              to="/upload"
+              to="/add-details"
               className="inline-flex items-center gap-2 rounded-lg bg-black text-white px-4 py-2 text-sm font-medium border-2 border-emerald-500 hover:bg-neutral-800"
             >
-              Upload resume
+              Add details
+            </Link>
+            <Link
+              to="/edit-resume"
+              className="inline-flex items-center gap-2 rounded-lg border-2 border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:border-emerald-500 hover:text-emerald-700"
+            >
+              Upload & edit resume
             </Link>
             <Link
               to="/templates/portfoliodesign"

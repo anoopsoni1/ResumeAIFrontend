@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FileText, LayoutTemplate } from "lucide-react";
+import { FileText, LayoutTemplate, ChevronRight, ArrowLeft, Layers } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -64,40 +64,64 @@ export default function TemplateDesignModeSelect() {
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
         <Topbar onLogout={handleLogout} />
-        <main className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 min-h-[60vh]">
-          <div className="mb-8 sm:mb-10 text-center px-1">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight">Choose template type</h1>
-            <p className="mt-2 text-sm sm:text-base text-zinc-400 max-w-md mx-auto">Use this design as a resume template or portfolio template.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <main className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-10 sm:py-14 md:py-20 min-h-[60vh] flex flex-col items-center justify-center">
+          <header className="mb-8 sm:mb-10 text-center">
+            <div className="mb-4 flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-zinc-300 text-sm font-medium">
+                <Layers className="h-4 w-4" /> Template type
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight tracking-tight">
+              Choose template type
+            </h1>
+            <p className="mt-3 max-w-sm mx-auto text-sm text-zinc-400">
+              Use this design as a resume or portfolio. Both use your saved details.
+            </p>
+          </header>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full">
             <button
               type="button"
               onClick={handleResume}
-              className="group rounded-xl sm:rounded-2xl border border-white/20 bg-white/5 p-6 sm:p-8 text-left transition hover:border-indigo-500/50 hover:bg-white/10 active:scale-[0.99] min-h-[180px] sm:min-h-0 w-full"
+              className="group rounded-xl border border-white/15 bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 text-left transition-all duration-200 hover:border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.99] w-full"
             >
-              <div className="mb-3 sm:mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0">
-                <FileText className="h-6 w-6 sm:h-7 sm:w-7" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0 mb-3">
+                <FileText className="h-5 w-5" />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Resume template</h2>
-              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-400">Use this design for your resume and continue to upload.</p>
-              <span className="mt-3 sm:mt-4 inline-block text-xs sm:text-sm font-medium text-indigo-400 group-hover:underline">Open resume design →</span>
+              <h2 className="text-base sm:text-lg font-bold text-white">Resume template</h2>
+              <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
+                Use this design for your resume. Pick a layout and view or download.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                Open resume design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
             </button>
             <button
               type="button"
               onClick={handlePortfolio}
-              className="group rounded-xl sm:rounded-2xl border border-white/20 bg-white/5 p-6 sm:p-8 text-left transition hover:border-emerald-500/50 hover:bg-white/10 active:scale-[0.99] min-h-[180px] sm:min-h-0 w-full"
+              className="group rounded-xl border border-white/15 bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 text-left transition-all duration-200 hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99] w-full"
             >
-              <div className="mb-3 sm:mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
-                <LayoutTemplate className="h-6 w-6 sm:h-7 sm:w-7" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
+                <LayoutTemplate className="h-5 w-5" />
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">Portfolio template</h2>
-              <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-400">Use this design for your portfolio and pick a layout.</p>
-              <span className="mt-3 sm:mt-4 inline-block text-xs sm:text-sm font-medium text-emerald-400 group-hover:underline">Open portfolio design →</span>
+              <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
+              <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
+                Use this design for your portfolio. Pick a layout and view or download.
+              </p>
+              <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                Open portfolio design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </span>
             </button>
           </div>
-          <div className="mt-10 sm:mt-12 flex justify-center">
-            <Link to="/templates" className="text-sm text-zinc-400 hover:text-white transition py-2 px-1 min-h-[44px] flex items-center justify-center">← Back to templates</Link>
-          </div>
+
+          <nav className="mt-10 sm:mt-12">
+            <Link
+              to="/templates"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:border-white/30 hover:bg-white/10 transition-all"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to templates
+            </Link>
+          </nav>
         </main>
         <AppFooter />
       </div>

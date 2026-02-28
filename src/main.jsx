@@ -9,7 +9,6 @@ import Register from './Register.jsx'
 import { Provider } from 'react-redux'
 import { store } from './Store/store.js'
 import Payal from "./Upload.jsx"
-import AiResumeEditor from "./Aiedit.jsx"
 import AtsChecker from "./ATSscore.jsx"
 import Home from './App.jsx'
 // import AtsResumeTemplate from "./Template.jsx"
@@ -40,6 +39,8 @@ import VideoCallInterviewCreate from './VideoCallInterviewCreate.jsx'
 import VideoCallInterviewDetail from './VideoCallInterviewDetail.jsx'
 import LiveInterviewCall from './LiveInterviewCall.jsx'
 import AIInterviewCall from './AIInterviewCall.jsx'
+import AddDetails from './AddDetails.jsx'
+import EditResumePage from './EditResumePage.jsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -76,9 +77,13 @@ const route = createBrowserRouter([
    element : <Payal />
  } ,
  {
-  path : "/aiedit" ,
-   element  : <AiResumeEditor />
- },
+  path : "/add-details" ,
+   element : <AddDetails />
+ } ,
+ {
+  path : "/edit-resume" ,
+   element : <EditResumePage />
+ } ,
  {
   path : "/atsscore" ,
   element : <AtsChecker />

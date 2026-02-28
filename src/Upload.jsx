@@ -120,7 +120,7 @@ function Payal() {
       if (res.ok) {
         dispatch(setResumeText(data.data.resumeText));
         localStorage.setItem("extractedtext", data.data.resumeText);
-        window.location.href = "/atsscore";
+        navigate("/atsscore");
       }
     } catch {
       setMessage("Something went wrong while uploading");
@@ -254,6 +254,11 @@ function Payal() {
           {message && (
             <p className="mt-4 text-center text-red-500 text-sm sm:text-base">{message}</p>
           )}
+          <p className="mt-4 text-center">
+            <Link to="/add-details" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium">
+              Or add your details manually for resume or portfolio →
+            </Link>
+          </p>
         </motion.div>
       </div>
       </div>

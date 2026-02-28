@@ -1,28 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import { ArrowLeft, FileText, Printer, Download } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { getResumeContentForView } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
 export default function ResumeDesignView() {
   const { id } = useParams();
-  const resumeTextFromRedux = useSelector((state) => state.resume?.resumeText);
-  const resumeText =
-    localStorage.getItem("EditedResumeText") ||
-    localStorage.getItem("extractedtext") ||
-    resumeTextFromRedux ||
-    "";
-
   const [template, setTemplate] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [detailLoading, setDetailLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const data = useMemo(() => parseResume(resumeText), [resumeText]);
 
   useEffect(() => {
     if (!id) {
@@ -48,6 +41,19 @@ export default function ResumeDesignView() {
     return () => { cancelled = true; };
   }, [id]);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setDetailLoading(true);
+      const content = await getResumeContentForView(parseResume);
+      if (!cancelled) {
+        setData(content);
+        setDetailLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const handlePrint = () => {
     window.print();
   };
@@ -56,12 +62,12 @@ export default function ResumeDesignView() {
     window.print();
   };
 
-  if (loading) {
+  if (loading || detailLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
         <AppHeader />
         <main className="flex-1 flex items-center justify-center px-4">
-          <p className="text-zinc-400">Loading template…</p>
+          <p className="text-zinc-400">Loading…</p>
         </main>
         <AppFooter />
       </div>
@@ -93,15 +99,20 @@ export default function ResumeDesignView() {
         <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
           <FileText className="text-zinc-500" size={48} />
           <p className="text-zinc-400 text-center max-w-md">
-            No resume content found. Upload or edit your resume first, then view it with this
-            template.
+            Resume is built from your saved details or from an uploaded & edited resume. Add details or upload and edit first.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
-              to="/upload"
+              to="/add-details"
               className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
             >
-              Upload resume
+              Add details
+            </Link>
+            <Link
+              to="/edit-resume"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white"
+            >
+              Upload & edit resume
             </Link>
             <Link
               to="/templates/resumedesign"
