@@ -184,41 +184,41 @@ function VideoCallInterviewDetail() {
               </span>
             </div>
 
-            <div className="detail-section rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
-              <h2 className="text-lg font-semibold text-white mb-4">Details</h2>
-              <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 mb-6">
+              <div className="detail-section">
+                <h2 className="text-lg font-semibold text-white mb-4">Details</h2>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-slate-300">
+                    <FiCalendar className="w-4 h-4 text-slate-500" />
+                    <span>Created: {formatDate(interview.createdAt || interview.scheduledAt)}</span>
+                  </div>
+                  {interview.startedAt && (
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <span>Started: {formatDate(interview.startedAt)}</span>
+                    </div>
+                  )}
+                  {interview.endedAt && (
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <span>Ended: {formatDate(interview.endedAt)}</span>
+                    </div>
+                  )}
                 <div className="flex items-center gap-2 text-slate-300">
-                  <FiCalendar className="w-4 h-4 text-slate-500" />
-                  <span>Created: {formatDate(interview.createdAt || interview.scheduledAt)}</span>
+                  <FiUser className="w-4 h-4 text-slate-500" />
+                  <span>Recruiter: ResumeAI</span>
                 </div>
-                {interview.startedAt && (
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <span>Started: {formatDate(interview.startedAt)}</span>
-                  </div>
-                )}
-                {interview.endedAt && (
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <span>Ended: {formatDate(interview.endedAt)}</span>
-                  </div>
-                )}
-                {rec && (
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <FiUser className="w-4 h-4 text-slate-500" />
-                    <span>Recruiter: {rec.FirstName} {rec.LastName} ({rec.email})</span>
-                  </div>
-                )}
-                {cand && (
-                  <div className="flex items-center gap-2 text-slate-300">
-                    <FiUser className="w-4 h-4 text-slate-500" />
-                    <span>Candidate: {cand.FirstName} {cand.LastName} ({cand.email})</span>
-                  </div>
-                )}
-                {interview.roomId && (
-                  <div className="text-slate-400">Room: {interview.roomId}</div>
-                )}
-              </dl>
+                  {cand && (
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <FiUser className="w-4 h-4 text-slate-500" />
+                      <span>Candidate: {cand.FirstName} {cand.LastName} ({cand.email})</span>
+                    </div>
+                  )}
+                  {interview.roomId && (
+                    <div className="text-slate-400">Room: {interview.roomId}</div>
+                  )}
+                </dl>
+              </div>
               {!interview.endedAt && (
-                <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3">
                   <Link
                     to={`/dashboard/interviews/${interview._id}/ai-call`}
                     className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-white font-semibold hover:bg-indigo-500 transition hover:scale-[1.02] active:scale-[0.98]"

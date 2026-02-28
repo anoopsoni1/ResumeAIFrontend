@@ -92,13 +92,9 @@ function VideoCallInterviews() {
   useEffect(() => {
     if (loading) return;
     const ctx = gsap.context(() => {
-      gsap.from(headerRef.current, { y: 24, opacity: 0, duration: 0.5, ease: "power2.out" });
       if (interviews.length > 0 && listRef.current) {
         const cards = listRef.current.querySelectorAll(".interview-card");
         gsap.fromTo(cards, { y: 28, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.08, duration: 0.45, ease: "power2.out", delay: 0.15 });
-      }
-      if (interviews.length === 0 && emptyRef.current) {
-        gsap.from(emptyRef.current, { y: 20, opacity: 0, duration: 0.5, delay: 0.2, ease: "power2.out" });
       }
     });
     return () => ctx.revert();
@@ -192,7 +188,7 @@ function VideoCallInterviews() {
               <ul ref={listRef} className="space-y-4">
                 {interviews.map((iv) => (
                   <li key={iv._id}>
-                    <div className="interview-card rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-indigo-500/50 hover:bg-white/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-indigo-500/10">
+                    <div className="interview-card flex flex-row items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-indigo-500/50 hover:bg-white/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-indigo-500/10">
                       <Link to={`/dashboard/interviews/${iv._id}`} className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-3">
                           <span className="font-semibold text-white">{iv.role || "Interview"}</span>
@@ -205,10 +201,15 @@ function VideoCallInterviews() {
                             <FiCalendar className="w-4 h-4" />
                             {formatDate(iv.createdAt || iv.scheduledAt)}
                           </span>
-                          {iv.recruiterId && (
+                          <span className="flex items-center gap-1">
+                            <FiUser className="w-4 h-4" />
+                            Recruiter: ResumeAI
+                          </span>
+                          {(iv.candidateId && (iv.candidateId.FirstName || iv.candidateId.email)) && (
                             <span className="flex items-center gap-1">
                               <FiUser className="w-4 h-4" />
-                              {iv.recruiterId.FirstName} {iv.recruiterId.LastName}
+                              User: {iv.candidateId.FirstName} {iv.candidateId.LastName}
+                              {iv.candidateId.email && ` (${iv.candidateId.email})`}
                             </span>
                           )}
                         </div>
@@ -216,7 +217,7 @@ function VideoCallInterviews() {
                       {!iv.endedAt && (
                         <Link
                           to={`/dashboard/interviews/${iv._id}/ai-call`}
-                          className="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition hover:scale-105 active:scale-95"
+                          className="shrink-0 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-500 transition hover:scale-[1.02] active:scale-[0.98] whitespace-nowrap"
                         >
                           AI Interview
                         </Link>

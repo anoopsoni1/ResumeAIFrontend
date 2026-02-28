@@ -25,6 +25,8 @@ import About from './About.jsx'
 import TemplatesPage from './Templates.jsx'
 import TemplateDesignModeSelect from './TemplateDesignModeSelect.jsx'
 import ResumeDesignPage from './ResumeDesignPage.jsx'
+import ResumeDesignView from './ResumeDesignView.jsx'
+import PortfolioDesignView from './PortfolioDesignView.jsx'
 import TemplatesDesignPage from './TemplatesDesign.jsx'
 import PortfolioPage from './Portfolio.jsx'
 import { Analytics } from "@vercel/analytics/react"
@@ -88,7 +90,9 @@ const route = createBrowserRouter([
     { index: true, element: <TemplatesPage /> },
     { path: "design", element: <TemplateDesignModeSelect /> },
     { path: "resumedesign", element: <ResumeDesignPage /> },
+    { path: "resumedesign/:id", element: <ResumeDesignView /> },
     { path: "portfoliodesign", element: <TemplatesDesignPage /> },
+    { path: "portfoliodesign/:id", element: <PortfolioDesignView /> },
   ],
  },
  {

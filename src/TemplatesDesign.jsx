@@ -26,30 +26,49 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
   const { _id, name, image } = template;
   return (
     <motion.div
-      role="button"
-      tabIndex={0}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -6, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.98 }}
-      className="rounded-xl sm:rounded-2xl border border-white/20 overflow-hidden bg-black shadow-xl cursor-pointer hover:border-emerald-500/50 hover:shadow-emerald-500/20 transition-all duration-300 min-h-[200px] flex flex-col"
-      onClick={() => onSelect?.(_id)}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect?.(_id)}
+      className="rounded-xl sm:rounded-2xl border border-white/20 overflow-hidden bg-black shadow-xl hover:border-emerald-500/50 hover:shadow-emerald-500/20 transition-all duration-300 min-h-[200px] flex flex-col"
     >
-      <div className="flex h-[220px] sm:h-[280px] md:h-[320px] bg-zinc-900 shrink-0 overflow-hidden">
-        <motion.img
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover object-top"
-          loading="lazy"
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.4 }}
-        />
+      <div
+        role="button"
+        tabIndex={0}
+        className="flex flex-1 flex-col cursor-pointer"
+        onClick={() => onSelect?.(_id)}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect?.(_id)}
+      >
+        <div className="flex h-[220px] sm:h-[280px] md:h-[320px] bg-zinc-900 shrink-0 overflow-hidden">
+          <motion.img
+            src={image}
+            alt={name}
+            className="w-full h-full object-cover object-top"
+            loading="lazy"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          />
+        </div>
+        <div className="px-3 py-3 sm:px-4 sm:py-3 border-t border-white/10 bg-white/5 flex-1 flex flex-col justify-center">
+          <p className="text-white font-medium text-sm truncate">{name}</p>
+          <p className="text-zinc-400 text-xs mt-0.5">Portfolio template</p>
+        </div>
       </div>
-      <div className="px-3 py-3 sm:px-4 sm:py-3 border-t border-white/10 bg-white/5 flex-1 flex flex-col justify-center">
-        <p className="text-white font-medium text-sm truncate">{name}</p>
-        <p className="text-zinc-400 text-xs mt-0.5">Portfolio template</p>
+      <div className="px-3 py-2 border-t border-white/10 bg-white/5 flex gap-2">
+        <button
+          type="button"
+          onClick={() => onSelect?.(_id)}
+          className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-500"
+        >
+          Use this template
+        </button>
+        <Link
+          to={`/templates/portfoliodesign/${_id}`}
+          className="flex-1 rounded-lg border border-white/20 px-3 py-2 text-xs font-medium text-center text-zinc-300 hover:text-white hover:border-emerald-500/50"
+        >
+          View full portfolio
+        </Link>
       </div>
     </motion.div>
   );

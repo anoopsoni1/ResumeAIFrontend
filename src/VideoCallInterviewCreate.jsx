@@ -130,12 +130,10 @@ function VideoCallInterviewCreate() {
       const back = el.querySelector(".create-back");
       const formEl = el.querySelector(".create-form");
       const fields = formEl?.querySelectorAll(".create-field");
-      const actions = formEl?.querySelectorAll(".create-actions button, .create-actions a");
       if (title) gsap.from(title, { y: 20, opacity: 0, duration: 0.45, ease: "power2.out" });
       if (back) gsap.from(back, { opacity: 0, duration: 0.35, delay: 0.05 });
       if (formEl) gsap.from(formEl, { y: 24, opacity: 0, duration: 0.5, delay: 0.1, ease: "power2.out" });
       if (fields?.length) gsap.fromTo(fields, { y: 12, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.06, duration: 0.4, delay: 0.25, ease: "power2.out" });
-      if (actions?.length) gsap.from(actions, { y: 8, opacity: 0, duration: 0.35, delay: 0.5, stagger: 0.05, ease: "power2.out" });
     }, el);
     return () => ctx.revert();
   }, [authChecking]);
@@ -222,17 +220,17 @@ function VideoCallInterviewCreate() {
                   className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 transition"
                 />
               </label>
-              <div className="create-actions flex gap-3 pt-2">
+              <div className="create-actions flex flex-wrap gap-3 pt-4 mt-2 border-t border-white/10">
                 <Link
                   to="/dashboard/interviews"
-                  className="flex-1 py-3 rounded-xl bg-white/10 text-white font-semibold text-center hover:bg-white/15 transition hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 min-w-[120px] py-3 rounded-xl bg-white/10 text-white font-semibold text-center hover:bg-white/15 transition hover:scale-[1.02] active:scale-[0.98]"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition disabled:opacity-60 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 min-w-[120px] py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition disabled:opacity-60 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {submitting ? "Creating…" : "Create interview"}
                 </button>

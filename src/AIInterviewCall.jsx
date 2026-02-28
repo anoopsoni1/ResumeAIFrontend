@@ -38,6 +38,7 @@ function AIInterviewCall() {
   const startScreenRef = useRef(null);
   const callScreenRef = useRef(null);
   const questionTextRef = useRef(null);
+  const localVideoRef = useRef(null);
 
   const toast = useToast();
 
@@ -204,6 +205,15 @@ function AIInterviewCall() {
     }
   };
 
+  // Attach user stream to video element when call screen is mounted
+  useEffect(() => {
+    if (!started || !streamRef.current || !localVideoRef.current) return;
+    localVideoRef.current.srcObject = streamRef.current;
+    return () => {
+      if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    };
+  }, [started]);
+
   // Read each question aloud using the browser's speech synthesis (if available)
   useEffect(() => {
     if (!started || ended) return;
@@ -297,15 +307,11 @@ function AIInterviewCall() {
     const icon = el.querySelector(".start-icon");
     const title = el.querySelector(".start-title");
     const desc = el.querySelector(".start-desc");
-    const btn = el.querySelector(".start-btn");
-    const cancel = el.querySelector(".start-cancel");
     if (!icon || !title) return;
     const ctx = gsap.context(() => {
       gsap.from(icon, { scale: 0.5, opacity: 0, duration: 0.5, ease: "back.out(1.4)" });
       gsap.from(title, { y: 16, opacity: 0, duration: 0.4, delay: 0.1, ease: "power2.out" });
       if (desc) gsap.from(desc, { y: 12, opacity: 0, duration: 0.4, delay: 0.2, ease: "power2.out" });
-      if (btn) gsap.from(btn, { y: 12, opacity: 0, duration: 0.4, delay: 0.3, ease: "power2.out" });
-      if (cancel) gsap.from(cancel, { opacity: 0, duration: 0.35, delay: 0.4 });
     }, el);
     return () => ctx.revert();
   }, [interview?._id, started === false]);
@@ -386,10 +392,11 @@ function AIInterviewCall() {
         <Link to={`/dashboard/interviews/${id}`} className="text-sm text-slate-400 hover:text-white transition">Exit</Link>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 p-4 min-h-0">
-        <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-0">
-          <div className="call-question-card flex-1 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 relative min-h-[200px] flex items-center justify-center">
-            <div className="text-center p-6">
+      <div className="flex-1 flex flex-col gap-4 p-4 min-h-0">
+        <div className="flex-1 flex flex-col sm:flex-row gap-4 min-h-0 min-w-0">
+          {/* AI Interviewer – equal half */}
+          <div className="call-question-card flex-1 min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 flex flex-col items-center justify-center p-6">
+            <div className="text-center w-full max-w-xl">
               <div className="w-20 h-20 rounded-full bg-indigo-600/40 flex items-center justify-center mx-auto mb-4">
                 <FiMessageCircle className="w-10 h-10 text-indigo-300" />
               </div>
@@ -397,7 +404,7 @@ function AIInterviewCall() {
               {questionLoading ? (
                 <p className="text-slate-500">Loading question…</p>
               ) : (
-                <p ref={questionTextRef} className="text-white text-lg max-w-xl mx-auto min-h-8">{question || "—"}</p>
+                <p ref={questionTextRef} className="text-white text-lg mx-auto min-h-8">{question || "—"}</p>
               )}
               <button
                 onClick={fetchNextQuestion}
@@ -418,9 +425,25 @@ function AIInterviewCall() {
               </div>
             </div>
           </div>
+
+          {/* User video – equal half, same space as AI */}
+          <div className="flex-1 min-h-[200px] sm:min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 relative flex items-center justify-center">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+              style={{ transform: "scaleX(-1)" }}
+              title="You"
+            />
+            <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white text-sm font-medium">
+              You
+            </div>
+          </div>
         </div>
 
-        <div className="call-tips w-full lg:w-72 shrink-0 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4">
+        <div className="call-tips shrink-0 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4">
           <h3 className="text-sm font-semibold text-indigo-300 mb-2">Tips</h3>
           <ul className="text-sm text-slate-300 space-y-1">
             <li>• Answer clearly and concisely.</li>
