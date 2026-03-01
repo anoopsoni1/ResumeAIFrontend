@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, Check, Eye, LayoutGrid, ArrowLeft, Layers } from "lucide-react";
+import { FileText, Check, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -29,6 +29,14 @@ function CardSkeleton() {
       </div>
     </div>
   );
+}
+
+/** Short comparison points for known resume templates (by name). */
+function getTemplateHighlights(name) {
+  const n = (name || "").toLowerCase();
+  if (n.includes("resume2") || n.includes("resume 2")) return ["Single-column layout", "Grey sidebar", "Clean & minimal", "Classic style"];
+  if (n.includes("resume3") || n.includes("resume 3")) return ["Single-column centered", "Emerald accents", "Compact & readable", "Simple style"];
+  return ["Different layout and style"];
 }
 
 function ApiTemplatePreview({ template, onSelect }) {
@@ -87,6 +95,7 @@ export default function ResumeDesignPage() {
   const [resumeTemplates, setResumeTemplates] = useState([]);
   const [resumeLoading, setResumeLoading] = useState(true);
   const [resumeError, setResumeError] = useState(null);
+  const [showCompare, setShowCompare] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -160,7 +169,48 @@ export default function ResumeDesignPage() {
             <p className="mt-4 max-w-lg text-base sm:text-lg text-zinc-400 leading-relaxed">
               Pick a layout for your resume. Each design uses your saved details—add them first if you haven’t.
             </p>
+            {!resumeLoading && resumeTemplates.length >= 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowCompare((v) => !v);
+                }}
+                className="mt-6 inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 hover:border-indigo-400/50 transition-all"
+              >
+                <GitCompare className="h-4 w-4" />
+                {showCompare ? "Hide differences" : "See differences"}
+                {showCompare ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+            )}
           </header>
+
+          {showCompare && resumeTemplates.length >= 1 && (
+            <section className="mb-10 rounded-2xl border border-white/15 bg-zinc-900/60 backdrop-blur-sm p-6 sm:p-8" aria-label="Compare designs">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <GitCompare className="h-5 w-5 text-indigo-400" /> Compare designs
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {resumeTemplates.slice(0, 3).map((t) => (
+                  <div key={t._id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+                    <div className="aspect-3/4 max-h-[200px] rounded-lg overflow-hidden bg-zinc-800 mb-4">
+                      <img src={t.image} alt={t.name} className="w-full h-full object-cover object-top" />
+                    </div>
+                    <p className="text-white font-semibold text-sm mb-2">{t.name}</p>
+                    <ul className="text-zinc-400 text-xs space-y-1">
+                      {getTemplateHighlights(t.name).map((item, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" aria-hidden />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
             {resumeLoading && (
