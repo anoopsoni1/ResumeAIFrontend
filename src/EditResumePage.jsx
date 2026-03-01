@@ -9,8 +9,10 @@ import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { buildResumeTextFromDetail, parsedToDetailPayload } from "./utils/detailApi.js";
+import { parseResume } from "./utils/parseResume.js";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+const API_BASE = "http://localhost:5000/api/v1/user" ;
 
 function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
@@ -23,6 +25,7 @@ export default function EditResumePage() {
   const user = useSelector((state) => state.user.userData);
 
   const [text, setText] = useState("");
+  const [detailId, setDetailId] = useState(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -87,17 +90,34 @@ export default function EditResumePage() {
         return;
       }
       try {
-        const res = await fetch(`${API_BASE}/get-edited-resume`, {
+        const res = await fetch(`${API_BASE}/get-detail`, {
           credentials: "include",
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         const json = await res.json().catch(() => ({}));
         if (cancelled) return;
-        if (res.ok && typeof json?.data?.text === "string") {
-          setText(json.data.text);
+        if (res.ok && json?.data) {
+          const detail = json.data;
+          if (!cancelled) setDetailId(detail._id);
+          const built = buildResumeTextFromDetail(detail);
+          if (built.trim()) {
+            if (!cancelled) setText(built);
+          } else {
+            const local = localStorage.getItem("extractedtext") || localStorage.getItem("EditedResumeText") || "";
+            if (!cancelled) setText(local);
+          }
         } else {
-          const local = localStorage.getItem("extractedtext") || localStorage.getItem("EditedResumeText") || "";
-          setText(local);
+          const fallbackRes = await fetch(`${API_BASE}/get-edited-resume`, {
+            credentials: "include",
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+          const fallback = await fallbackRes.json().catch(() => ({}));
+          if (fallbackRes.ok && typeof fallback?.data?.text === "string" && fallback.data.text.trim()) {
+            if (!cancelled) setText(fallback.data.text);
+          } else {
+            const local = localStorage.getItem("extractedtext") || localStorage.getItem("EditedResumeText") || "";
+            if (!cancelled) setText(local);
+          }
         }
       } catch (_) {
         const local = localStorage.getItem("extractedtext") || localStorage.getItem("EditedResumeText") || "";
@@ -160,14 +180,25 @@ export default function EditResumePage() {
     setError("");
     setSaveSuccess(false);
     try {
-      const res = await fetch(`${API_BASE}/save-edited-resume`, {
-        method: "POST",
+      const parsed = parseResume(toSave);
+      const payload = parsedToDetailPayload(parsed);
+      if (!payload) {
+        setError("Could not parse resume text.");
+        setSaveLoading(false);
+        return;
+      }
+      const url = detailId
+        ? `${API_BASE}/update-detail/${detailId}`
+        : `${API_BASE}/create-detail`;
+      const method = detailId ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token()}`,
         },
-        body: JSON.stringify({ text: toSave }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.status === 401) {
@@ -176,6 +207,7 @@ export default function EditResumePage() {
         return;
       }
       if (!res.ok) throw new Error(data?.message || "Save failed");
+      if (data?.data?._id) setDetailId(data.data._id);
       setSaveSuccess(true);
       localStorage.setItem("EditedResumeText", toSave);
       setTimeout(() => setSaveSuccess(false), 3000);

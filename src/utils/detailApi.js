@@ -1,12 +1,147 @@
 /**
  * Fetch user's saved details from the backend.
- * Resume and portfolio can be built from:
- * 1) Saved edited resume text (upload flow) - from GET /get-edited-resume
- * 2) Saved details (add-details flow) - from GET /get-detail
+ * Single source of truth: GET /get-detail (Detail model).
+ * Both AddDetails (manual) and EditResumePage (upload → edit/AI → save) write via create-detail/update-detail.
  * Returns data in the same shape as parseResume() for use in ResumeDesignView, Portfolio, PortfolioDesignView.
-  */
+ */
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user"; 
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+
+/** Form shape used by Add Details page (for localStorage "addDetailsForm") */
+const INITIAL_FORM = {
+  name: "",
+  role: "",
+  email: "",
+  phone: "",
+  summary: "",
+  skills: [""],
+  experience: [{ role: "", bullets: [""] }],
+  projects: [""],
+  education: "",
+  languageProficiency: "",
+};
+
+/**
+ * Build plain resume text from form shape (used by AddDetails and EditResumePage).
+ * Inverse of parseResume for display; same format so parsing back works.
+ */
+export function buildResumeTextFromForm(form) {
+  if (!form) return "";
+  const lines = [];
+  lines.push((form.name || "").trim() || "Your Name");
+  lines.push((form.role || "").trim() || "Your Role");
+  lines.push("");
+  if (form.summary?.trim()) {
+    lines.push("SUMMARY");
+    lines.push(form.summary.trim());
+    lines.push("");
+  }
+  if (form.skills?.length) {
+    const skillList = form.skills.filter((s) => (s || "").trim()).join("\n");
+    if (skillList) {
+      lines.push("SKILLS");
+      lines.push(skillList);
+      lines.push("");
+    }
+  }
+  if (form.experience?.length) {
+    lines.push("EXPERIENCE");
+    (form.experience || []).forEach((exp) => {
+      if (exp?.role?.trim()) lines.push(exp.role.trim());
+      (exp.bullets || []).filter(Boolean).forEach((b) => lines.push(`• ${(b || "").trim()}`));
+      lines.push("");
+    });
+  }
+  if (form.projects?.length) {
+    const projectTexts = form.projects.filter((p) => (p || "").trim());
+    if (projectTexts.length) {
+      lines.push("PROJECTS");
+      projectTexts.forEach((p) => {
+        lines.push((p || "").trim());
+        lines.push("");
+      });
+    }
+  }
+  if (form.education?.trim()) {
+    lines.push("EDUCATION");
+    lines.push(form.education.trim());
+    lines.push("");
+  }
+  if (form.languageProficiency?.trim()) {
+    lines.push("LANGUAGE PROFICIENCY");
+    lines.push(form.languageProficiency.trim());
+  }
+  const text = lines.join("\n");
+  const contact = [form.email?.trim(), form.phone?.trim()].filter(Boolean).join(" | ");
+  if (contact) return text + (text ? "\n\n" : "") + contact;
+  return text;
+}
+
+/**
+ * Build plain resume text from API detail (get-detail response).
+ */
+export function buildResumeTextFromDetail(d) {
+  if (!d) return "";
+  return buildResumeTextFromForm(detailLikeToForm(d));
+}
+
+/**
+ * Convert a detail-like object (parsed resume or API detail) to Add Details form shape.
+ * Use after upload to prefill addDetailsForm from extracted text.
+ */
+export function detailLikeToForm(d) {
+  if (!d) return { ...INITIAL_FORM };
+  const experience = (d.experience && d.experience.length > 0)
+    ? d.experience.map((str) => {
+        const lines = (str || "").split("\n").map((l) => l.replace(/^\s*[•\-]\s*/, "").trim()).filter(Boolean);
+        const role = lines[0] || "";
+        const bullets = lines.slice(1).length ? lines.slice(1) : [""];
+        return { role, bullets };
+      })
+    : [{ role: "", bullets: [""] }];
+  const skills = Array.isArray(d.skills) && d.skills.length > 0 ? d.skills : [""];
+  const projects = Array.isArray(d.projects) && d.projects.length > 0 ? d.projects : [""];
+  return {
+    name: d.name || "",
+    role: d.role || "",
+    email: d.email || "",
+    phone: d.phone || "",
+    summary: d.summary || "",
+    skills,
+    experience,
+    projects,
+    education: d.education || "",
+    languageProficiency: d.languageProficiency || "",
+  };
+}
+
+/**
+ * Convert parseResume() output to payload for create-detail / update-detail.
+ */
+export function parsedToDetailPayload(parsed) {
+  if (!parsed) return null;
+  const experience = Array.isArray(parsed.experience) && parsed.experience.length > 0
+    ? parsed.experience.map((e) => (e != null ? String(e).trim() : "")).filter(Boolean)
+    : [""];
+  const skills = Array.isArray(parsed.skills) && parsed.skills.length > 0
+    ? parsed.skills.map((s) => (s || "").trim()).filter(Boolean)
+    : [""];
+  const projects = Array.isArray(parsed.projects) && parsed.projects.length > 0
+    ? parsed.projects.map((p) => (p || "").trim()).filter(Boolean)
+    : [""];
+  return {
+    name: (parsed.name || "").trim() || "Your Name",
+    role: (parsed.role || "").trim() || "Your Role",
+    summary: (parsed.summary || "").trim() || "",
+    skills,
+    experience,
+    projects,
+    education: (parsed.education || "").trim() || "",
+    languageProficiency: (parsed.languageProficiency || "").trim() || "",
+    email: (parsed.email || "").trim() || "",
+    phone: (parsed.phone || "").trim() || "",
+  };
+}
 
 /**
  * @returns {Promise<{ name, role, summary, skills, experience, projects, education, languageProficiency, email, phone } | null>}
@@ -44,53 +179,9 @@ export async function fetchDetailForResume() {
 }
 
 /**
- * Fetch user's saved edited resume text (upload flow). Used when building resume/portfolio from uploaded + edited text.
- * @returns {Promise<string|null>} Raw text or null.
+ * Get resume/portfolio content from the single source of truth: Detail API.
+ * Both AddDetails (manual) and EditResumePage (upload → edit → save) write to the same Detail API.
  */
-export async function fetchEditedResumeText() {
-  const token = localStorage.getItem("accessToken");
-  if (!token) return null;
-  try {
-    const res = await fetch(`${API_BASE}/get-edited-resume`, {
-      credentials: "include",
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) return null;
-    const t = json?.data?.text;
-    return typeof t === "string" && t.trim() ? t.trim() : null;
-  } catch (_) {
-    return null;
-  }
-}
-
-/** Return true if detail has real content (not just defaults with nothing else). */
-function detailHasContent(d) {
-  if (!d) return false;
-  const nameOk = (d.name || "").trim() && (d.name || "").trim() !== "Your Name";
-  const roleOk = (d.role || "").trim() && (d.role || "").trim() !== "Your Role";
-  const hasSummary = (d.summary || "").trim().length > 0;
-  const hasSkills = Array.isArray(d.skills) && d.skills.some((s) => (s || "").trim());
-  const hasExperience = Array.isArray(d.experience) && d.experience.some((e) => (e || "").trim());
-  const hasProjects = Array.isArray(d.projects) && d.projects.some((p) => (p || "").trim());
-  const hasEducation = (d.education || "").trim().length > 0;
-  return nameOk || roleOk || hasSummary || hasSkills || hasExperience || hasProjects || hasEducation;
-}
-
-/**
- * Get resume/portfolio content. Both flows supported:
- * - When user saves edited text: resume/portfolio use that text (so saving updates the view).
- * - When user has no saved edited text: use saved details from Add details.
- * We prefer edited text when present so that "Save to account" on Edit Resume page actually updates resume/portfolio.
- */
-export async function getResumeContentForView(parseResume) {
-  const editedText = await fetchEditedResumeText();
-  if (editedText && typeof parseResume === "function") {
-    const parsed = parseResume(editedText);
-    if (parsed) return parsed;
-  }
-  const detail = await fetchDetailForResume();
-  if (detail && detailHasContent(detail)) return detail;
-  return detail || null;
+export async function getResumeContentForView() {
+  return fetchDetailForResume();
 }

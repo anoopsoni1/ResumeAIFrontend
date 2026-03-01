@@ -12,9 +12,10 @@ import {
   Save,
   ArrowLeft,
 } from "lucide-react";
-import { setResumeText } from "./slice/Resume.slice";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { useToast } from "./context/ToastContext";
+
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
@@ -259,15 +260,11 @@ export default function AddDetails() {
 
   const handleSave = async () => {
     setApiError(null);
-    const text = buildResumeText(form);
-    localStorage.setItem("extractedtext", text);
-    localStorage.setItem("EditedResumeText", text);
     localStorage.setItem("addDetailsForm", JSON.stringify(form));
-    dispatch(setResumeText(text));
     setSaved(true);
 
     const token = localStorage.getItem("accessToken");
-    if (!user || !token) return;
+    if (!token) return;
 
     setSaveLoading(true);
     try {
@@ -302,6 +299,20 @@ export default function AddDetails() {
     navigate("/templates/design");
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        `${API_BASE}/api/v1/user/logout`,
+        {},
+        { withCredentials: true }
+      );
+      dispatch(clearUser());
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex flex-col">
@@ -316,7 +327,7 @@ export default function AddDetails() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <AppHeader />
+      <AppHeader  onLogout={handleLogout} />
 
       <main className="flex-1 py-6 sm:py-8 px-4 sm:px-6  mx-auto w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">

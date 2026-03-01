@@ -6,9 +6,25 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import PortfolioHTMLDownload from "./Download";
 import { getResumeContentForView } from "./utils/detailApi.js";
-import { parseResume } from "./utils/parseResume.js";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+
+/** Placeholder data so logged-out users can still view portfolio template */
+const PLACEHOLDER_PORTFOLIO_DATA = {
+  name: "Your Name",
+  role: "Your Role / Title",
+  summary: "Add a short summary of your experience and goals. Sign in and add your details to see your own content here.",
+  skills: [],
+  experience: [],
+  education: "",
+  projects: [],
+  languageProficiency: "",
+  email: "email@example.com",
+  phone: "+1 234 567 8900",
+  location: "",
+  website: "",
+  linkedin: "",
+};
 
 const NAV_LINKS = [
   { to: "#home", label: "Home" },
@@ -54,7 +70,7 @@ export default function PortfolioDesignView() {
     let cancelled = false;
     (async () => {
       setDetailLoading(true);
-      const content = await getResumeContentForView(parseResume);
+      const content = await getResumeContentForView();
       if (!cancelled) {
         setData(content);
         setDetailLoading(false);
@@ -63,8 +79,10 @@ export default function PortfolioDesignView() {
     return () => { cancelled = true; };
   }, []);
 
-  const firstName = data?.name?.split(/\s+/)[0] || "Portfolio";
-  const initials = data?.name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
+  const displayData = data || PLACEHOLDER_PORTFOLIO_DATA;
+  const isPlaceholder = !data;
+  const firstName = displayData?.name?.split(/\s+/)[0] || "Portfolio";
+  const initials = displayData?.name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
 
   if (loading || detailLoading) {
     return (
@@ -96,45 +114,31 @@ export default function PortfolioDesignView() {
     );
   }
 
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-white text-neutral-800 flex flex-col">
-        <AppHeader />
-        <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-100 border border-emerald-300">
-            <Sparkles className="text-emerald-600" size={28} />
-          </div>
-          <p className="text-neutral-500 text-center max-w-md">
-            Portfolio is built from your saved details or from an uploaded & edited resume. Add details or upload and edit first.
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <Link
-              to="/add-details"
-              className="inline-flex items-center gap-2 rounded-lg bg-black text-white px-4 py-2 text-sm font-medium border-2 border-emerald-500 hover:bg-neutral-800"
-            >
-              Add details
-            </Link>
-            <Link
-              to="/edit-resume"
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:border-emerald-500 hover:text-emerald-700"
-            >
-              Upload & edit resume
-            </Link>
-            <Link
-              to="/templates/portfoliodesign"
-              className="inline-flex items-center gap-2 text-neutral-600 hover:text-black font-medium"
-            >
-              <ArrowLeft size={18} /> Back to designs
-            </Link>
-          </div>
-        </main>
-        <AppFooter />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white text-neutral-900 flex flex-col" id="home">
+      {isPlaceholder && (
+        <div className="print:hidden bg-amber-500/20 border-b border-amber-400/30 px-3 sm:px-4 py-2.5">
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-2 text-sm">
+            <p className="text-amber-800">
+              Viewing with sample data. Sign in to use your own details and save your portfolio.
+            </p>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="inline-flex items-center rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-medium text-black hover:bg-amber-400"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex items-center rounded-lg border border-amber-600/50 px-3 py-1.5 text-sm font-medium text-amber-800 hover:text-amber-900"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="print:hidden fixed top-4 right-4 z-30 flex items-center gap-2">
         <Link
           to="/templates/portfoliodesign"
@@ -188,19 +192,19 @@ export default function PortfolioDesignView() {
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               <div className="order-2 lg:order-1">
                 <div className="inline-block rounded-lg border-2 border-emerald-500 bg-black text-white px-4 py-2 mb-6 text-sm font-medium">
-                  Hi everyone 👋, I'm {data.name}
+                  Hi everyone 👋, I'm {displayData.name}
                 </div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black tracking-tight leading-tight">
-                  {data.role}
+                  {displayData.role}
                 </h1>
-                {data.summary && (
+                {displayData.summary && (
                   <p className="mt-4 text-neutral-600 text-base sm:text-lg leading-relaxed max-w-xl">
-                    {data.summary}
+                    {displayData.summary}
                   </p>
                 )}
                 <div className="mt-8 flex flex-wrap items-center gap-4">
                   <a
-                    href={data.email ? `mailto:${data.email}` : "#contact"}
+                    href={displayData.email ? `mailto:${displayData.email}` : "#contact"}
                     className="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-500 bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-800 transition-colors"
                   >
                     Get In Touch
@@ -218,18 +222,18 @@ export default function PortfolioDesignView() {
                 <div className="mt-10">
                   <p className="text-sm text-neutral-600 mb-3">Find me on:</p>
                   <div className="flex items-center gap-3">
-                    {data.email && (
+                    {displayData.email && (
                       <a
-                        href={`mailto:${data.email}`}
+                        href={`mailto:${displayData.email}`}
                         className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
                         aria-label="Email"
                       >
                         <Mail size={18} />
                       </a>
                     )}
-                    {data.phone && (
+                    {displayData.phone && (
                       <a
-                        href={`tel:${data.phone}`}
+                        href={`tel:${displayData.phone}`}
                         className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
                         aria-label="Phone"
                       >

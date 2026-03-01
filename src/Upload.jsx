@@ -11,6 +11,8 @@ import LightPillar from './LiquidEther.jsx';
 import { LuDollarSign } from "react-icons/lu";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
+import { parseResume } from "./utils/parseResume.js";
+import { detailLikeToForm } from "./utils/detailApi.js";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
@@ -118,8 +120,16 @@ function Payal() {
       }
 
       if (res.ok) {
-        dispatch(setResumeText(data.data.resumeText));
-        localStorage.setItem("extractedtext", data.data.resumeText);
+        const extractedText = data.data.resumeText || "";
+        dispatch(setResumeText(extractedText));
+        localStorage.setItem("extractedtext", extractedText);
+        try {
+          const parsed = parseResume(extractedText);
+          if (parsed) {
+            const form = detailLikeToForm(parsed);
+            localStorage.setItem("addDetailsForm", JSON.stringify(form));
+          }
+        } catch (_) {}
         navigate("/atsscore");
       }
     } catch {

@@ -34,8 +34,11 @@ function CardSkeleton() {
 /** Short comparison points for known resume templates (by name). */
 function getTemplateHighlights(name) {
   const n = (name || "").toLowerCase();
-  if (n.includes("resume2") || n.includes("resume 2")) return ["Single-column layout", "Grey sidebar", "Clean & minimal", "Classic style"];
-  if (n.includes("resume3") || n.includes("resume 3")) return ["Single-column centered", "Emerald accents", "Compact & readable", "Simple style"];
+  if (n.includes("resume2") || n.includes("resume 2")) return ["Grey sidebar left", "Clean & minimal", "Classic style"];
+  if (n.includes("resume3") || n.includes("resume 3")) return ["Single-column centered", "Emerald accents", "Compact & readable"];
+  if (n.includes("resume4") || n.includes("resume 4")) return ["Light blue sections", "Two columns", "Contact + name header", "Language bars"];
+  if (n.includes("resume5") || n.includes("resume 5")) return ["Right sidebar", "Violet accents", "Slate sidebar"];
+  if (n.includes("resume6") || n.includes("resume 6")) return ["Dark theme", "Pink accents", "Profile photo", "Two columns"];
   return ["Different layout and style"];
 }
 
