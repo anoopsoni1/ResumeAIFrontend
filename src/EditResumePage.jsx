@@ -26,6 +26,7 @@ export default function EditResumePage() {
 
   const [text, setText] = useState("");
   const [detailId, setDetailId] = useState(null);
+  const [optimizedDetail, setOptimizedDetail] = useState(null);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -155,10 +156,13 @@ export default function EditResumePage() {
         return;
       }
       if (!res.ok) throw new Error(data?.message || "AI edit failed");
-      const edited = data?.data?.editedText || "";
+      const responseData = data?.data || {};
+      const optimized = responseData.optimizedDetail || null;
+      const edited = responseData.editedText || (optimized ? buildResumeTextFromDetail(optimized) : "");
+      setOptimizedDetail(optimized);
       setText(edited);
       localStorage.setItem("EditedResumeText", edited);
-      dispatch(setEditedResumeText(data));
+      dispatch(setEditedResumeText({ ...data, data: { ...responseData, editedText: edited } }));
     } catch (err) {
       setError(err?.message || "AI improvement failed");
     } finally {
@@ -168,8 +172,8 @@ export default function EditResumePage() {
 
   const handleSave = async () => {
     const toSave = text.trim();
-    if (!toSave) {
-      setError("Nothing to save. Add or paste resume text.");
+    if (!toSave && !optimizedDetail) {
+      setError("Nothing to save. Add or paste resume text, or run Improve with AI first.");
       return;
     }
     if (!token()) {
@@ -180,8 +184,24 @@ export default function EditResumePage() {
     setError("");
     setSaveSuccess(false);
     try {
-      const parsed = parseResume(toSave);
-      const payload = parsedToDetailPayload(parsed);
+      let payload = null;
+      if (optimizedDetail) {
+        payload = {
+          name: optimizedDetail.name ?? "Your Name",
+          role: optimizedDetail.role ?? "Your Role",
+          summary: optimizedDetail.summary ?? "",
+          skills: Array.isArray(optimizedDetail.skills) ? optimizedDetail.skills : [],
+          experience: Array.isArray(optimizedDetail.experience) ? optimizedDetail.experience : [],
+          projects: Array.isArray(optimizedDetail.projects) ? optimizedDetail.projects : [],
+          education: optimizedDetail.education ?? "",
+          languageProficiency: optimizedDetail.languageProficiency ?? "",
+          email: optimizedDetail.email ?? "",
+          phone: optimizedDetail.phone ?? "",
+        };
+      } else {
+        const parsed = parseResume(toSave);
+        payload = parsedToDetailPayload(parsed);
+      }
       if (!payload) {
         setError("Could not parse resume text.");
         setSaveLoading(false);
@@ -270,7 +290,10 @@ export default function EditResumePage() {
               <label className="block font-medium text-zinc-300 text-sm mb-2">Resume text (editable)</label>
               <textarea
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => {
+                  setText(e.target.value);
+                  setOptimizedDetail(null);
+                }}
                 placeholder="Paste or type your resume, or upload a file first to see extracted text here."
                 className="w-full h-64 sm:h-80 resize-y rounded-lg border border-white/20 bg-white/5 p-4 text-sm text-slate-200 placeholder-zinc-500 focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                 disabled={!initialLoadDone}
@@ -289,7 +312,7 @@ export default function EditResumePage() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={saveLoading || !text.trim()}
+                  disabled={saveLoading || (!text.trim() && !optimizedDetail)}
                   className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10 disabled:opacity-50"
                 >
                   {saveLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

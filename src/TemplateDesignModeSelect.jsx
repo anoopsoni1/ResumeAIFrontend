@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FileText, LayoutTemplate, ChevronRight, ArrowLeft, Layers } from "lucide-react";
+import { FileText, LayoutTemplate, ChevronRight, ArrowLeft, Layers, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
 import LightPillar from "./LiquidEther.jsx";
@@ -19,6 +19,8 @@ export default function TemplateDesignModeSelect() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userData);
+  const isPremium = !!user?.Premium;
   const templateId = location.state?.templateId || null;
 
   const [size, setSize] = useState({
@@ -47,6 +49,7 @@ export default function TemplateDesignModeSelect() {
   };
 
   const handlePortfolio = () => {
+    if (!isPremium) return;
     navigate("/templates/portfoliodesign", { state: { templateId } });
   };
 
@@ -96,22 +99,43 @@ export default function TemplateDesignModeSelect() {
                 Open resume design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </button>
-            <button
-              type="button"
-              onClick={handlePortfolio}
-              className="group rounded-xl border border-white/15 bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 text-left transition-all duration-200 hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99] w-full"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
-                <LayoutTemplate className="h-5 w-5" />
-              </div>
-              <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
-              <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
-                Use this design for your portfolio. Pick a layout and view or download.
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                Open portfolio design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </button>
+            {isPremium ? (
+              <button
+                type="button"
+                onClick={handlePortfolio}
+                className="group rounded-xl border border-white/15 bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 text-left transition-all duration-200 hover:border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.99] w-full"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
+                  <LayoutTemplate className="h-5 w-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
+                <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
+                  Use this design for your portfolio. Pick a layout and view or download.
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                  Open portfolio design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </button>
+            ) : (
+              <Link
+                to="/price"
+                className="group rounded-xl border border-amber-500/30 bg-zinc-900/80 backdrop-blur-sm p-5 sm:p-6 text-left transition-all duration-200 hover:border-amber-400/50 w-full relative block"
+              >
+                <div className="absolute top-3 right-3 rounded-full bg-amber-500/20 p-1.5 border border-amber-400/40" title="Premium feature">
+                  <Lock className="h-3.5 w-3.5 text-amber-400" />
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
+                  <LayoutTemplate className="h-5 w-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
+                <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
+                  Use this design for your portfolio. Pick a layout and view or download.
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-amber-400">
+                  <Lock className="h-3.5 w-3.5" /> Upgrade to unlock
+                </span>
+              </Link>
+            )}
           </div>
 
           <nav className="mt-10 sm:mt-12">

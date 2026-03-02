@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
-import { Sparkles, Check, Eye, LayoutGrid, ArrowLeft, Layers } from "lucide-react";
+import { Sparkles, Check, Eye, LayoutGrid, ArrowLeft, Layers, Lock } from "lucide-react";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
@@ -93,6 +93,8 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
 export default function TemplatesDesignPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userData);
+  const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -151,6 +153,44 @@ export default function TemplatesDesignPage() {
     localStorage.setItem("selectedDesignTemplate", templateId);
     navigate("/upload");
   };
+
+  if (!isPremium) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-black">
+        <div className="absolute inset-0 z-0 bg-black/40" />
+        <div className="relative z-10 min-h-screen flex flex-col">
+          <Topbar onLogout={async () => {
+            try {
+              await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
+              dispatch(clearUser());
+              navigate("/login");
+            } catch (e) { console.error(e); }
+          }} />
+          <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+            <div className="rounded-2xl border border-amber-500/30 bg-zinc-900/80 backdrop-blur-sm p-8 sm:p-10 max-w-md text-center">
+              <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
+                <Lock className="h-7 w-7 text-amber-400" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Portfolio designs are premium</h1>
+              <p className="text-zinc-400 text-sm sm:text-base mb-6">
+                Upgrade to access portfolio templates and all premium features.
+              </p>
+              <Link
+                to="/price"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 py-3 text-sm font-medium text-white hover:bg-amber-500 transition-all"
+              >
+                <Lock className="h-4 w-4" /> Upgrade to unlock
+              </Link>
+            </div>
+            <Link to="/templates/design" className="mt-6 text-zinc-400 hover:text-white text-sm">
+              <ArrowLeft className="inline h-4 w-4 mr-1" /> Back to template type
+            </Link>
+          </main>
+          <AppFooter />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">

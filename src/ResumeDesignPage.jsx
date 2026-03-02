@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, Check, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp } from "lucide-react";
+import { FileText, Check, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
 import LightPillar from "./LiquidEther.jsx";
@@ -42,16 +42,23 @@ function getTemplateHighlights(name) {
   return ["Different layout and style"];
 }
 
-function ApiTemplatePreview({ template, onSelect }) {
+const FREE_RESUME_TEMPLATES_COUNT = 4;
+
+function ApiTemplatePreview({ template, onSelect, isLocked }) {
   const { _id, name, image } = template;
   return (
-    <article className="group rounded-xl border border-white/15 overflow-hidden bg-zinc-900/80 backdrop-blur-sm shadow-lg shadow-black/20 hover:border-indigo-400/40 hover:shadow-indigo-500/15 transition-all duration-300 flex flex-col">
+    <article className={`group rounded-xl border border-white/15 overflow-hidden bg-zinc-900/80 backdrop-blur-sm shadow-lg shadow-black/20 hover:border-indigo-400/40 hover:shadow-indigo-500/15 transition-all duration-300 flex flex-col relative ${isLocked ? "opacity-90" : ""}`}>
+      {isLocked && (
+        <div className="absolute top-2 right-2 z-10 rounded-full bg-amber-500/20 p-1.5 border border-amber-400/40" title="Premium template">
+          <Lock className="h-3.5 w-3.5 text-amber-400" />
+        </div>
+      )}
       <div
         role="button"
         tabIndex={0}
         className="flex flex-1 flex-col cursor-pointer"
-        onClick={() => onSelect?.(_id)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onSelect?.(_id)}
+        onClick={() => !isLocked && onSelect?.(_id)}
+        onKeyDown={(e) => !isLocked && (e.key === "Enter" || e.key === " ") && onSelect?.(_id)}
       >
         <div className="relative flex h-[160px] sm:h-[200px] md:h-[220px] bg-zinc-800 shrink-0 overflow-hidden">
           <img
@@ -70,19 +77,30 @@ function ApiTemplatePreview({ template, onSelect }) {
         </div>
       </div>
       <div className="px-2.5 py-2 border-t border-white/10 bg-white/5 flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => onSelect?.(_id)}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-indigo-500 active:scale-[0.98] transition-all"
-        >
-          <Check className="h-3.5 w-3.5" /> Use this template
-        </button>
-        <Link
-          to={`/templates/resumedesign/${_id}`}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/5 transition-all"
-        >
-          <Eye className="h-3.5 w-3.5" /> View full
-        </Link>
+        {isLocked ? (
+          <Link
+            to="/price"
+            className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-amber-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-amber-500 transition-all"
+          >
+            <Lock className="h-3.5 w-3.5" /> Upgrade to unlock
+          </Link>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => onSelect?.(_id)}
+              className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-indigo-500 active:scale-[0.98] transition-all"
+            >
+              <Check className="h-3.5 w-3.5" /> Use this template
+            </button>
+            <Link
+              to={`/templates/resumedesign/${_id}`}
+              className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/5 transition-all"
+            >
+              <Eye className="h-3.5 w-3.5" /> View full
+            </Link>
+          </>
+        )}
       </div>
     </article>
   );
@@ -91,6 +109,8 @@ function ApiTemplatePreview({ template, onSelect }) {
 export default function ResumeDesignPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user.userData);
+  const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -239,8 +259,13 @@ export default function ResumeDesignPage() {
               </div>
             )}
             {!resumeLoading &&
-              resumeTemplates.map((template) => (
-                <ApiTemplatePreview key={template._id} template={template} onSelect={handleSelectApiTemplate} />
+              resumeTemplates.map((template, index) => (
+                <ApiTemplatePreview
+                  key={template._id}
+                  template={template}
+                  onSelect={handleSelectApiTemplate}
+                  isLocked={!isPremium && index >= FREE_RESUME_TEMPLATES_COUNT}
+                />
               ))}
           </div>
 
