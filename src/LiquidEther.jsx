@@ -33,6 +33,15 @@ export default function LiquidEther({
   useEffect(() => {
     if (!mountRef.current) return;
 
+    // Skip entire effect if WebGL is not available (avoids THREE.js errors in console)
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (!gl) return;
+    } catch (_) {
+      return;
+    }
+
     function makePaletteTexture(stops) {
       let arr;
       if (Array.isArray(stops) && stops.length > 0) {
@@ -1006,15 +1015,23 @@ export default function LiquidEther({
     container.style.position = container.style.position || 'relative';
     container.style.overflow = container.style.overflow || 'hidden';
 
-    const webgl = new WebGLManager({
-      $wrapper: container,
-      autoDemo,
-      autoSpeed,
-      autoIntensity,
-      takeoverDuration,
-      autoResumeDelay,
-      autoRampDuration
-    });
+    // Gracefully disable effect if WebGL context cannot be created
+    let webgl;
+    try {
+      webgl = new WebGLManager({
+        $wrapper: container,
+        autoDemo,
+        autoSpeed,
+        autoIntensity,
+        takeoverDuration,
+        autoResumeDelay,
+        autoRampDuration
+      });
+    } catch (e) {
+      console.error('[LiquidEther] WebGL not available, skipping background effect.', e);
+      webglRef.current = null;
+      return () => {};
+    }
     webglRef.current = webgl;
 
     const applyOptionsFromProps = () => {

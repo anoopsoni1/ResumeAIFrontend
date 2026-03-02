@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { FiVideo, FiCalendar, FiUser, FiAward } from "react-icons/fi";
+import { FiVideo, FiCalendar, FiUser, FiAward, FiArrowLeft } from "react-icons/fi";
 import gsap from "gsap";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
@@ -124,6 +124,8 @@ function VideoCallInterviewDetail() {
     return "text-slate-400 bg-slate-500/20";
   };
 
+  const isProcessing = interview?.status === "processing";
+
   if (authChecking) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -167,12 +169,35 @@ function VideoCallInterviewDetail() {
         </div>
       )}
       <div className="absolute inset-0 z-1 bg-black/40" />
+      {isProcessing && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-400/40 bg-black/80 px-8 py-6 shadow-xl">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 rounded-full border-2 border-amber-400/30 animate-ping" />
+              <div
+                className="absolute inset-2 rounded-full border-2 border-amber-300/80 border-t-transparent animate-spin"
+                style={{ animationDuration: "1.1s" }}
+              />
+            </div>
+            <div className="text-center">
+              <p className="text-amber-200 font-semibold">Generating your AI evaluation…</p>
+              <p className="text-slate-400 text-xs mt-1 max-w-xs">
+                We&apos;re processing your interview recording with AI. This can take up to a minute. Please stay on this page.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="relative z-10 flex flex-col min-h-screen">
         <AppHeader onLogout={handleLogout} />
         <main className="flex-1 py-8 px-4">
-          <div ref={mainRef} className="max-w-4xl mx-auto">
-            <Link to="/dashboard/interviews" className="detail-section text-sm text-indigo-400 hover:text-indigo-300 mb-4 inline-block">
-              ← Back to interviews
+          <div ref={mainRef} className="max-w-7xl mx-auto">
+            <Link
+              to="/dashboard/interviews"
+              className="detail-section inline-flex items-center gap-2 text-sm mb-4 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1.5 text-indigo-200 hover:bg-indigo-500/20 hover:text-white hover:border-indigo-400/80 transition shadow-sm hover:shadow-indigo-500/20"
+            >
+              <FiArrowLeft className="w-4 h-4" />
+              <span>Back to interviews</span>
             </Link>
             <div className="detail-section flex flex-wrap items-center gap-3 mb-6">
               <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -212,7 +237,7 @@ function VideoCallInterviewDetail() {
                       <span>Candidate: {cand.FirstName} {cand.LastName} ({cand.email})</span>
                     </div>
                   )}
-                  {interview.roomId && (
+                  {interview.roomId != null && String(interview.roomId).trim() !== "" && String(interview.roomId) !== "0" && (
                     <div className="text-slate-400">Room: {interview.roomId}</div>
                   )}
                 </dl>
@@ -233,7 +258,7 @@ function VideoCallInterviewDetail() {
             {interview.status === "processing" && (
               <div className="detail-section rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 mb-6">
                 <p className="text-amber-200 font-medium">Generating your evaluation…</p>
-                <p className="text-slate-400 text-sm mt-1">Scores and feedback will appear here in a moment. This page updates automatically.</p>
+                <p className="text-slate-400 text-sm mt-1">We&apos;re analyzing your recording with AI. The page will update automatically.</p>
               </div>
             )}
 
@@ -242,6 +267,20 @@ function VideoCallInterviewDetail() {
                 <p className="text-amber-200 font-medium">Recording or evaluation not available</p>
                 <p className="text-slate-400 text-sm mt-1">
                   The recording was not saved or the upload failed. Try ending the interview after speaking for at least a few seconds, and ensure your connection is stable. You can start another AI interview from this page.
+                </p>
+              </div>
+            )}
+
+            {["completed"].includes(interview.status) && interview.recordingUrl && !report && (
+              <div className="detail-section rounded-2xl border border-rose-500/40 bg-rose-500/10 p-6 mb-6">
+                <p className="text-rose-200 font-medium">AI evaluation could not be generated</p>
+                <p className="text-slate-300 text-sm mt-1">
+                  We were able to save your recording, but the AI analysis did not complete. This usually means the AI service is not configured
+                  (missing or invalid API key) or there was an internal error while processing the recording.
+                </p>
+                <p className="text-slate-500 text-xs mt-2">
+                  If you are the developer, check your backend logs and ensure the <code className="px-1 py-0.5 rounded bg-black/40 text-[0.7rem]">GEMINI_API_KEY</code> environment
+                  variable is set correctly, then try another interview.
                 </p>
               </div>
             )}
@@ -256,19 +295,19 @@ function VideoCallInterviewDetail() {
                   {report.technicalScore != null && (
                     <div className="score-box rounded-xl bg-white/5 p-3 border border-white/5">
                       <p className="text-xs text-slate-500">Technical</p>
-                      <p className="text-xl font-bold text-white">{report.technicalScore}</p>
+                      <p className="text-xl font-bold text-white">{report.technicalScore}<span className="text-slate-500 font-normal text-sm">/10</span></p>
                     </div>
                   )}
                   {report.communicationScore != null && (
                     <div className="score-box rounded-xl bg-white/5 p-3 border border-white/5">
                       <p className="text-xs text-slate-500">Communication</p>
-                      <p className="text-xl font-bold text-white">{report.communicationScore}</p>
+                      <p className="text-xl font-bold text-white">{report.communicationScore}<span className="text-slate-500 font-normal text-sm">/10</span></p>
                     </div>
                   )}
                   {report.confidenceScore != null && (
                     <div className="score-box rounded-xl bg-white/5 p-3 border border-white/5">
                       <p className="text-xs text-slate-500">Confidence</p>
-                      <p className="text-xl font-bold text-white">{report.confidenceScore}</p>
+                      <p className="text-xl font-bold text-white">{report.confidenceScore}<span className="text-slate-500 font-normal text-sm">/10</span></p>
                     </div>
                   )}
                 </div>

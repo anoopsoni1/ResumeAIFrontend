@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import { useNavigate, Link } from "react-router-dom";
-import { FiVideo } from "react-icons/fi";
+import { FiVideo, FiArrowLeft, FiMail, FiUser, FiHash, FiX, FiCheck } from "react-icons/fi";
 import gsap from "gsap";
 import LiquidEther from "./LiquidEther";
 import LightPillar from "./LiquidEther.jsx";
@@ -171,68 +171,104 @@ function VideoCallInterviewCreate() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <AppHeader onLogout={handleLogout} />
         <main className="flex-1 py-8 px-4">
-          <div className="max-w-lg mx-auto">
-            <h1 className="create-title text-2xl font-bold text-white flex items-center gap-2 mb-2">
-              <FiVideo className="w-7 h-7 text-indigo-400" />
-              Create video interview
-            </h1>
-            <Link to="/dashboard/interviews" className="create-back text-sm text-indigo-400 hover:text-indigo-300 mb-6 inline-block">
-              ← Back to interviews
+          <div className="max-w-xl mx-auto">
+            <Link
+              to="/dashboard/interviews"
+              className="create-back inline-flex items-center gap-2 text-xs sm:text-sm mb-3 rounded-full border border-indigo-500/40 bg-indigo-500/10 px-3 py-1.5 text-indigo-200 hover:bg-indigo-500/20 hover:text-white hover:border-indigo-400/80 transition shadow-sm hover:shadow-indigo-500/20"
+            >
+              <FiArrowLeft className="w-4 h-4" />
+              <span>Back to interviews</span>
             </Link>
-            <form onSubmit={handleSubmit} className="create-form rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
+
+            <div className="mb-6">
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/15 border border-indigo-400/30 px-3 py-1 text-[11px] sm:text-xs font-medium text-indigo-200 mb-3">
+                <FiVideo className="w-3.5 h-3.5" />
+                <span>AI-powered video interview</span>
+              </div>
+              <h1 className="create-title text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 mb-1">
+                <span className="bg-linear-to-r from-indigo-300 via-sky-300 to-purple-300 bg-clip-text text-transparent">
+                  Create video interview
+                </span>
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-lg">
+                Invite a candidate to a dedicated interview room. We&apos;ll record the call and let AI evaluate their performance.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="create-form rounded-2xl border border-indigo-500/30 bg-black/60 backdrop-blur-xl p-6 sm:p-7 space-y-4 shadow-xl shadow-indigo-500/20">
               {error && (
                 <p className="text-amber-400 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2">
                   {error}
                 </p>
               )}
               <label className="create-field block">
-                <span className="text-sm text-slate-400">Candidate email *</span>
+                <span className="text-sm text-slate-300 flex items-center gap-1.5">
+                  <FiMail className="w-3.5 h-3.5 text-slate-500" />
+                  Candidate email <span className="text-rose-400">*</span>
+                </span>
                 <input
                   type="email"
                   name="candidateEmail"
                   value={form.candidateEmail}
                   onChange={handleChange}
                   placeholder="candidate@example.com"
-                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 transition"
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5/5 bg-white/5 border border-white/15 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-400/90 focus:ring-2 focus:ring-indigo-500/40 transition"
                   required
                 />
               </label>
               <label className="create-field block">
-                <span className="text-sm text-slate-400">Role *</span>
+                <span className="text-sm text-slate-300 flex items-center gap-1.5">
+                  <FiUser className="w-3.5 h-3.5 text-slate-500" />
+                  Role <span className="text-rose-400">*</span>
+                </span>
                 <input
                   type="text"
                   name="role"
                   value={form.role}
                   onChange={handleChange}
                   placeholder="e.g. Frontend Developer"
-                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 transition"
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-400/90 focus:ring-2 focus:ring-indigo-500/40 transition"
                   required
                 />
               </label>
               <label className="create-field block">
-                <span className="text-sm text-slate-400">Room ID (optional)</span>
+                <span className="text-sm text-slate-300 flex items-center gap-1.5">
+                  <FiHash className="w-3.5 h-3.5 text-slate-500" />
+                  Room ID <span className="text-slate-500 text-xs">(optional)</span>
+                </span>
                 <input
                   type="text"
                   name="roomId"
                   value={form.roomId}
                   onChange={handleChange}
                   placeholder="e.g. room-abc-123"
-                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-500 transition"
+                  className="mt-1 w-full px-4 py-3 rounded-xl bg-white/5 border border-white/15 text-white placeholder:text-zinc-500 outline-none focus:border-indigo-400/90 focus:ring-2 focus:ring-indigo-500/40 transition"
                 />
               </label>
               <div className="create-actions flex flex-wrap gap-3 pt-4 mt-2 border-t border-white/10">
                 <Link
                   to="/dashboard/interviews"
-                  className="flex-1 min-w-[120px] py-3 rounded-xl bg-white/10 text-white font-semibold text-center hover:bg-white/15 transition hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 text-slate-200 font-semibold text-center hover:bg-white/10 transition hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Cancel
+                  <FiX className="w-4 h-4" />
+                  <span>Cancel</span>
                 </Link>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 min-w-[120px] py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition disabled:opacity-60 hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 min-w-[120px] inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-500 transition disabled:opacity-60 hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
                 >
-                  {submitting ? "Creating…" : "Create interview"}
+                  {submitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/40 border-t-transparent rounded-full animate-spin" />
+                      <span>Creating…</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiCheck className="w-4 h-4" />
+                      <span>Create interview</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

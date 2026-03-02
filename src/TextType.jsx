@@ -18,12 +18,16 @@ const TextType = ({
   cursorClassName = '',
   cursorBlinkDuration = 0.5,
   textColors = [],
-  variableSpeed,
+  variableSpeed: variableSpeedProp,
+  variableSpeedEnabled = false,
+  variableSpeedMin = 60,
+  variableSpeedMax = 120,
   onSentenceComplete,
   startOnVisible = false,
   reverseMode = false,
   ...props
 }) => {
+  const variableSpeed = variableSpeedProp ?? (variableSpeedEnabled ? { min: variableSpeedMin, max: variableSpeedMax } : null);
   const [displayedText, setDisplayedText] = useState('');
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);

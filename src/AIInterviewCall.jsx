@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { clearUser, setUser } from "./slice/user.slice";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { FiMic, FiMicOff, FiVideo, FiPhoneOff, FiMessageCircle } from "react-icons/fi";
+import { FiMic, FiMicOff, FiVideo, FiPhoneOff, FiUser } from "react-icons/fi";
 import gsap from "gsap";
 import { useToast } from "./context/ToastContext";
-import LightPillar from "./LiquidEther.jsx";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
@@ -27,6 +26,8 @@ function AIInterviewCall() {
   const [uploading, setUploading] = useState(false);
   const [localMuted, setLocalMuted] = useState(false);
   const [aiVoiceEnabled, setAiVoiceEnabled] = useState(true);
+  const [aiSpeaking, setAiSpeaking] = useState(false);
+  const [advancingQuestion, setAdvancingQuestion] = useState(false);
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 768,
     height: typeof window !== "undefined" ? window.innerHeight : 1024,
@@ -39,6 +40,11 @@ function AIInterviewCall() {
   const callScreenRef = useRef(null);
   const questionTextRef = useRef(null);
   const localVideoRef = useRef(null);
+  const fullscreenContainerRef = useRef(null);
+  const userWaveCanvasRef = useRef(null);
+  const audioAnalyserRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const waveRafRef = useRef(null);
 
   const toast = useToast();
 
@@ -124,6 +130,44 @@ function AIInterviewCall() {
       setQuestion("Tell me about yourself and your experience.");
     } finally {
       setQuestionLoading(false);
+      setAdvancingQuestion(false);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (questionLoading || advancingQuestion) return;
+
+    // If AI voice is enabled and supported, say "Okay" before the next question
+    if (
+      aiVoiceEnabled &&
+      typeof window !== "undefined" &&
+      "speechSynthesis" in window &&
+      window.SpeechSynthesisUtterance
+    ) {
+      const synth = window.speechSynthesis;
+      const utterance = new window.SpeechSynthesisUtterance("Okay, let's move to the next question.");
+      utterance.lang = (typeof navigator !== "undefined" && navigator.language) ? navigator.language : "en-US";
+      utterance.rate = 1;
+      utterance.pitch = 1;
+
+      utterance.onstart = () => setAiSpeaking(true);
+      const stopSpeaking = () => setAiSpeaking(false);
+      utterance.onend = () => {
+        stopSpeaking();
+        setAdvancingQuestion(true);
+        fetchNextQuestion();
+      };
+      utterance.onerror = () => {
+        stopSpeaking();
+        setAdvancingQuestion(true);
+        fetchNextQuestion();
+      };
+
+      synth.cancel();
+      synth.speak(utterance);
+    } else {
+      setAdvancingQuestion(true);
+      fetchNextQuestion();
     }
   };
 
@@ -158,6 +202,8 @@ function AIInterviewCall() {
         const chunks = chunksRef.current;
         setUploading(true);
         let uploadError = null;
+        let uploadedRecording = false;
+
         try {
           if (chunks.length > 0) {
             const blob = new Blob(chunks, { type: "video/webm" });
@@ -177,18 +223,35 @@ function AIInterviewCall() {
               const uploadJson = await uploadRes.json().catch(() => ({}));
               if (!uploadRes.ok) {
                 uploadError = uploadJson?.message || `Upload failed (${uploadRes.status}).`;
+              } else {
+                uploadedRecording = true;
               }
             }
+          }
+        } catch (e) {
+          console.error("Upload failed", e);
+          uploadError = e?.message || "Upload failed.";
+        }
+
+        try {
+          const payload = {
+            endedAt: new Date().toISOString(),
+          };
+          // If we didn't successfully upload a recording, mark interview as ended (no processing)
+          if (!uploadedRecording) {
+            payload.status = "ended";
           }
           await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
             method: "PUT",
             credentials: "include",
             headers: { "Content-Type": "application/json", ...getHeaders() },
-            body: JSON.stringify({ status: "ended", endedAt: new Date().toISOString() }),
+            body: JSON.stringify(payload),
           });
         } catch (e) {
-          console.error("Upload failed", e);
-          uploadError = e?.message || "Upload failed.";
+          console.error("Failed to finalize interview", e);
+          if (!uploadError) {
+            uploadError = e?.message || "Failed to finalize interview.";
+          }
         } finally {
           setUploading(false);
           if (uploadError) toast.error(uploadError);
@@ -200,10 +263,54 @@ function AIInterviewCall() {
 
       setStarted(true);
       fetchNextQuestion();
+
+      // Request fullscreen on the interview container (user gesture from Start button)
+      const el = fullscreenContainerRef.current;
+      if (el && typeof el.requestFullscreen === "function") {
+        try {
+          el.requestFullscreen().catch(() => {});
+        } catch (_) {}
+      }
     } catch (err) {
       console.error(err);
     }
   };
+
+  // Keep interview in fullscreen until user exits or interview completes; re-enter if they leave fullscreen (e.g. Esc)
+  useEffect(() => {
+    if (!started || ended || uploading) return;
+    const el = fullscreenContainerRef.current;
+    if (!el || typeof el.requestFullscreen !== "function") return;
+
+    let reenterTimeoutId = null;
+
+    const handleFullscreenChange = () => {
+      if (endedRef.current) return;
+      if (document.fullscreenElement !== el) {
+        reenterTimeoutId = setTimeout(() => {
+          reenterTimeoutId = null;
+          if (endedRef.current) return;
+          if (document.fullscreenElement !== el) {
+            el.requestFullscreen().catch(() => {});
+          }
+        }, 200);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      if (reenterTimeoutId) clearTimeout(reenterTimeoutId);
+    };
+  }, [started, ended, uploading]);
+
+  // Exit fullscreen when interview ends or is uploading so next page isn't stuck in fullscreen
+  useEffect(() => {
+    if (!ended && !uploading) return;
+    if (typeof document.exitFullscreen === "function" && document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, [ended, uploading]);
 
   // Attach user stream to video element when call screen is mounted
   useEffect(() => {
@@ -213,6 +320,162 @@ function AIInterviewCall() {
       if (localVideoRef.current) localVideoRef.current.srcObject = null;
     };
   }, [started]);
+
+  // Nice smooth wave effect when user speaks – audio analyser + canvas overlay
+  useEffect(() => {
+    if (!started || ended || !streamRef.current) return;
+    const stream = streamRef.current;
+    const canvas = userWaveCanvasRef.current;
+    const audioTrack = stream.getAudioTracks()[0];
+    if (!canvas || !audioTrack) return;
+
+    let ctx;
+    try {
+      ctx = canvas.getContext("2d");
+    } catch (_) {
+      return;
+    }
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.8;
+    source.connect(analyser);
+
+    audioContextRef.current = audioContext;
+    audioAnalyserRef.current = analyser;
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    const wavePoints = 64;
+    let rafId;
+    let phase = 0;
+
+    const resize = () => {
+      const container = canvas.parentElement;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+      }
+    };
+
+    const draw = () => {
+      rafId = requestAnimationFrame(draw);
+      if (!audioAnalyserRef.current || !userWaveCanvasRef.current) return;
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+      if (w <= 0 || h <= 0) return;
+
+      analyser.getByteFrequencyData(dataArray);
+      phase += 0.02;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const bottom = h - 6;
+      const maxAmp = h * 0.4;
+      const step = w / (wavePoints - 1);
+
+      // Build smooth wave Y values from frequency data + subtle motion
+      const ys = [];
+      for (let i = 0; i < wavePoints; i++) {
+        const idx = Math.floor((i / (wavePoints - 1)) * (dataArray.length - 1));
+        const raw = dataArray[Math.min(idx, dataArray.length - 1)] || 0;
+        const norm = localMuted ? 0 : Math.min(1, raw / 200);
+        const wave = Math.sin(i * 0.3 + phase) * 0.15 + Math.sin(i * 0.5 + phase * 1.3) * 0.1;
+        const amp = (4 + norm * maxAmp) * (1 + wave);
+        ys.push(bottom - amp);
+      }
+
+      // Draw soft glow layer (wider, more transparent)
+      ctx.beginPath();
+      ctx.moveTo(0, bottom);
+      for (let i = 0; i < wavePoints - 1; i++) {
+        const x0 = i * step;
+        const x1 = (i + 1) * step;
+        const cx = (x0 + x1) / 2;
+        const y0 = ys[i];
+        const y1 = ys[i + 1];
+        const cy = (y0 + y1) / 2;
+        ctx.quadraticCurveTo(x0, y0, cx, cy);
+      }
+      ctx.lineTo(w, ys[wavePoints - 1]);
+      ctx.lineTo(w, bottom);
+      ctx.closePath();
+      const glowGrad = ctx.createLinearGradient(0, bottom, 0, 0);
+      glowGrad.addColorStop(0, "rgba(34, 211, 238, 0.25)");
+      glowGrad.addColorStop(0.6, "rgba(34, 211, 238, 0.08)");
+      glowGrad.addColorStop(1, "rgba(34, 211, 238, 0)");
+      ctx.fillStyle = glowGrad;
+      ctx.shadowColor = "rgba(34, 211, 238, 0.8)";
+      ctx.shadowBlur = 28;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Main wave fill – smooth curve
+      ctx.beginPath();
+      ctx.moveTo(0, bottom);
+      for (let i = 0; i < wavePoints - 1; i++) {
+        const x0 = i * step;
+        const x1 = (i + 1) * step;
+        const cx = (x0 + x1) / 2;
+        const y0 = ys[i];
+        const y1 = ys[i + 1];
+        const cy = (y0 + y1) / 2;
+        ctx.quadraticCurveTo(x0, y0, cx, cy);
+      }
+      ctx.lineTo(w, ys[wavePoints - 1]);
+      ctx.lineTo(w, bottom);
+      ctx.closePath();
+      const fillGrad = ctx.createLinearGradient(0, bottom, 0, 0);
+      fillGrad.addColorStop(0, "rgba(6, 182, 212, 0.6)");
+      fillGrad.addColorStop(0.35, "rgba(34, 211, 238, 0.9)");
+      fillGrad.addColorStop(0.7, "rgba(165, 243, 252, 0.95)");
+      fillGrad.addColorStop(1, "rgba(255,255,255,0.85)");
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+
+      // Wave outline for a crisp, shiny edge
+      ctx.beginPath();
+      ctx.moveTo(0, ys[0]);
+      for (let i = 0; i < wavePoints - 1; i++) {
+        const x0 = i * step;
+        const cx = (x0 + (i + 1) * step) / 2;
+        ctx.quadraticCurveTo(x0, ys[i], cx, (ys[i] + ys[i + 1]) / 2);
+      }
+      ctx.quadraticCurveTo((wavePoints - 1) * step, ys[wavePoints - 1], w, ys[wavePoints - 1]);
+      ctx.strokeStyle = "rgba(255,255,255,0.7)";
+      ctx.lineWidth = 1.5;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.shadowColor = "rgba(255,255,255,0.9)";
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    };
+
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas.parentElement);
+    draw();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      ro.disconnect();
+      try {
+        source.disconnect();
+        if (audioContext.close) audioContext.close();
+      } catch (_) {}
+      audioContextRef.current = null;
+      audioAnalyserRef.current = null;
+    };
+  }, [started, ended, localMuted]);
 
   // Read each question aloud using the browser's speech synthesis (if available)
   useEffect(() => {
@@ -228,11 +491,17 @@ function AIInterviewCall() {
     utterance.rate = 1;
     utterance.pitch = 1;
 
+    utterance.onstart = () => setAiSpeaking(true);
+    const stopSpeaking = () => setAiSpeaking(false);
+    utterance.onend = stopSpeaking;
+    utterance.onerror = stopSpeaking;
+
     synth.cancel();
     synth.speak(utterance);
 
     return () => {
       synth.cancel();
+      setAiSpeaking(false);
     };
   }, [question, started, ended, aiVoiceEnabled, questionLoading]);
 
@@ -297,6 +566,9 @@ function AIInterviewCall() {
       if (prev && typeof window !== "undefined" && "speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+      if (prev) {
+        setAiSpeaking(false);
+      }
       return !prev;
     });
   };
@@ -337,7 +609,7 @@ function AIInterviewCall() {
 
   if (authChecking || loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div ref={fullscreenContainerRef} className="fixed inset-0 w-screen h-screen min-h-dvh bg-black flex items-center justify-center">
         <p className="text-white">{authChecking ? "Checking session…" : "Loading…"}</p>
       </div>
     );
@@ -345,30 +617,9 @@ function AIInterviewCall() {
 
   if (!interview) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
+      <div ref={fullscreenContainerRef} className="fixed inset-0 w-screen h-screen min-h-dvh bg-black flex flex-col items-center justify-center gap-4">
         <p className="text-slate-400">Interview not found.</p>
         <Link to="/dashboard/interviews" className="text-indigo-400">Back to interviews</Link>
-      </div>
-    );
-  }
-
-  if (!started) {
-    return (
-      <div ref={startScreenRef} className="min-h-screen bg-black flex flex-col items-center justify-center gap-6 px-4">
-        <div className="start-icon rounded-full w-24 h-24 bg-indigo-600/30 flex items-center justify-center">
-          <FiMessageCircle className="w-12 h-12 text-indigo-400" />
-        </div>
-        <h1 className="start-title text-xl font-bold text-white text-center">AI Interview – {interview.role || "Interview"}</h1>
-        <p className="start-desc text-slate-400 text-center max-w-sm">
-          Up to {DURATION_MINUTES} minutes max; you can end anytime. The AI will ask you questions. Your video and audio will be recorded and analyzed.
-        </p>
-        <button
-          onClick={startInterview}
-          className="start-btn rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-500 transition hover:scale-[1.02] active:scale-[0.98]"
-        >
-          Start interview
-        </button>
-        <Link to={`/dashboard/interviews/${id}`} className="start-cancel text-slate-500 text-sm hover:text-slate-400">Cancel</Link>
       </div>
     );
   }
@@ -376,14 +627,29 @@ function AIInterviewCall() {
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
 
+  // Single fullscreen wrapper so browser fullscreen persists when switching from start → call
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
-      {size.width >= 768 && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
+    <div ref={fullscreenContainerRef} className="fixed inset-0 w-screen h-screen min-h-dvh overflow-hidden bg-black">
+      {!started ? (
+        <div ref={startScreenRef} className="w-full h-full flex flex-col items-center justify-center gap-6 px-4">
+          <div className="start-icon rounded-full w-24 h-24 bg-indigo-600/30 flex items-center justify-center">
+            <FiUser className="w-12 h-12 text-indigo-400" />
+          </div>
+          <h1 className="start-title text-xl font-bold text-white text-center">AI Interview – {interview.role || "Interview"}</h1>
+          <p className="start-desc text-slate-400 text-center max-w-sm">
+            Up to {DURATION_MINUTES} minutes max; you can end anytime. The AI will ask you questions. Your video and audio will be recorded and analyzed.
+          </p>
+          <button
+            onClick={startInterview}
+            className="start-btn rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-500 transition hover:scale-[1.02] active:scale-[0.98]"
+          >
+            Start interview
+          </button>
+          <Link to={`/dashboard/interviews/${id}`} className="start-cancel text-slate-500 text-sm hover:text-slate-400">Cancel</Link>
         </div>
-      )}
-      <div ref={callScreenRef} className="relative z-10 min-h-screen bg-black flex flex-col">
+      ) : (
+        <>
+          <div ref={callScreenRef} className="relative z-10 w-full h-full min-h-0 flex flex-col">
       <div className="call-header flex items-center justify-between px-4 py-3 border-b border-white/10">
         <span className="text-white font-semibold">{interview.role || "AI Interview"}</span>
         <span className="text-amber-400 font-mono tabular-nums">
@@ -397,8 +663,25 @@ function AIInterviewCall() {
           {/* AI Interviewer – equal half */}
           <div className="call-question-card flex-1 min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 flex flex-col items-center justify-center p-6">
             <div className="text-center w-full max-w-xl">
-              <div className="w-20 h-20 rounded-full bg-indigo-600/40 flex items-center justify-center mx-auto mb-4">
-                <FiMessageCircle className="w-10 h-10 text-indigo-300" />
+              <div className="relative w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+                {/* 360° ripple rings when AI is speaking */}
+                {aiSpeaking && (
+                  <>
+                    <div className="absolute inset-0 rounded-full border-2 border-cyan-400/60 animate-ripple" style={{ animationDelay: "0s" }} />
+                    <div className="absolute inset-0 rounded-full border-2 border-indigo-400/50 animate-ripple" style={{ animationDelay: "0.2s" }} />
+                    <div className="absolute inset-0 rounded-full border-2 border-sky-400/50 animate-ripple" style={{ animationDelay: "0.4s" }} />
+                    <div className="absolute inset-0 rounded-full border-2 border-cyan-400/40 animate-ripple" style={{ animationDelay: "0.6s" }} />
+                    <div className="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ripple" style={{ animationDelay: "0.8s" }} />
+                  </>
+                )}
+                {/* Person avatar – replaces message icon */}
+                <div
+                  className={`relative w-24 h-24 rounded-full bg-linear-to-br from-indigo-500 via-slate-600 to-indigo-700 flex items-center justify-center shadow-xl transition-all duration-300 overflow-hidden ${
+                    aiSpeaking ? "scale-105 ring-4 ring-cyan-400/40 shadow-[0_0_50px_rgba(34,211,238,0.5)]" : "scale-100"
+                  }`}
+                >
+                  <FiUser className="w-12 h-12 text-white/95" strokeWidth={2} />
+                </div>
               </div>
               <p className="text-slate-400 text-sm mb-2">AI Interviewer</p>
               {questionLoading ? (
@@ -407,22 +690,12 @@ function AIInterviewCall() {
                 <p ref={questionTextRef} className="text-white text-lg mx-auto min-h-8">{question || "—"}</p>
               )}
               <button
-                onClick={fetchNextQuestion}
-                disabled={questionLoading}
+              onClick={handleNextQuestion}
+              disabled={questionLoading || advancingQuestion}
                 className="mt-4 rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-50 transition hover:scale-[1.02] active:scale-[0.98]"
               >
                 Next question
               </button>
-              <div className="mt-3 flex flex-col items-center gap-1 text-xs text-slate-400">
-                <button
-                  type="button"
-                  onClick={toggleAiVoice}
-                  className="underline underline-offset-2"
-                >
-                  {aiVoiceEnabled ? "Mute AI voice" : "Enable AI voice"}
-                </button>
-                {aiVoiceEnabled && <span>AI will read each question aloud.</span>}
-              </div>
             </div>
           </div>
 
@@ -436,6 +709,13 @@ function AIInterviewCall() {
               className="w-full h-full object-cover"
               style={{ transform: "scaleX(-1)" }}
               title="You"
+            />
+            {/* Shiny wave overlay when user speaks */}
+            <canvas
+              ref={userWaveCanvasRef}
+              className="absolute inset-0 w-full h-full pointer-events-none"
+              style={{ transform: "scaleX(-1)" }}
+              aria-hidden
             />
             <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/60 text-white text-sm font-medium">
               You
@@ -479,7 +759,9 @@ function AIInterviewCall() {
           )}
         </div>
       )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

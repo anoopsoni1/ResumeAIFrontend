@@ -157,7 +157,7 @@ function VideoCallInterviews() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <AppHeader onLogout={handleLogout} />
         <main className="flex-1 py-8 px-4">
-          <div className="max-w-4xl mx-auto">
+          <div className=" mx-auto">
             <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                 <FiVideo className="w-7 h-7 text-indigo-400" />
