@@ -12,7 +12,7 @@ import AppFooter from "./AppFooter";
 import { buildResumeTextFromDetail, parsedToDetailPayload } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
 
-const API_BASE = "http://localhost:5000/api/v1/user" ;
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user" ;
 
 function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
