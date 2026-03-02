@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -31,9 +31,9 @@ const PLACEHOLDER_RESUME_DATA = {
 
 const DOCUMENT_CLASS =
   "resume-document w-full mx-auto bg-white text-black shadow-2xl rounded-none sm:rounded-lg overflow-visible print:shadow-none print:rounded-none flex-1 min-h-0 flex flex-col";
-/** Multi-page for all resume templates (Resume 2–6): min height one page (11in); content can grow and flow to second page (and more). No cutting or scaling. */
-const MULTI_PAGE_WRAPPER_CLASS =
-  "resume-multi-page w-full min-h-[11in] print:min-h-0 overflow-visible relative flex flex-col";
+/** One page only: constrain to 11in height; scale content down to fit if it overflows. */
+const ONE_PAGE_WRAPPER_CLASS =
+  "resume-one-page w-full max-h-[11in] min-h-[11in] print:max-h-[11in] print:min-h-0 print:h-[11in] overflow-hidden relative flex flex-col";
 
 function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
@@ -54,6 +54,30 @@ function parseExperienceEntry(entry) {
     .map((l) => l.trim())
     .filter(Boolean);
   return { roleTitle: lines[0] || "Role", bullets: lines.slice(1) };
+}
+
+/** Parse experience entry into job title, company, dates/location line, and bullets (for Resume2 orange layout). */
+function parseExperienceEntryDetailed(entry) {
+  const lines = (entry || "")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const jobTitle = lines[0] || "";
+  const company = lines[1] || "";
+  const datesOrLocation = lines[2] || "";
+  const bullets = lines.slice(3);
+  return { jobTitle, company, datesOrLocation, bullets };
+}
+
+/** Parse education string into degree, institution, dates (for Resume2). */
+function parseEducation(education) {
+  if (!education || !String(education).trim()) return null;
+  const lines = education.split("\n").map((l) => l.trim()).filter(Boolean);
+  return {
+    degree: lines[0] || "",
+    institution: lines[1] || "",
+    dates: lines[2] || "",
+  };
 }
 
 function ContactStrip({ data, linkClass = "text-blue-600 hover:underline" }) {
@@ -154,76 +178,145 @@ function SkillsBlock({ skills, variant = "list", theme = "zinc" }) {
   );
 }
 
+const RESUME2_SECTION_HEAD = "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black pb-1 mb-2 border-b-2 border-orange-500";
+
 function Resume2Layout({ data }) {
-  const sideHeading = "text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-0.5 mb-1 sm:mb-2";
-  const mainHeading = "text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-zinc-500 border-b border-black pb-0.5 mb-1 sm:mb-2";
-  const mainHeadingMb4 = `${mainHeading} mb-2 sm:mb-2.5`;
+  const name = data?.name || "Your Name";
+  const role = data?.role || "Your Role";
+  const location = data?.location || "";
+  const educationParsed = parseEducation(data?.education);
+  const achievements = (data?.experience?.flatMap((e) => parseExperienceEntry(e).bullets) || []).slice(0, 4);
+  const achievementsFromProjects = (data?.projects || []).slice(0, 4).map((p) => ({ title: (p || "").slice(0, 40), desc: (p || "").trim() }));
+  const hasAchievements = achievements.length > 0 || achievementsFromProjects.length > 0;
+  const skillsList = Array.isArray(data?.skills) ? data.skills.filter(Boolean) : [];
+  const skillsText = skillsList.join(", ");
+
   return (
-    <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row`}>
-      <aside className="w-full md:w-[36%] md:min-w-[200px] print:w-[36%] bg-zinc-200 print:bg-zinc-200 p-2.5 sm:p-3 md:p-4 flex flex-col order-2 md:order-1">
-        <section className="mb-2 sm:mb-3">
-          <div className="space-y-1 text-xs sm:text-sm text-black">
-            {data.phone && (
-              <div className="flex items-center gap-2">
-                <Phone size={14} className="shrink-0 text-black" />
-                <a href={`tel:${data.phone}`}>{data.phone}</a>
-              </div>
+    <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row bg-neutral-50 print:bg-white`}>
+      {/* ——— Left column (wider): name, role, contact, summary, employment ——— */}
+      <div className="w-full md:w-[62%] print:w-[62%] min-h-0 p-4 sm:p-5 md:p-6 bg-white print:bg-white order-1 flex flex-col overflow-visible">
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-3 border-b border-neutral-200">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-black">{name}</h1>
+            <p className="text-sm text-black mt-0.5">{role}</p>
+            <div className="mt-2 space-y-0.5 text-xs sm:text-sm text-black">
+              {data?.phone && <p>{data.phone}</p>}
+              {location && <p>{location}</p>}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+            {data?.email && (
+              <a href={`mailto:${data.email}`} className="flex items-center gap-1.5 text-black hover:text-orange-600 break-all">
+                <Mail size={14} className="shrink-0 text-orange-500" />
+                {data.email}
+              </a>
             )}
-            {data.email && (
-              <div className="flex items-center gap-2">
-                <Mail size={14} className="shrink-0 text-black" />
-                <a href={`mailto:${data.email}`} className="break-all">{data.email}</a>
-              </div>
+            {data?.linkedin && (
+              <a href={data.linkedin.startsWith("http") ? data.linkedin : `https://${data.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-black hover:text-orange-600">
+                <Linkedin size={14} className="shrink-0 text-orange-500" />
+                {data.linkedin.replace(/^https?:\/\//i, "")}
+              </a>
             )}
           </div>
-        </section>
-        {data.education && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={sideHeading}>Education</h2>
-            <p className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{data.education}</p>
-          </section>
-        )}
-        {data.skills?.length > 0 && (
-          <section className="md:flex-1 min-h-0">
-            <h2 className={sideHeading}>Skills</h2>
-            <SkillsBlock skills={data.skills} variant="list" theme="zinc" />
-          </section>
-        )}
-        {data.languageProficiency && (
-          <section className="mt-2 sm:mt-3">
-            <h2 className={sideHeading}>Languages</h2>
-            <p className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{data.languageProficiency}</p>
-          </section>
-        )}
-      </aside>
-      <div className="flex-1 w-full min-h-0 p-2.5 sm:p-3 md:p-4 bg-white order-1 md:order-2 overflow-visible">
-        <header className="border-b border-black pb-1.5 sm:pb-2 mb-2 sm:mb-3">
-          <h1 className="text-base sm:text-lg font-bold uppercase tracking-wide text-zinc-600 leading-tight">{data.name || "Your Name"}</h1>
-          <p className="text-sm sm:text-base font-semibold uppercase tracking-wide text-zinc-600 mt-0.5">{data.role || "Your Role"}</p>
         </header>
-        {data.summary && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={mainHeading}>Professional Summary</h2>
-            <p className="text-xs sm:text-sm text-black leading-snug">{data.summary}</p>
+
+        {data?.summary && (
+          <section className="mt-4">
+            <h2 className={RESUME2_SECTION_HEAD}>Professional Summary</h2>
+            <p className="text-xs sm:text-sm text-black leading-relaxed">{data.summary}</p>
           </section>
         )}
-        {data.experience?.length > 0 && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={mainHeadingMb4}>Experience</h2>
-            <ExperienceList experience={data.experience} />
-          </section>
-        )}
-        {data.projects?.length > 0 && (
-          <section>
-            <h2 className={mainHeading}>Projects</h2>
-            <div className="space-y-1">
-              {data.projects.map((project, i) => (
-                <p key={i} className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{project}</p>
-              ))}
+
+        {data?.experience?.length > 0 && (
+          <section className="mt-5">
+            <h2 className={RESUME2_SECTION_HEAD}>Employment History</h2>
+            <div className="space-y-4">
+              {data.experience.map((entry, i) => {
+                const { jobTitle, company, datesOrLocation, bullets } = parseExperienceEntryDetailed(entry);
+                return (
+                  <div key={i}>
+                    <p className="text-xs sm:text-sm font-bold text-black">{jobTitle || "Role"}</p>
+                    {company && (
+                      <a href="#" className="text-xs sm:text-sm text-orange-600 underline decoration-orange-600">{company}</a>
+                    )}
+                    {datesOrLocation && (
+                      <p className="text-[10px] sm:text-xs text-black mt-0.5">
+                        <span className="text-orange-600">{datesOrLocation.split("|")[0]?.trim() || datesOrLocation}</span>
+                        {datesOrLocation.includes("|") ? ` | ${datesOrLocation.split("|").slice(1).join("|").trim()}` : ""}
+                      </p>
+                    )}
+                    {bullets.length > 0 && (
+                      <ul className="mt-1.5 space-y-0.5 list-none pl-0 text-xs sm:text-sm text-black">
+                        {bullets.map((b, j) => (
+                          <li key={j} className="flex gap-2 leading-snug">
+                            <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-1.5" aria-hidden />
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
+
+        {/* Left column remaining space: Education + Language */}
+        {(data?.education || educationParsed) && (
+          <section className="mt-5">
+            <h2 className={RESUME2_SECTION_HEAD}>Education</h2>
+            {educationParsed ? (
+              <div>
+                <p className="text-xs font-bold text-black">{educationParsed.degree}</p>
+                <span className="text-xs text-orange-600">{educationParsed.institution}</span>
+                {educationParsed.dates && (
+                  <p className="text-[10px] text-black mt-0.5"><span className="text-orange-600">{educationParsed.dates}</span></p>
+                )}
+              </div>
+            ) : (
+              <p className="text-[10px] sm:text-xs text-black leading-snug whitespace-pre-wrap">{data.education}</p>
+            )}
+          </section>
+        )}
+        {data?.languageProficiency && (
+          <section className="mt-5">
+            <h2 className={RESUME2_SECTION_HEAD}>Language</h2>
+            <p className="text-[10px] sm:text-xs text-black leading-snug whitespace-pre-wrap">{data.languageProficiency}</p>
+          </section>
+        )}
       </div>
+
+      {/* ——— Right column: Projects, Skills ——— */}
+      <aside className="w-full md:w-[38%] print:w-[38%] md:min-w-[180px] print:min-w-0 p-4 sm:p-5 md:p-6 bg-neutral-50 print:bg-neutral-50/80 border-l border-neutral-200 order-2 flex flex-col overflow-visible">
+        {hasAchievements && (
+          <section className="mb-4">
+            <h2 className={RESUME2_SECTION_HEAD}>Projects</h2>
+            <div className="space-y-3">
+              {achievementsFromProjects.length > 0
+                ? achievementsFromProjects.map((a, i) => (
+                    <div key={i}>
+                      <p className="text-xs font-bold text-black">{a.title || "Achievement"}</p>
+                      <p className="text-[10px] sm:text-xs text-black mt-0.5 leading-snug">{a.desc}</p>
+                    </div>
+                  ))
+                : achievements.slice(0, 4).map((bullet, i) => (
+                    <div key={i}>
+                      <p className="text-[10px] sm:text-xs text-black leading-snug">{bullet}</p>
+                    </div>
+                  ))}
+            </div>
+          </section>
+        )}
+
+        {skillsList.length > 0 && (
+          <section className="mb-4">
+            <h2 className={RESUME2_SECTION_HEAD}>Skills</h2>
+            <p className="text-[10px] sm:text-xs text-black leading-relaxed">{skillsText}</p>
+          </section>
+        )}
+
+      </aside>
     </article>
   );
 }
@@ -700,7 +793,18 @@ export default function ResumeDesignView() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [fitScale, setFitScale] = useState(1);
+  const wrapperRef = useRef(null);
   const contentRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!wrapperRef.current || !contentRef.current) return;
+    const wrapperHeight = wrapperRef.current.getBoundingClientRect().height;
+    const contentHeight = contentRef.current.scrollHeight;
+    if (contentHeight <= 0) return;
+    const scale = Math.min(1, wrapperHeight / contentHeight);
+    setFitScale(scale);
+  }, [template, data, loading, detailLoading]);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -844,12 +948,17 @@ export default function ResumeDesignView() {
         </div>
       </div>
 
-      {/* All resume templates (Resume 2–6): multi-page — content flows to second page when needed, no cutting */}
+      {/* Resume: strict one page (11in); content scales to fit */}
       <main className="flex-1 py-4 sm:py-6 px-3 sm:px-4 overflow-auto">
-        <div className={MULTI_PAGE_WRAPPER_CLASS}>
+        <div ref={wrapperRef} className={ONE_PAGE_WRAPPER_CLASS}>
           <div
             ref={contentRef}
-            className="resume-content-fit w-full flex flex-col min-h-[11in]"
+            className="resume-content-fit w-full origin-top-left flex flex-col min-h-0"
+            style={{
+              transform: `scale(${fitScale})`,
+              width: fitScale < 1 ? `${100 / fitScale}%` : "100%",
+              ...(fitScale < 1 ? { position: "absolute", top: 0, left: 0 } : { flex: 1 }),
+            }}
           >
             {(() => {
               const layout = getLayoutType(template);
@@ -867,27 +976,29 @@ export default function ResumeDesignView() {
         </div>
       </main>
 
-      {/* Print / PDF: multi-page — content flows to second (and more) pages; no cutting. Turn off "Headers and footers" to hide date in print dialog. */}
+      {/* Print / PDF: one page only (11in). Turn off "Headers and footers" in Print dialog to hide date. */}
       <style>{`
-        @page { size: letter; margin: 0.5in; }
+        @page { size: letter; margin: 0; }
         @media print {
           body { background: #fff !important; }
           .print\\:hidden { display: none !important; }
-          .resume-multi-page {
-            min-height: 0 !important;
-            overflow: visible !important;
-            page-break-inside: auto !important;
+          .resume-one-page {
+            height: 11in !important;
+            max-height: 11in !important;
+            min-height: 11in !important;
+            overflow: hidden !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
           }
           .resume-content-fit {
-            min-height: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            page-break-inside: auto !important;
           }
           .resume-document {
             box-shadow: none !important;
-            overflow: visible !important;
-            page-break-inside: auto !important;
+            height: 100% !important;
+            max-height: 11in !important;
+            overflow: hidden !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
