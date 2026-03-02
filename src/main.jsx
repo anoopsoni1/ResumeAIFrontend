@@ -33,7 +33,7 @@ import { registerSW } from 'virtual:pwa-register'
 import { ToastProvider } from './context/ToastContext'
 import UpPage from './up.jsx'
 import AdminDashboard from './AdminDashboard.jsx'
-import Makeadminpage from './Makeadminpage.jsx'
+// import Makeadminpage from './Makeadminpage.jsx'
 import VideoCallInterviews from './VideoCallInterviews.jsx'
 import VideoCallInterviewCreate from './VideoCallInterviewCreate.jsx'
 import VideoCallInterviewDetail from './VideoCallInterviewDetail.jsx'
@@ -131,10 +131,6 @@ const route = createBrowserRouter([
  {
   path: "/admin-dashboard",
   element: <AdminDashboard />,
- },
- {
-  path: "/make-admin",
-  element: <Makeadminpage />,
  },
  {
   path: "/dashboard/interviews",

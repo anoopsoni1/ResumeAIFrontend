@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, Check, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp, Lock } from "lucide-react";
+import { FileText, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -31,15 +31,9 @@ function CardSkeleton() {
   );
 }
 
-/** Short comparison points for known resume templates (by name). */
-function getTemplateHighlights(name) {
-  const n = (name || "").toLowerCase();
-  if (n.includes("resume2") || n.includes("resume 2")) return ["Grey sidebar left", "Clean & minimal", "Classic style"];
-  if (n.includes("resume3") || n.includes("resume 3")) return ["Single-column centered", "Emerald accents", "Compact & readable"];
-  if (n.includes("resume4") || n.includes("resume 4")) return ["Light blue sections", "Two columns", "Contact + name header", "Language bars"];
-  if (n.includes("resume5") || n.includes("resume 5")) return ["Right sidebar", "Violet accents", "Slate sidebar"];
-  if (n.includes("resume6") || n.includes("resume 6")) return ["Dark theme", "Pink accents", "Profile photo", "Two columns"];
-  return ["Different layout and style"];
+/** Short comparison points for the single resume template. */
+function getTemplateHighlights() {
+  return ["Two columns", "Clean & minimal", "Classic style"];
 }
 
 const FREE_RESUME_TEMPLATES_COUNT = 4;
@@ -85,21 +79,12 @@ function ApiTemplatePreview({ template, onSelect, isLocked }) {
             <Lock className="h-3.5 w-3.5" /> Upgrade to unlock
           </Link>
         ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => onSelect?.(_id)}
-              className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-indigo-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-indigo-500 active:scale-[0.98] transition-all"
-            >
-              <Check className="h-3.5 w-3.5" /> Use this template
-            </button>
-            <Link
-              to={`/templates/resumedesign/${_id}`}
-              className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/5 transition-all"
-            >
-              <Eye className="h-3.5 w-3.5" /> View full
-            </Link>
-          </>
+          <Link
+            to={`/templates/resumedesign/${_id}`}
+            className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-indigo-400/50 hover:bg-white/5 transition-all"
+          >
+            <Eye className="h-3.5 w-3.5" /> View full
+          </Link>
         )}
       </div>
     </article>
@@ -133,7 +118,8 @@ export default function ResumeDesignPage() {
         setResumeError(null);
         const { data } = await axios.get(`${API_BASE}/templates`, { params: { type: "resume" } });
         if (data?.success && Array.isArray(data?.data)) {
-          setResumeTemplates(data.data.filter((t) => t.type !== "portfolio"));
+          const resumes = data.data.filter((t) => t.type !== "portfolio");
+          setResumeTemplates(resumes.slice(0, 1));
         } else {
           setResumeTemplates([]);
         }

@@ -230,7 +230,7 @@ function AtsChecker() {
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
                 ATS Resume{" "}
-                <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-orange-400 bg-clip-text text-transparent">
+                <span className="bg-linear-to-r from-amber-400 via-amber-300 to-orange-400 bg-clip-text text-transparent">
                   Score Checker
                 </span>
               </h1>
@@ -320,7 +320,7 @@ function AtsChecker() {
                         </defs>
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className={`text-3xl sm:text-4xl font-bold tabular-nums bg-gradient-to-br ${getScoreGradient(result.score)} bg-clip-text text-transparent`}>
+                        <span className={`text-3xl sm:text-4xl font-bold tabular-nums bg-linear-to-br ${getScoreGradient(result.score)} bg-clip-text text-transparent`}>
                           {result.score}
                         </span>
                         <span className="text-slate-500 text-lg font-medium">%</span>
@@ -386,7 +386,7 @@ function AtsChecker() {
                 <button
                   onClick={handleCheckATS}
                   disabled={loading}
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 sm:px-8 font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 sm:px-8 font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                 >
                   {loading ? (
                     <>
@@ -405,7 +405,7 @@ function AtsChecker() {
                   <Link
                     to="/edit-resume"
                     state={{ extractedText: resumeText }}
-                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/20 bg-white/5 px-6 sm:px-8 font-semibold text-slate-200 transition hover:bg-indigo-600 hover:border-indigo-500 hover:text-white active:scale-[0.98] hover:shadow-lg hover:shadow-indigo-500/20"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border-2 border-white/20 bg-white/5 px-6 sm:px-8 font-semibold text-slate-200 transition hover:bg-indigo-600 hover:border-indigo-500 hover:text-white active:scale-[0.98] hover:shadow-lg hover:shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     <Sparkles size={20} />
                     Optimize with AI

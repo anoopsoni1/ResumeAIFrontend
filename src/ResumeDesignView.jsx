@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
+﻿import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
@@ -17,8 +17,8 @@ const PLACEHOLDER_RESUME_DATA = {
   summary: "Add a short summary of your experience and goals. Sign in and add your details to see your own content here.",
   skills: ["Skill 1", "Skill 2", "Skill 3", "Skill 4"],
   experience: [
-    "Job Title\nCompany Name\n2020 – Present\nBrief description of your role and key responsibilities.",
-    "Previous Role\nPrevious Company\n2018 – 2020\nSummary and achievements.",
+    "Job Title\nCompany Name\n2020 â€“ Present\nBrief description of your role and key responsibilities.",
+    "Previous Role\nPrevious Company\n2018 â€“ 2020\nSummary and achievements.",
   ],
   education: "Degree or certification\nInstitution name\nYear",
   projects: [],
@@ -37,15 +37,6 @@ const ONE_PAGE_WRAPPER_CLASS =
 
 function Topbar({ onLogout }) {
   return <AppHeader onLogout={onLogout} />;
-}
-
-function getLayoutType(template) {
-  const n = (template?.name || "").toLowerCase();
-  if (n.includes("resume3") || n.includes("resume 3")) return "resume3";
-  if (n.includes("resume4") || n.includes("resume 4")) return "resume4";
-  if (n.includes("resume5") || n.includes("resume 5")) return "resume5";
-  if (n.includes("resume6") || n.includes("resume 6")) return "resume6";
-  return "resume2";
 }
 
 function parseExperienceEntry(entry) {
@@ -148,7 +139,7 @@ function SkillsBlock({ skills, variant = "list", theme = "zinc" }) {
     return (
       <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
         {list.map((skill, i) => (
-          <span key={i} className={`${tagClass} break-words`}>{skill}</span>
+          <span key={i} className={`${tagClass} wrap-break-words`}>{skill}</span>
         ))}
       </div>
     );
@@ -170,8 +161,8 @@ function SkillsBlock({ skills, variant = "list", theme = "zinc" }) {
   return (
     <ul className={`grid grid-cols-2 gap-x-3 gap-y-1 sm:gap-y-1.5 text-xs sm:text-sm ${textCls} list-none pl-0 leading-snug`}>
       {list.map((skill, i) => (
-        <li key={i} className={`flex items-start gap-2 before:content-['•'] before:shrink-0 before:font-bold ${bullet}`}>
-          <span className="break-words">{skill}</span>
+        <li key={i} className={`flex items-start gap-2 before:content-['â€¢'] before:shrink-0 before:font-bold ${bullet}`}>
+          <span className="wrap-break-words">{skill}</span>
         </li>
       ))}
     </ul>
@@ -193,7 +184,7 @@ function Resume2Layout({ data }) {
 
   return (
     <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row bg-neutral-50 print:bg-white`}>
-      {/* ——— Left column (wider): name, role, contact, summary, employment ——— */}
+      {/* â€”â€”â€” Left column (wider): name, role, contact, summary, employment â€”â€”â€” */}
       <div className="w-full md:w-[62%] print:w-[62%] min-h-0 p-4 sm:p-5 md:p-6 bg-white print:bg-white order-1 flex flex-col overflow-visible">
         <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-3 border-b border-neutral-200">
           <div>
@@ -287,7 +278,7 @@ function Resume2Layout({ data }) {
         )}
       </div>
 
-      {/* ——— Right column: Projects, Skills ——— */}
+      {/* â€”â€”â€” Right column: Projects, Skills â€”â€”â€” */}
       <aside className="w-full md:w-[38%] print:w-[38%] md:min-w-[180px] print:min-w-0 p-4 sm:p-5 md:p-6 bg-neutral-50 print:bg-neutral-50/80 border-l border-neutral-200 order-2 flex flex-col overflow-visible">
         {hasAchievements && (
           <section className="mb-4">
@@ -321,468 +312,6 @@ function Resume2Layout({ data }) {
   );
 }
 
-function Resume3Layout({ data }) {
-  const headingClass = "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-700 border-b border-emerald-200 pb-0.5 mb-1 sm:mb-2";
-  const headingClassMb4 = `${headingClass} mb-2 sm:mb-2.5`;
-  return (
-    <article className={`${DOCUMENT_CLASS} max-w-3xl`}>
-      <div className="p-2.5 sm:p-3 md:p-4 min-h-0 overflow-visible flex flex-col">
-        <header className="text-center border-b border-emerald-200 pb-2 sm:pb-3 mb-2 sm:mb-3">
-          <h1 className="text-base sm:text-lg md:text-xl font-bold text-black leading-tight">{data.name || "Your Name"}</h1>
-          <p className="text-emerald-600 font-medium mt-0.5 sm:mt-1 text-sm sm:text-base">{data.role || "Your Role"}</p>
-          <div className="mt-1.5 sm:mt-2 flex flex-wrap justify-center gap-x-2 sm:gap-x-3 gap-y-0.5">
-            <ContactStrip data={data} linkClass="text-emerald-600 hover:underline" />
-          </div>
-        </header>
-        {data.summary && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={headingClass}>Summary</h2>
-            <p className="text-xs sm:text-sm text-black leading-snug">{data.summary}</p>
-          </section>
-        )}
-        {data.skills?.length > 0 && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={headingClass}>Skills</h2>
-            <SkillsBlock skills={data.skills} variant="tags" theme="emerald" />
-          </section>
-        )}
-        {data.experience?.length > 0 && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={headingClassMb4}>Experience</h2>
-            <ExperienceList experience={data.experience} />
-          </section>
-        )}
-        {data.education && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={headingClass}>Education</h2>
-            <p className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{data.education}</p>
-          </section>
-        )}
-        {data.projects?.length > 0 && (
-          <section>
-            <h2 className={headingClass}>Projects</h2>
-            <div className="space-y-1">
-              {data.projects.map((project, i) => (
-                <p key={i} className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{project}</p>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-    </article>
-  );
-}
-
-function Resume4Layout({ data }) {
-  const sectionTitleClass = "bg-sky-100 text-sky-900 font-bold uppercase tracking-wider text-[10px] sm:text-xs py-1 px-2 sm:px-3 mb-1.5";
-  const sectionTitleClassMb4 = `${sectionTitleClass} mb-2`;
-  const languagesList = data.languageProficiency
-    ? data.languageProficiency.split(/[\n,;]+/).map((s) => s.trim()).filter(Boolean)
-    : [];
-  const referencesList = data.references
-    ? (Array.isArray(data.references) ? data.references : [data.references]).map((r) => (typeof r === "string" ? r : `${r.name || ""} ${r.email || ""}`).trim()).filter(Boolean)
-    : [];
-
-  return (
-    <article className={`${DOCUMENT_CLASS} max-w-4xl bg-white`}>
-      <header className="flex flex-col md:flex-row print:flex-row md:items-start md:justify-between gap-2 p-2.5 sm:p-3 border-b border-sky-100">
-        <div className="flex flex-col gap-1 text-zinc-600 text-xs sm:text-sm">
-          {data.phone && (
-            <a href={`tel:${data.phone}`} className="flex items-center gap-2 hover:text-sky-700">
-              <span className="w-8 h-8 rounded bg-sky-100 flex items-center justify-center shrink-0"><Phone size={14} className="text-sky-700" /></span>
-              {data.phone}
-            </a>
-          )}
-          {data.email && (
-            <a href={`mailto:${data.email}`} className="flex items-center gap-2 break-all hover:text-sky-700">
-              <span className="w-8 h-8 rounded bg-sky-100 flex items-center justify-center shrink-0"><Mail size={14} className="text-sky-700" /></span>
-              {data.email}
-            </a>
-          )}
-          {data.location && (
-            <span className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded bg-sky-100 flex items-center justify-center shrink-0"><MapPin size={14} className="text-sky-700" /></span>
-              {data.location}
-            </span>
-          )}
-          {(data.website || data.linkedin) && (
-            <a href={data.website?.startsWith("http") ? data.website : data.linkedin || `https://${data.website || ""}`} className="flex items-center gap-2 hover:text-sky-700" target="_blank" rel="noopener noreferrer">
-              <span className="w-8 h-8 rounded bg-sky-100 flex items-center justify-center shrink-0"><Globe size={14} className="text-sky-700" /></span>
-              {(data.website || data.linkedin || "").replace(/^https?:\/\//i, "")}
-            </a>
-          )}
-        </div>
-        <div className="text-right md:text-right">
-          <h1 className="text-base sm:text-lg md:text-xl font-bold text-sky-900 uppercase tracking-wide leading-tight">{data.name || "Your Name"}</h1>
-          <p className="text-zinc-600 text-sm sm:text-base mt-0.5">{data.role || "Your Role"}</p>
-        </div>
-      </header>
-
-      <div className="flex flex-col md:flex-row print:flex-row min-h-0 flex-1 overflow-visible">
-        <div className="flex-1 min-w-0 min-h-0 p-2.5 sm:p-3 md:p-4 order-2 md:order-1 overflow-visible">
-          {data.summary && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClass}>About me</h2>
-              <p className="text-zinc-700 text-xs sm:text-sm leading-snug">{data.summary}</p>
-            </section>
-          )}
-          {data.experience?.length > 0 && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClassMb4}>Experience</h2>
-              <div className="space-y-2">
-                {data.experience.map((entry, i) => {
-                  const lines = entry.split("\n").map((l) => l.trim()).filter(Boolean);
-                  const { roleTitle, bullets } = parseExperienceEntry(entry);
-                  const dateLine = lines[1] && /(\d{4}|\d{2})/.test(lines[1]) ? lines[1] : "";
-                  return (
-                    <div key={i} className="border-l-2 border-sky-200 pl-2.5">
-                      <div className="flex flex-wrap justify-between gap-x-2 items-baseline">
-                        <p className="text-sky-900 font-bold text-xs sm:text-sm leading-tight">{roleTitle}</p>
-                        {dateLine && <span className="text-zinc-500 text-[10px] whitespace-nowrap">{dateLine}</span>}
-                      </div>
-                      {bullets.length > 0 && (
-                        <ul className="mt-1 space-y-0.5 text-zinc-700 text-xs sm:text-sm list-disc list-inside pl-0">
-                          {bullets.map((b, j) => (
-                            <li key={j} className="leading-snug">{b}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-          {data.education && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClass}>Education</h2>
-              <p className="text-zinc-700 text-xs sm:text-sm leading-snug whitespace-pre-wrap">{data.education}</p>
-            </section>
-          )}
-          {data.projects?.length > 0 && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClass}>Projects</h2>
-              <div className="space-y-1.5 text-zinc-700 text-xs sm:text-sm">
-                {data.projects.map((project, i) => (
-                  <p key={i} className="leading-snug whitespace-pre-wrap">{project}</p>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        <aside className="w-full md:w-[36%] md:min-w-[200px] print:w-[36%] p-2.5 sm:p-3 bg-sky-50/50 print:bg-sky-50/30 border-t md:border-t-0 md:border-l border-sky-100 order-1 md:order-2 min-h-0 overflow-visible">
-          {data.skills?.length > 0 && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClass}>Skills</h2>
-              <ul className="space-y-1 text-zinc-700 text-xs sm:text-sm list-none pl-0">
-                {data.skills.filter((s) => (s || "").trim()).map((s, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-800 shrink-0" aria-hidden />
-                    <span className="break-words">{(s || "").trim()}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-          {languagesList.length > 0 && (
-            <section className="mb-2 sm:mb-3">
-              <h2 className={sectionTitleClass}>Languages</h2>
-              <div className="space-y-1">
-                {languagesList.map((lang, i) => {
-                  const match = lang.match(/(.+?)\s*[:\-–]\s*(\d+)%?/i) || lang.match(/(.+?)\s*\((.+)\)/i);
-                  const name = match ? match[1].trim() : lang;
-                  const level = match && /^\d+$/.test(String(match[2]).replace("%", "")) ? Math.min(100, parseInt(match[2], 10)) : 100;
-                  return (
-                    <div key={i}>
-                      <div className="flex justify-between text-[10px] text-zinc-700 mb-0.5">
-                        <span>{name}</span>
-                        {level < 100 && <span>{level}%</span>}
-                      </div>
-                      <div className="h-1.5 w-full rounded-full bg-zinc-200 overflow-hidden">
-                        <div className="h-full rounded-full bg-sky-600" style={{ width: `${level}%` }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-          {referencesList.length > 0 && (
-            <section>
-              <h2 className={sectionTitleClass}>References</h2>
-              <div className="space-y-1 text-zinc-700 text-xs sm:text-sm">
-                {referencesList.map((ref, i) => {
-                  const parts = ref.split(/\s+Email:\s*/i);
-                  const name = parts[0]?.trim() || ref;
-                  const email = parts[1]?.trim();
-                  return (
-                    <div key={i}>
-                      <p className="font-bold text-sky-900">{name}</p>
-                      {email && <p>Email: <a href={`mailto:${email}`} className="text-sky-700 hover:underline">{email}</a></p>}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-        </aside>
-      </div>
-    </article>
-  );
-}
-
-function Resume5Layout({ data }) {
-  const sectionTitle = "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black mb-1.5 sm:mb-2";
-  const educationBlocks = data.education
-    ? data.education.split(/\n\s*\n/).map((b) => b.split("\n").map((l) => l.trim()).filter(Boolean)).filter((arr) => arr.length > 0)
-    : [];
-  const contactParts = [
-    data.phone,
-    data.location,
-    data.website || data.linkedin,
-    data.email,
-  ].filter(Boolean);
-
-  return (
-    <article className={`${DOCUMENT_CLASS} max-w-4xl bg-white overflow-visible relative`}>
-      <header className="flex flex-col sm:flex-row print:flex-row">
-        <div className="w-full sm:w-[36%] sm:min-w-[180px] print:w-[36%] bg-blue-700 print:bg-blue-700 px-5 sm:px-6 py-6 sm:py-8 flex items-center">
-          <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight">
-            {data.name || "Your Name"}
-          </h1>
-        </div>
-        <div className="flex-1 px-4 sm:px-6 py-4 sm:py-5 flex flex-col justify-center">
-          <p className="text-black font-semibold text-base sm:text-lg text-right">{data.role || "Your Role"}</p>
-          <div className="flex flex-wrap justify-end gap-x-2 sm:gap-x-3 gap-y-1 mt-2 text-zinc-700 text-xs sm:text-sm">
-            {contactParts.map((part, i) => (
-              <span key={i} className="flex items-center gap-2">
-                {i > 0 && <span className="text-zinc-300">|</span>}
-                {typeof part === "string" && (part.startsWith("http") || part.includes(".com") || part.includes("@")) ? (
-                  <a href={part.startsWith("http") ? part : part.includes("@") ? `mailto:${part}` : `https://${part}`} className="text-black hover:underline">{part}</a>
-                ) : part === data.phone ? (
-                  <a href={`tel:${part}`} className="text-black hover:underline">{part}</a>
-                ) : (
-                  <span>{part}</span>
-                )}
-              </span>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      <div className="bg-zinc-100 print:bg-zinc-100 p-2.5 sm:p-3 md:p-4 min-h-0 overflow-visible flex flex-col">
-        {data.summary && (
-          <section className="mb-2 sm:mb-3">
-            <h2 className={sectionTitle}>About me</h2>
-            <p className="text-black text-xs sm:text-sm leading-snug">{data.summary}</p>
-          </section>
-        )}
-
-        <div className="flex flex-col md:flex-row print:flex-row gap-2 md:gap-4 mb-2 sm:mb-3">
-          {data.education && (
-            <section className="flex-1 min-w-0">
-              <h2 className={sectionTitle}>Education</h2>
-              {educationBlocks.length >= 2 ? (
-                <div className="relative">
-                  <div className="absolute top-2 left-0 right-0 h-0.5 bg-black hidden md:block print:block" style={{ top: "0.6rem" }} aria-hidden />
-                  <div className="flex justify-between gap-2 relative">
-                    {educationBlocks.slice(0, 3).map((lines, i) => (
-                      <div key={i} className="flex-1 text-center">
-                        <div className="w-3 h-3 rounded-full bg-black mx-auto mb-2 shrink-0" aria-hidden />
-                        <p className="text-xs text-black">{lines[0] || ""}</p>
-                        <p className="text-xs font-bold text-black uppercase mt-0.5">{lines[1] || ""}</p>
-                        <p className="text-xs text-black mt-0.5">{lines[2] || ""}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs sm:text-sm text-black leading-snug whitespace-pre-wrap">{data.education}</p>
-              )}
-            </section>
-          )}
-          {data.skills?.length > 0 && (
-            <section className="md:w-[42%] md:max-w-[220px] md:pl-3 md:border-l md:border-zinc-300 print:border-l print:border-zinc-300">
-              <h2 className={sectionTitle}>Skills</h2>
-              <ul className="space-y-1 text-black text-xs sm:text-sm list-none pl-0">
-                {data.skills.filter((s) => (s || "").trim()).map((s, i) => (
-                  <li key={i}>{(s || "").trim()}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
-
-        {data.experience?.length > 0 && (
-          <section>
-            <h2 className={sectionTitle}>Work experience</h2>
-            <div className="space-y-2 sm:space-y-2.5">
-              {data.experience.map((entry, i) => {
-                const lines = entry.split("\n").map((l) => l.trim()).filter(Boolean);
-                const { roleTitle, bullets } = parseExperienceEntry(entry);
-                const dateLine = lines[1] && /(\d{4}|\d{2})/.test(lines[1]) ? lines[1] : "";
-                return (
-                  <div key={i}>
-                    <div className="flex flex-wrap justify-between gap-x-2 items-baseline">
-                      <p className="text-black font-bold uppercase text-xs sm:text-sm leading-tight">{roleTitle}</p>
-                      {dateLine && <span className="text-black text-[10px] whitespace-nowrap">{dateLine}</span>}
-                    </div>
-                    {bullets.length > 0 && (
-                      <>
-                        {bullets[0] && <p className="mt-1 text-black text-xs sm:text-sm leading-snug">{bullets[0]}</p>}
-                        {bullets.length > 1 && (
-                          <ul className="mt-1 space-y-0.5 text-black text-xs sm:text-sm list-disc list-inside pl-3">
-                            {bullets.slice(1).map((b, j) => (
-                              <li key={j} className="leading-snug">{b}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-        {data.projects?.length > 0 && (
-          <section>
-            <h2 className={sectionTitle}>Projects</h2>
-            <div className="space-y-1.5 text-black text-xs sm:text-sm">
-              {data.projects.map((project, i) => (
-                <p key={i} className="leading-snug whitespace-pre-wrap">{project}</p>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
-
-      <div className="h-1.5 w-20 bg-blue-700 print:bg-blue-700 rounded-br-full shrink-0" aria-hidden />
-    </article>
-  );
-}
-
-function Resume6Layout({ data }) {
-  const name = data.name || "Your Name";
-  const initials = name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-  const sectionTitleClass = "flex items-center gap-2 text-white font-bold uppercase tracking-widest text-[10px] sm:text-xs mb-1.5 sm:mb-2";
-  const pinkSquare = <span className="w-1.5 h-1.5 rounded-sm bg-rose-400 shrink-0 shadow-sm shadow-rose-400/30" aria-hidden />;
-  const linkClass = "text-white hover:text-rose-300 transition-colors underline underline-offset-2";
-  return (
-    <article className={`${DOCUMENT_CLASS} max-w-4xl bg-zinc-900 text-white overflow-visible`}>
-      <header className="relative text-center pt-3 sm:pt-4 pb-3 sm:pb-4 px-3">
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-800/50 to-transparent pointer-events-none" aria-hidden />
-        {data.avatar || data.profileImage ? (
-          <img src={data.avatar || data.profileImage} alt="" className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto object-cover ring-2 ring-rose-400/60 ring-offset-2 ring-offset-zinc-900 shadow-lg" />
-        ) : (
-          <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full mx-auto bg-zinc-700/80 ring-2 ring-rose-400/60 ring-offset-2 ring-offset-zinc-900 flex items-center justify-center text-rose-400 font-bold text-sm shadow-inner">
-            {initials}
-          </div>
-        )}
-        <h1 className="relative mt-2 sm:mt-2.5 text-base sm:text-lg md:text-xl font-bold text-rose-400 uppercase tracking-widest leading-tight drop-shadow-sm">{name}</h1>
-        <p className="relative text-white/95 text-sm sm:text-base uppercase tracking-widest mt-1 font-medium">{data.role || "Your Role"}</p>
-      </header>
-      <div className="flex flex-col md:flex-row print:flex-row px-2.5 sm:px-4 pb-4 sm:pb-5 gap-3 md:gap-4 min-h-0 flex-1 overflow-visible">
-        <div className="w-full md:w-[48%] space-y-2 sm:space-y-3 order-2 md:order-1 min-h-0 overflow-visible">
-          {data.experience?.length > 0 && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} Work Experience</h2>
-              <div className="space-y-2">
-                {data.experience.map((entry, i) => {
-                  const lines = entry.split("\n").map((l) => l.trim()).filter(Boolean);
-                  const { roleTitle, bullets } = parseExperienceEntry(entry);
-                  const dateOrSub = lines[1] || "";
-                  return (
-                    <div key={i} className="border-l-2 border-zinc-700 pl-2.5">
-                      <p className="text-white font-semibold text-xs sm:text-sm leading-tight">{roleTitle}</p>
-                      {dateOrSub && <p className="text-rose-400/90 text-[10px] sm:text-xs mt-0.5 font-medium">{dateOrSub}</p>}
-                      {bullets.length > 0 && (
-                        <ul className="mt-1 space-y-0.5 text-zinc-300 text-xs sm:text-sm list-none pl-0">
-                          {bullets.map((b, j) => (
-                            <li key={j} className="flex gap-2 before:content-['•'] before:text-rose-400/80 before:shrink-0 leading-snug">{b}</li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-          {data.skills?.length > 0 && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} Skills</h2>
-              <SkillsBlock skills={data.skills} variant="list" theme="rose" />
-            </section>
-          )}
-          {data.languageProficiency && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} Languages</h2>
-              <p className="text-zinc-300 text-xs sm:text-sm leading-snug whitespace-pre-wrap">{data.languageProficiency}</p>
-            </section>
-          )}
-          <section>
-            <h2 className={sectionTitleClass}>{pinkSquare} Contact</h2>
-            <div className="space-y-1 text-zinc-300 text-xs sm:text-sm">
-              {data.email && (
-                <p className="flex items-center gap-2">
-                  <Mail size={12} className="shrink-0 text-rose-400/80" />
-                  <a href={`mailto:${data.email}`} className={linkClass}>{data.email}</a>
-                </p>
-              )}
-              {data.phone && (
-                <p className="flex items-center gap-2">
-                  <Phone size={12} className="shrink-0 text-rose-400/80" />
-                  <a href={`tel:${data.phone}`} className={linkClass}>{data.phone}</a>
-                </p>
-              )}
-              {data.website && (
-                <p className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded border border-rose-400/80 shrink-0 inline-block" aria-hidden />
-                  <a href={data.website.startsWith("http") ? data.website : `https://${data.website}`} className={linkClass} target="_blank" rel="noopener noreferrer">{data.website.replace(/^https?:\/\//i, "")}</a>
-                </p>
-              )}
-              {data.linkedin && (
-                <p className="flex items-center gap-2">
-                  <Linkedin size={12} className="shrink-0 text-rose-400/80" />
-                  <a href={data.linkedin} className={linkClass} target="_blank" rel="noopener noreferrer">{data.linkedin.replace(/^https?:\/\//i, "")}</a>
-                </p>
-              )}
-              {!data.email && !data.phone && !data.website && !data.linkedin && (
-                <p className="text-zinc-500 text-xs">Add contact in your details</p>
-              )}
-            </div>
-          </section>
-        </div>
-        <div className="w-full md:w-[52%] md:pl-4 print:pl-4 space-y-2 sm:space-y-3 order-1 md:order-2 border-t md:border-t-0 md:border-l border-zinc-700/80 pt-3 md:pt-0 min-h-0 overflow-visible">
-          {data.summary && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} About</h2>
-              <p className="text-zinc-300 text-xs sm:text-sm leading-snug tracking-wide">{data.summary}</p>
-            </section>
-          )}
-          {data.education && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} Education</h2>
-              <p className="text-zinc-300 text-xs sm:text-sm leading-snug whitespace-pre-wrap tracking-wide">{data.education}</p>
-            </section>
-          )}
-          {data.projects?.length > 0 && (
-            <section>
-              <h2 className={sectionTitleClass}>{pinkSquare} Projects</h2>
-              <div className="space-y-1 text-zinc-300 text-xs sm:text-sm">
-                {data.projects.map((project, i) => (
-                  <p key={i} className="leading-snug whitespace-pre-wrap">{project}</p>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
 
 export default function ResumeDesignView() {
   const { id } = useParams();
@@ -860,7 +389,7 @@ export default function ResumeDesignView() {
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
         <Topbar onLogout={handleLogout} />
         <main className="flex-1 flex items-center justify-center px-4">
-          <p className="text-zinc-400">Loading…</p>
+          <p className="text-zinc-400">Loadingâ€¦</p>
         </main>
         <AppFooter />
       </div>
@@ -960,15 +489,7 @@ export default function ResumeDesignView() {
               ...(fitScale < 1 ? { position: "absolute", top: 0, left: 0 } : { flex: 1 }),
             }}
           >
-            {(() => {
-              const layout = getLayoutType(template);
-              /* All layouts use same multi-page wrapper and print CSS above */
-              if (layout === "resume3") return <Resume3Layout data={displayData} />;
-              if (layout === "resume4") return <Resume4Layout data={displayData} />;
-              if (layout === "resume5") return <Resume5Layout data={displayData} />;
-              if (layout === "resume6") return <Resume6Layout data={displayData} />;
-              return <Resume2Layout data={displayData} />;
-            })()}
+            <Resume2Layout data={displayData} />
             <footer className="resume-doc-footer mt-auto pt-2 text-center text-zinc-500 text-[10px] sm:text-xs print:text-[10px] print:text-zinc-600">
               Made by Resume AI
             </footer>

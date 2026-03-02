@@ -165,9 +165,9 @@ function Profile() {
           <div className="mx-auto max-w-2xl">
             <Link
               to="/dashboard"
-              className="inline-flex items-center text-sm text-slate-400 hover:text-indigo-400 transition mb-6"
+              className="mb-6 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:border-indigo-400/50 hover:bg-indigo-500/20 hover:text-indigo-200 transition-all"
             >
-              ← Back to Dashboard
+              <span className="text-indigo-400">←</span> Back to Dashboard
             </Link>
 
             <div className="rounded-2xl border border-slate-200/50 bg-black/60 p-6 sm:p-8 space-y-8">

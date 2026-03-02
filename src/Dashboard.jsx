@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiUserPlus, FiVideo } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo } from "react-icons/fi";
 import { MdAutoAwesome, MdWbSunny } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -479,12 +479,12 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Admin-only: All Users & Make Admin */}
+              {/* Admin-only: All Users */}
               {user?.isAdmin && (
                 <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-indigo-500/60 p-5">
                   <p className="text-sm font-semibold text-indigo-400">Admin</p>
                   <p className="mt-1 text-xs sm:text-sm text-slate-400 mb-4">
-                    Manage users and admins.
+                    Manage users.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     <Link
@@ -493,13 +493,6 @@ export default function Dashboard() {
                     >
                       <FiUsers className="w-4 h-4" />
                       All Users
-                    </Link>
-                    <Link
-                      to="/make-admin"
-                      className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15 border border-indigo-400/50"
-                    >
-                      <FiUserPlus className="w-4 h-4" />
-                      Make Admin
                     </Link>
                   </div>
                 </div>

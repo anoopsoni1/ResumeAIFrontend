@@ -171,8 +171,8 @@ function VideoCallInterviews() {
                 New interview
               </Link>
             </div>
-            <Link to="/dashboard" className="text-sm text-indigo-400 hover:text-indigo-300 mb-4 inline-block">
-              ← Back to Dashboard
+            <Link to="/dashboard" className="mb-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:border-indigo-400/50 hover:bg-indigo-500/20 hover:text-indigo-200 transition-all">
+              <span className="text-indigo-400">←</span> Back to Dashboard
             </Link>
             {loading ? (
               <p className="text-slate-400">Loading interviews…</p>

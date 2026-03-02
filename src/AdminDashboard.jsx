@@ -1,16 +1,63 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { clearUser } from "./slice/user.slice";
-import LiquidEther from "./LiquidEther";
 import LightPillar from "./LiquidEther.jsx";
-import FloatingLines from "./Lighting";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { Users, Sparkles, FileText, TrendingUp } from "lucide-react";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+
+// Build registration counts by day (last 14 days)
+function useRegistrationsByDay(users) {
+  return useMemo(() => {
+    if (!users?.length) return [];
+    const now = new Date();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const days = 14;
+    const buckets = {};
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      buckets[d.toISOString().slice(0, 10)] = { date: d.toISOString().slice(0, 10), count: 0, label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) };
+    }
+    users.forEach((u) => {
+      if (u.createdAt) {
+        const key = new Date(u.createdAt).toISOString().slice(0, 10);
+        if (buckets[key]) buckets[key].count += 1;
+      }
+    });
+    return Object.values(buckets).sort((a, b) => a.date.localeCompare(b.date));
+  }, [users]);
+}
+
+// Top users by AI optimize count (for bar chart)
+function useOptimizeChartData(users) {
+  return useMemo(() => {
+    if (!users?.length) return [];
+    return users
+      .filter((u) => (u.optimizeCount ?? 0) > 0)
+      .map((u) => ({ name: u.FirstName ? `${u.FirstName} ${u.LastName || ""}`.trim() || u.email : u.email, count: u.optimizeCount ?? 0, email: u.email }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [users]);
+}
+
+// Top users by resume count
+function useResumeChartData(users) {
+  return useMemo(() => {
+    if (!users?.length) return [];
+    return users
+      .filter((u) => (u.resumeCount ?? 0) > 0)
+      .map((u) => ({ name: u.FirstName ? `${u.FirstName} ${u.LastName || ""}`.trim() || u.email : u.email, count: u.resumeCount ?? 0, email: u.email }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [users]);
+}
 
 function AdminDashboard() {
   const { userData } = useSelector((state) => state.user);
@@ -20,6 +67,13 @@ function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const registrationsByDay = useRegistrationsByDay(users);
+  const optimizeChartData = useOptimizeChartData(users);
+  const resumeChartData = useResumeChartData(users);
+  const totalOptimizes = useMemo(() => users.reduce((s, u) => s + (u.optimizeCount ?? 0), 0), [users]);
+  const totalResumes = useMemo(() => users.reduce((s, u) => s + (u.resumeCount ?? 0), 0), [users]);
+  const usersWhoUsedAi = useMemo(() => users.filter((u) => (u.optimizeCount ?? 0) > 0).length, [users]);
 
   useEffect(() => {
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -113,9 +167,9 @@ function AdminDashboard() {
           <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
           <Link
             to="/dashboard"
-            className="text-sm text-white hover:text-indigo-400 transition"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:border-indigo-400/50 hover:bg-indigo-500/20 hover:text-indigo-200 transition-all"
           >
-            ← Back to Dashboard
+            <span className="text-indigo-400">←</span> Back to Dashboard
           </Link>
         </div>
 
@@ -132,91 +186,153 @@ function AdminDashboard() {
         )}
 
         {!loading && !error && (
-          <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-slate-700 bg-slate-800/50">
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      #
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      First Name
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Last Name
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Premium
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Admin
-                    </th>
-                    <th className="px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Joined
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-8 text-center text-white">
-                        No users found.
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map((u, i) => (
-                      <tr
-                        key={u._id}
-                        className="border-b border-slate-700/50 hover:bg-slate-800/30 transition"
-                      >
-                        <td className="px-4 py-3 text-slate-300">{i + 1}</td>
-                        <td className="px-4 py-3 font-medium text-white">{u.FirstName}</td>
-                        <td className="px-4 py-3 font-medium text-white">{u.LastName}</td>
-                        <td className="px-4 py-3 text-slate-300">{u.email}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                              u.Premium
-                                ? "bg-amber-500/20 text-amber-400"
-                                : "bg-slate-600/50 text-slate-400"
-                            }`}
-                          >
-                            {u.Premium ? "Yes" : "No"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                              u.isAdmin
-                                ? "bg-indigo-500/20 text-indigo-400"
-                                : "bg-slate-600/50 text-slate-400"
-                            }`}
-                          >
-                            {u.isAdmin ? "Yes" : "No"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-white text-sm">
-                          {u.createdAt
-                            ? new Date(u.createdAt).toLocaleDateString()
-                            : "—"}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+          <>
+            {/* Stats cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="rounded-xl border border-violet-500/30 bg-linear-to-br from-violet-500/10 to-slate-900/80 p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div className="text-slate-400 text-sm font-medium">Total Users</div>
+                  <div className="text-2xl font-bold text-white mt-0.5">{users.length}</div>
+                  <div className="text-xs text-slate-500 mt-1">Registered</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-cyan-500/30 bg-linear-to-br from-cyan-500/10 to-slate-900/80 p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm font-medium">AI Optimizes</p>
+                    <p className="text-2xl font-bold text-white mt-0.5">{totalOptimizes}</p>
+                    <p className="text-xs text-slate-500 mt-1">{usersWhoUsedAi} users used AI</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-cyan-400" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-amber-500/30 bg-linear-to-br from-amber-500/10 to-slate-900/80 p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm font-medium">Resumes Created</p>
+                    <p className="text-2xl font-bold text-white mt-0.5">{totalResumes}</p>
+                    <p className="text-xs text-slate-500 mt-1">From your site</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-amber-400" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-emerald-500/30 bg-linear-to-br from-emerald-500/10 to-slate-900/80 p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-slate-400 text-sm font-medium">Registrations</p>
+                    <p className="text-2xl font-bold text-white mt-0.5">{registrationsByDay.slice(-7).reduce((s, d) => s + d.count, 0)}</p>
+                    <p className="text-xs text-slate-500 mt-1">Last 7 days</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-emerald-400" />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
 
-        {!loading && !error && users.length > 0 && (
-          <p className="mt-4 text-sm text-white">
-            Total: {users.length} user{users.length !== 1 ? "s" : ""}
-          </p>
+            {/* Charts row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Registrations over time */}
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-700/50">
+                  <h2 className="text-lg font-semibold text-white">Registrations Over Time</h2>
+                  <p className="text-sm text-slate-400 mt-0.5">New user sign-ups (last 14 days)</p>
+                </div>
+                <div className="p-5">
+                  <div className="flex items-end justify-between gap-1 min-h-[140px]">
+                    {registrationsByDay.length ? (
+                      registrationsByDay.map((d) => {
+                        const max = Math.max(1, ...registrationsByDay.map((x) => x.count));
+                        const barHeightPx = max > 0 ? Math.round((d.count / max) * 100) : 0;
+                        return (
+                          <div key={d.date} className="flex-1 flex flex-col items-center gap-2">
+                            <div className="w-full flex justify-center items-end" style={{ height: "100px" }}>
+                              <div
+                                className="w-full max-w-[20px] rounded-t-md bg-linear-to-t from-violet-600 to-violet-400 transition-all hover:from-violet-500 hover:to-violet-300"
+                                style={{ height: `${Math.max(barHeightPx, 4)}px` }}
+                                title={`${d.label}: ${d.count}`}
+                              />
+                            </div>
+                            <span className="text-[10px] sm:text-xs text-slate-500 truncate max-w-full">{d.label}</span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="w-full h-32 flex items-center justify-center text-slate-500 text-sm">No registration data</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Optimize usage */}
+              <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-700/50">
+                  <h2 className="text-lg font-semibold text-white">AI Resume Optimize Usage</h2>
+                  <p className="text-sm text-slate-400 mt-0.5">Times each user used AI to optimize resume (top 10)</p>
+                </div>
+                <div className="p-5">
+                  {optimizeChartData.length ? (
+                    <div className="space-y-3">
+                      {optimizeChartData.map((u, i) => {
+                        const max = Math.max(1, ...optimizeChartData.map((x) => x.count));
+                        const w = (u.count / max) * 100;
+                        return (
+                          <div key={u.email + i} className="flex items-center gap-3">
+                            <span className="text-slate-300 text-sm w-24 truncate" title={u.email}>{u.name}</span>
+                            <div className="flex-1 h-6 rounded-full bg-slate-700/50 overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-linear-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
+                                style={{ width: `${w}%`, minWidth: "8px" }}
+                              />
+                            </div>
+                            <span className="text-cyan-400 font-medium text-sm w-8 text-right">{u.count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center text-slate-500 text-sm">No AI optimize usage yet</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Resumes per user */}
+            <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden mb-8">
+              <div className="px-5 py-4 border-b border-slate-700/50">
+                <h2 className="text-lg font-semibold text-white">Resumes Created per User</h2>
+                <p className="text-sm text-slate-400 mt-0.5">How many times each user created/saved a resume (top 10)</p>
+              </div>
+              <div className="p-5">
+                {resumeChartData.length ? (
+                  <div className="space-y-3">
+                    {resumeChartData.map((u, i) => {
+                      const max = Math.max(1, ...resumeChartData.map((x) => x.count));
+                      const w = (u.count / max) * 100;
+                      return (
+                        <div key={u.email + i} className="flex items-center gap-3">
+                          <span className="text-slate-300 text-sm w-24 truncate" title={u.email}>{u.name}</span>
+                          <div className="flex-1 h-6 rounded-full bg-slate-700/50 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-linear-to-r from-amber-600 to-amber-400 transition-all duration-500"
+                              style={{ width: `${w}%`, minWidth: "8px" }}
+                            />
+                          </div>
+                          <span className="text-amber-400 font-medium text-sm w-8 text-right">{u.count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="h-32 flex items-center justify-center text-slate-500 text-sm">No resume data yet</div>
+                )}
+              </div>
+            </div>
+          </>
         )}
         </main>
         <AppFooter />
@@ -253,8 +369,8 @@ function AdminDashboard() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-amber-500">Access Denied</h1>
               <p className="mt-2 text-slate-400">This page is for administrators only.</p>
-              <Link to="/dashboard" className="mt-4 inline-block text-indigo-400 hover:underline">
-                Back to Dashboard
+              <Link to="/dashboard" className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:border-indigo-400/50 hover:bg-indigo-500/20 hover:text-indigo-200 transition-all">
+                <span className="text-indigo-400">←</span> Back to Dashboard
               </Link>
             </div>
           </main>
