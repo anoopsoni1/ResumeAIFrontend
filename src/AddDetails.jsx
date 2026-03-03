@@ -325,7 +325,7 @@ export default function AddDetails() {
               <ArrowLeft size={18} /> Back
             </Link>
             <h1 className="text-xl sm:text-2xl font-bold text-white">
-              Add details for resume or portfolio
+              Add details for resume or project
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -350,7 +350,7 @@ export default function AddDetails() {
 
         {saved && (
           <div className="mb-6 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-            Details saved. Use "Save & choose template" to build your resume or portfolio.
+            Details saved. Use "Save & choose template" to build your resume or project.
           </div>
         )}
         {apiError && (
@@ -656,7 +656,7 @@ export default function AddDetails() {
             to="/portfolio"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-500/50 px-5 py-3 text-sm font-semibold text-indigo-400 hover:bg-indigo-500/10 text-center"
           >
-            View portfolio
+            View project
           </Link>
         </div>
       </main>

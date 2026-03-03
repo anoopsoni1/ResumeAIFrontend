@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2 } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { clearUser, setUser } from "./slice/user.slice";
-import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -70,8 +69,8 @@ function StatCards({ atsScore, optimizeCount }) {
     },
     {
       icon: <FiTarget className="w-6 h-6" />,
-      title: "Add details for resume or portfolio",
-      desc: "Build your resume or portfolio by filling in your details.",
+      title: "Add details for resume or project",
+      desc: "Build your resume or project by filling in your details.",
       link: "/add-details",
     },
     {
@@ -82,8 +81,8 @@ function StatCards({ atsScore, optimizeCount }) {
     },
     {
       icon: <FiGlobe className="w-6 h-6" />,
-      title: "Choose portfolio design",
-      desc: "Pick a template and view your portfolio.",
+      title: "Choose project design",
+      desc: "Pick a template and view your project.",
       link: "/templates/portfoliodesign",
     },
   ];
@@ -169,6 +168,9 @@ export default function Dashboard() {
   const [authChecking, setAuthChecking] = useState(true);
   const [atsScore, setAtsScore] = useState(null);
   const [optimizeCount, setOptimizeCount] = useState(null);
+  const [deployments, setDeployments] = useState([]);
+  const [copiedUrl, setCopiedUrl] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -279,6 +281,62 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [user]);
 
+  // Fetch deployments (portfolio URLs) for dashboard
+  useEffect(() => {
+    if (!user) {
+      setDeployments([]);
+      return;
+    }
+    let cancelled = false;
+    async function fetchDeployments() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const res = await fetch(`${API_BASE}/api/v1/user/get-deployments`, {
+          credentials: "include",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        });
+        const json = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        const list = json?.data;
+        if (res.ok && Array.isArray(list)) {
+          setDeployments(list);
+        } else {
+          setDeployments([]);
+        }
+      } catch {
+        if (!cancelled) setDeployments([]);
+      }
+    }
+    fetchDeployments();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const latestDeployment = deployments.length > 0 ? deployments[0] : null;
+  const formatDeployDate = (d) => {
+    if (!d) return "";
+    const date = new Date(d);
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const handleDeleteDeployment = async (dep) => {
+    if (!dep._id) return;
+    if (!window.confirm("Remove this project from the list and delete it from Vercel? This cannot be undone.")) return;
+    const accessToken = localStorage.getItem("accessToken");
+    setDeletingId(dep._id);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/user/delete-deployment/${dep._id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      if (res.ok) {
+        setDeployments((prev) => prev.filter((d) => d._id !== dep._id));
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (authChecking) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -294,27 +352,21 @@ export default function Dashboard() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {size.width >= 768 ? (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <Particles
-            particleColors={["#ffffff"]}
-            particleCount={200}
-            particleSpread={10}
-            speed={0.1}
-            particleBaseSize={100}
-            moveParticlesOnHover
-            alphaParticles={false}
-            disableRotation={false}
-            pixelRatio={1}
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+        <Particles
+          particleColors={["#ffffff"]}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={1}
+        />
+      </div>
 
-      <div className={`absolute inset-0 z-1 ${size.width >= 768 ? 'bg-black/40' : 'bg-black/30'}`} />
+      <div className="absolute inset-0 z-1 bg-black/30" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <Topbar />
@@ -451,6 +503,103 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+
+              {/* Deployed project URLs from database – same card style as Admin */}
+              {user?.Premium ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-emerald-500/60 p-4 sm:p-5">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-emerald-400">
+                          <FiGlobe className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-emerald-400">
+                            Live projects
+                          </p>
+                          <p className="mt-1 text-xs sm:text-sm text-slate-400">
+                            {deployments.length > 0
+                              ? `${deployments.length} deployment${deployments.length === 1 ? "" : "s"} · Your live links`
+                              : "Deploy from a project template to get a live link."}
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        to="/templates/portfoliodesign"
+                        className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500 transition-colors shrink-0"
+                      >
+                        {deployments.length > 0 ? "Deploy another" : "Deploy project"}
+                      </Link>
+                    </div>
+                    {deployments.length > 0 ? (
+                      <ul className="space-y-3 border-t border-white/10 pt-4 mt-1">
+                        {deployments.map((dep, index) => (
+                          <li
+                            key={dep._id || dep.portfolioUrl || index}
+                            className="group flex flex-col sm:flex-row sm:items-center gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-4"
+                          >
+                            <div className="min-w-0 flex-1 flex items-start sm:items-center gap-3">
+                              <span className="mt-1.5 sm:mt-0 shrink-0 w-2 h-2 rounded-full bg-emerald-500/80 shadow-[0_0_8px_rgba(16,185,129,0.5)]" aria-hidden />
+                              <div className="min-w-0 flex-1">
+                                <a
+                                  href={dep.portfolioUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm font-medium text-emerald-400 hover:text-emerald-300 break-all transition-colors duration-150"
+                                  title={dep.portfolioUrl}
+                                >
+                                  {dep.portfolioUrl}
+                                </a>
+                                {dep.deployedAt && (
+                                  <p className="text-xs text-slate-400 mt-1">
+                                    Deployed {formatDeployDate(dep.deployedAt)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 pl-5 sm:pl-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard?.writeText(dep.portfolioUrl).then(() => {
+                                    setCopiedUrl(dep.portfolioUrl);
+                                    setTimeout(() => setCopiedUrl(null), 2000);
+                                  });
+                                }}
+                                className={`inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 min-w-16 ${
+                                  copiedUrl === dep.portfolioUrl
+                                    ? "border-emerald-500/60 bg-emerald-500/20 text-emerald-400"
+                                    : "border-white/20 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white hover:border-white/30"
+                                }`}
+                                title="Copy URL"
+                              >
+                                {copiedUrl === dep.portfolioUrl ? "Copied" : "Copy"}
+                              </button>
+                              <a
+                                href={dep.portfolioUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/30 hover:border-emerald-500/70 transition-all duration-200"
+                              >
+                                Open →
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDeployment(dep)}
+                                disabled={deletingId === dep._id}
+                                className="inline-flex items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10 px-2.5 py-2 text-xs font-medium text-red-400 hover:bg-red-500/20 hover:border-red-500/60 disabled:opacity-50 transition-all duration-200"
+                                title="Delete project and remove from Vercel"
+                              >
+                                {deletingId === dep._id ? "…" : <FiTrash2 className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
               {/* Admin-only: All Users */}
               {user?.isAdmin && (

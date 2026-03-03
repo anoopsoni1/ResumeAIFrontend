@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { ArrowLeft, Sparkles, Mail, Phone, Download, ChevronRight, Linkedin, Lock, ArrowUpRight } from "lucide-react";
+import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowLeft, Mail, Phone, Download, ChevronRight, Linkedin, Lock, ArrowUpRight, Upload } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import PortfolioHTMLDownload from "./Download";
 import { getResumeContentForView } from "./utils/detailApi.js";
+import { useToast } from "./context/ToastContext";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
@@ -30,8 +36,17 @@ const PLACEHOLDER_PORTFOLIO_DATA = {
 const NAV_LINKS = [
   { to: "#home", label: "Home" },
   { to: "#about", label: "About" },
-  { to: "#services", label: "Services" },
+  { to: "#skills", label: "Skills" },
+  { to: "#experience", label: "Experience" },
   { to: "#projects", label: "Projects" },
+  { to: "#contact", label: "Contact" },
+];
+
+const NAV_LINKS_P2 = [
+  { to: "#home", label: "Home" },
+  { to: "#about", label: "About" },
+  { to: "#skills", label: "Skills" },
+  { to: "#portfolio", label: "Project" },
   { to: "#contact", label: "Contact" },
 ];
 
@@ -41,111 +56,497 @@ function getLayoutType(template) {
   return "portfolio1";
 }
 
-/** Portfolio 2: Dark agency-style layout (hero + about + CTA sections). Uses displayData for all text. */
+/** Portfolio 2: Dark teal/cyan theme — hero with glowing avatar, full sections, GSAP + motion. */
 function Portfolio2Layout({ data }) {
+  const rootRef = useRef(null);
+  const heroLeftRef = useRef(null);
+  const heroAvatarRef = useRef(null);
   const name = data?.name || "Your Name";
-  const role = data?.role || "Your Role";
-  const summary = data?.summary || "";
-  const initials = name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
-  const headline = role || "RECOGNIZE POTENTIAL";
-  const tagline = summary ? summary.slice(0, 120) + (summary.length > 120 ? "…" : "") : "Discover the power of innovation and embrace growth with bold strategies.";
-  const skills = Array.isArray(data?.skills) ? data.skills : [];
-  const projects = Array.isArray(data?.projects) ? data.projects : [];
-  const partnerLabels = skills.length >= 3 ? skills.slice(0, 6) : projects.length >= 2 ? projects.map((p) => (p || "").slice(0, 20)) : ["Zoom", "Google", "Partners", "Clients", "Brands", "Studio"];
-  const contactHref = data?.email ? `mailto:${data.email}` : "#contact";
+  const role = data?.role || "Frontend Developer";
+  const summary = data?.summary || "Passionate about creating beautiful, responsive websites and exceptional user experiences. Specialized in modern web technologies including React, Vue.js, and advanced CSS frameworks.";
+  const skills = Array.isArray(data?.skills) ? data.skills.filter(Boolean) : [];
+  const projects = Array.isArray(data?.projects) ? data.projects.filter(Boolean) : [];
+  const experience = Array.isArray(data?.experience) ? data.experience : [];
+  const email = data?.email || "";
+  const phone = data?.phone || "";
+  const linkedin = data?.linkedin || "";
+  const website = data?.website || "";
+  const firstName = name.split(/\s+/)[0] || name;
+  const displayName = name.trim() || "Your Name";
+  const initials = name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "Y";
+  const contactHref = email ? `mailto:${email}` : "#contact";
+
+  const socials = [
+    { href: linkedin || "#", icon: Linkedin, label: "LinkedIn" },
+    { href: website ? (website.startsWith("http") ? website : `https://${website}`) : "#", icon: ArrowUpRight, label: "Website" },
+    { href: email ? `mailto:${email}` : "#", icon: Mail, label: "Email" },
+    { href: phone ? `tel:${phone}` : "#", icon: Phone, label: "Phone" },
+  ];
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (heroLeftRef.current) {
+        const els = heroLeftRef.current.querySelectorAll(".p2-hero-item");
+        gsap.fromTo(els, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: "power3.out", delay: 0.2 });
+      }
+      if (heroAvatarRef.current) {
+        gsap.fromTo(heroAvatarRef.current, { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.9, ease: "back.out(1.2)", delay: 0.3 });
+        gsap.to(heroAvatarRef.current, { scale: 1.03, duration: 2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+      }
+      gsap.utils.toArray(".p2-section").forEach((section) => {
+        gsap.fromTo(section, { opacity: 0, y: 70 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 85%", toggleActions: "play none none none" },
+        });
+        const cards = section.querySelectorAll(".p2-skill-card, .p2-project-card");
+        if (cards.length) {
+          gsap.fromTo(cards, { opacity: 0, y: 30 }, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.08,
+            ease: "power2.out",
+            scrollTrigger: { trigger: section, start: "top 80%", toggleActions: "play none none none" },
+          });
+        }
+      });
+    }, rootRef.current);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* ——— Section 1: Hero ——— */}
-      <section className="min-h-screen flex flex-col">
-        <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-          <a href="#menu" className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/90 hover:text-white">Menu</a>
-          <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-white/10 text-white text-sm font-bold">
-            {initials[0] || "P"}
-          </span>
-          <a href={contactHref} className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/90 hover:text-white">Contact us</a>
-        </header>
+    <div ref={rootRef} className="min-h-screen bg-[#050508] text-white overflow-x-hidden">
+      {/* Subtle gradient glow background */}
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(34,211,238,0.08)_0%,transparent_50%)]" aria-hidden />
 
-        <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-          <div className="flex-1 relative flex items-center justify-center lg:justify-start order-2 lg:order-1 px-4 sm:px-6 lg:pl-12">
-            <div className="relative w-full max-w-md aspect-[3/4] rounded-lg overflow-hidden bg-neutral-800">
-              {data?.avatar || data?.profileImage ? (
-                <img src={data.avatar || data.profileImage} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl sm:text-5xl font-bold text-white/30">{initials}</div>
-              )}
-              <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "linear-gradient(90deg, rgba(220,38,38,0.15) 1px, transparent 1px), linear-gradient(rgba(220,38,38,0.15) 1px, transparent 1px)", backgroundSize: "20px 20px" }} aria-hidden />
-            </div>
+      <header className="relative z-10 border-b border-white/5">
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <motion.a href="#home" className="text-lg font-semibold text-white" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+            {displayName}
+          </motion.a>
+          <ul className="hidden sm:flex items-center gap-8">
+            {NAV_LINKS_P2.map((item, i) => (
+              <li key={item.label}>
+                <motion.a
+                  href={item.to}
+                  className={`relative py-2 text-sm font-medium transition-colors hover:text-cyan-400 ${
+                    item.to === "#home" ? "text-cyan-400" : "text-white/90"
+                  }`}
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 + i * 0.05, duration: 0.4 }}
+                >
+                  {item.label}
+                  {item.to === "#home" && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 rounded-full" style={{ boxShadow: "0 0 12px rgba(34,211,238,0.6)" }} />
+                  )}
+                </motion.a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </header>
+
+      {/* Hero */}
+      <section id="home" className="relative min-h-[90vh] flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16 max-w-6xl mx-auto px-4 sm:px-6 py-16 lg:py-24">
+        <div ref={heroLeftRef} className="flex-1 order-2 lg:order-1">
+          <p className="p2-hero-item text-cyan-400 text-sm font-medium tracking-wide mb-2">HI, Myself</p>
+          <h1 className="p2-hero-item text-4xl sm:text-5xl md:text-6xl font-bold text-cyan-400 mb-2">{firstName}</h1>
+          <p className="p2-hero-item text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">And I&apos;m a {role}</p>
+          <p className="p2-hero-item text-white/70 text-base sm:text-lg leading-relaxed max-w-xl mb-8">{summary}</p>
+          <div className="p2-hero-item flex gap-4 mb-8">
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target={s.href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-cyan-400/80 text-white/90 transition-all duration-300 hover:border-cyan-400 hover:text-cyan-400 hover:scale-110"
+                style={{ boxShadow: "0 0 20px rgba(34,211,238,0.2)" }}
+                aria-label={s.label}
+              >
+                <s.icon size={20} />
+              </a>
+            ))}
           </div>
-          <div className="flex-1 flex flex-col justify-center px-4 sm:px-6 lg:px-12 py-12 lg:py-0 order-1 lg:order-2 text-left">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight leading-[1.1]">
-              {headline.split(/\s+/).slice(0, 2).join(" ")}
-              <br />
-              {headline.split(/\s+/).slice(2).join(" ") || "\u00A0"}
-            </h1>
-            <p className="mt-4 sm:mt-6 text-sm sm:text-base text-white/60 uppercase tracking-wide max-w-lg">
-              {tagline}
-            </p>
-            <a href={contactHref} className="mt-6 sm:mt-8 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-white hover:text-white/80">
-              Get in touch <ArrowUpRight className="h-4 w-4 text-orange-500" />
-            </a>
-          </div>
+          <a
+            href="#about"
+            className="p2-hero-item inline-flex items-center justify-center rounded-lg bg-cyan-500 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:bg-cyan-400 hover:shadow-lg hover:shadow-cyan-500/30 hover:scale-105"
+          >
+            Read more
+          </a>
         </div>
 
-        <footer className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-5 sm:py-6 border-t border-white/10">
-          <span className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80">{role}</span>
-          <span className="text-xs sm:text-sm text-white/60 uppercase tracking-widest">IG / LN / TW / WA</span>
-          <span className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80">Scroll for more</span>
-        </footer>
+        <div className="flex-1 flex justify-center lg:justify-end order-1 lg:order-2">
+          <div
+            ref={heroAvatarRef}
+            className="relative w-56 h-56 sm:w-72 sm:h-72 rounded-full overflow-hidden border-4 border-cyan-400/90"
+            style={{ boxShadow: "0 0 40px rgba(34,211,238,0.4), 0 0 80px rgba(34,211,238,0.2)" }}
+          >
+            {data?.avatar || data?.profileImage ? (
+              <img src={data.avatar || data.profileImage} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-5xl sm:text-6xl font-bold text-white/40">
+                {initials}
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
-      {/* ——— Section 2: About + partners bar ——— */}
-      <section id="about" className="min-h-screen flex flex-col justify-between py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
-        <a href="#about" className="self-start text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80 hover:text-white mb-8 sm:mb-12">About us</a>
-        <div className="flex-1 flex flex-col justify-center max-w-4xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold uppercase leading-tight tracking-tight text-right">
-            <span className="block">Let&apos;s work together</span>
-            <span className="block mt-2 sm:mt-4 pl-8 sm:pl-16">to recognize your</span>
-            <span className="block mt-2 sm:mt-4 pl-16 sm:pl-24">potential</span>
-            <span className="block mt-2 sm:mt-4 pl-8 sm:pl-16">and shape</span>
-            <span className="block mt-2 sm:mt-4">a future</span>
-            <span className="block mt-2 sm:mt-4 pl-16 sm:pl-24">where</span>
-            <span className="block mt-2 sm:mt-4 pl-16 sm:pl-24">your brand shines</span>
+      {/* About */}
+      <section id="about" className="p2-section relative py-20 sm:py-28 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
+            About <span className="text-cyan-400">me</span>
           </h2>
-          <p className="mt-6 sm:mt-8 text-white/60 text-right max-w-xl ml-auto text-sm sm:text-base">{summary || "We help you grow."}</p>
+          <p className="text-white/70 text-base sm:text-lg leading-relaxed max-w-3xl">{summary}</p>
         </div>
-        <div className="mt-12 sm:mt-16 w-full rounded-t-xl sm:rounded-t-2xl bg-red-600 px-4 sm:px-6 py-4 sm:py-5">
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12 text-sm sm:text-base font-medium uppercase">
-            {partnerLabels.slice(0, 6).map((label, i) => (
-              <span key={i} className="text-white/95">{typeof label === "string" ? label : String(label).slice(0, 15)}</span>
+      </section>
+
+      {/* Skills */}
+      <section id="skills" className="p2-section relative py-20 sm:py-28 bg-white/[0.02] border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+            Skil<span className="text-cyan-400">ls</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(skills.length ? skills : ["Web Development", "UI/UX Design", "Responsive Design"]).slice(0, 6).map((skill, i) => (
+              <div
+                key={i}
+                className="p2-skill-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1"
+              >
+                <p className="text-white font-medium">{typeof skill === "string" ? skill : String(skill)}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ——— Section 3: CTA + footer ——— */}
-      <section id="contact" className="min-h-screen flex flex-col justify-between py-12 sm:py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
-        <a href="#contact" className="self-start text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80 hover:text-white mb-8 sm:mb-12">Let&apos;s get started</a>
-        <div className="flex-1 flex flex-col justify-center items-end">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold uppercase leading-tight tracking-tight text-right max-w-4xl">
-            <span className="block">Let&apos;s take your brand</span>
-            <span className="block mt-2 sm:mt-4">to the next level</span>
-            <span className="block mt-2 sm:mt-4 pl-8 sm:pl-16">whether you&apos;re</span>
-            <span className="block mt-2 sm:mt-4 pl-16 sm:pl-24">looking to rebrand</span>
-            <span className="block mt-2 sm:mt-4 pl-8 sm:pl-16">stunning campaign</span>
-            <span className="block mt-2 sm:mt-4 pl-16 sm:pl-24">or develop a digital</span>
-            <span className="block mt-2 sm:mt-4 pl-8 sm:pl-16">strategy</span>
+      {/* Project (projects) */}
+      <section id="portfolio" className="p2-section relative py-20 sm:py-28 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+            Proj<span className="text-cyan-400">ect</span>
           </h2>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {(projects.length ? projects : ["Project One", "Project Two", "Project Three"]).slice(0, 4).map((project, i) => (
+              <div
+                key={i}
+                className="p2-project-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+              >
+                <p className="text-white/80 text-sm sm:text-base line-clamp-3">{typeof project === "string" ? project : String(project)}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <footer className="flex items-center justify-between pt-8 sm:pt-12 border-t border-white/10">
-          <a href="#menu" className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80 hover:text-white">Menu</a>
-          <span className="text-xs sm:text-sm text-white/60 uppercase tracking-widest">IG / LN / TW / WA</span>
-          <a href={contactHref} className="text-xs sm:text-sm font-medium uppercase tracking-widest text-white/80 hover:text-white">Contact us</a>
-        </footer>
       </section>
+
+      {/* Contact */}
+      <section id="contact" className="p2-section relative py-20 sm:py-28 bg-white/[0.02] border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
+            Cont<span className="text-cyan-400">act</span>
+          </h2>
+          <p className="text-white/70 mb-10 max-w-xl">
+            Have a project in mind or want to connect? Reach out via email or phone.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            {email && (
+              <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 text-sm font-medium text-white hover:bg-cyan-400 hover:scale-105 transition-all">
+                <Mail size={18} /> {email}
+              </a>
+            )}
+            {phone && (
+              <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 hover:scale-105 transition-all">
+                <Phone size={18} /> {phone}
+              </a>
+            )}
+            {linkedin && (
+              <a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 hover:scale-105 transition-all">
+                <Linkedin size={18} /> LinkedIn
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/5 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/50">
+          <p>© {new Date().getFullYear()} {displayName}. All rights reserved.</p>
+          <div className="flex gap-6">
+            {NAV_LINKS_P2.map(({ to, label }) => (
+              <a key={label} href={to} className="hover:text-cyan-400 transition-colors">{label}</a>
+            ))}
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
+
+/** Portfolio 1: Static HTML + Tailwind — semantic sections, clean typography, emerald accent, GSAP. */
+function Portfolio1StaticLayout({ data }) {
+  const rootRef = useRef(null);
+  const heroLeftRef = useRef(null);
+  const heroRightRef = useRef(null);
+  const name = data?.name || "Your Name";
+  const role = data?.role || "Your Role";
+  const summary = data?.summary || "";
+  const skills = Array.isArray(data?.skills) ? data.skills.filter(Boolean) : [];
+  const experience = Array.isArray(data?.experience) ? data.experience : [];
+  const projects = Array.isArray(data?.projects) ? data.projects.filter(Boolean) : [];
+  const education = data?.education || "";
+  const email = data?.email || "";
+  const phone = data?.phone || "";
+  const linkedin = data?.linkedin || "";
+  const website = data?.website || "";
+  const initials = name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
+  const firstName = name.split(/\s+/)[0] || "Portfolio";
+
+  const expItems = experience.map((e) => {
+    if (typeof e === "string") return { role: e, bullets: [] };
+    return { role: e?.role || "", bullets: Array.isArray(e?.bullets) ? e.bullets : [] };
+  });
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (heroLeftRef.current) {
+        const els = heroLeftRef.current.querySelectorAll(".p1-hero-item");
+        gsap.fromTo(els, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.6, stagger: 0.08, ease: "power3.out", delay: 0.15 });
+      }
+      if (heroRightRef.current) {
+        gsap.fromTo(heroRightRef.current, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out", delay: 0.25 });
+      }
+      gsap.utils.toArray(".p1-section").forEach((section) => {
+        gsap.fromTo(section, { opacity: 0, y: 60 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 88%", toggleActions: "play none none none" },
+        });
+      });
+    }, rootRef.current);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={rootRef} className="min-h-screen bg-white text-neutral-900" id="home">
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <a href="#home" className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold">
+              {firstName[0]?.toUpperCase() || "P"}
+            </span>
+            <span className="text-lg font-semibold text-black">{firstName}</span>
+          </a>
+          <nav className="hidden sm:flex items-center gap-8">
+            {NAV_LINKS.map(({ to, label }) => (
+              <a key={label} href={to} className="text-sm font-medium text-neutral-600 hover:text-black transition-colors">
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section id="home" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div ref={heroLeftRef}>
+              <p className="p1-hero-item inline-block rounded-lg border-2 border-emerald-500 bg-black text-white px-4 py-2 mb-6 text-sm font-medium">
+                Hi, I&apos;m {name}
+              </p>
+              <h1 className="p1-hero-item text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-black tracking-tight leading-tight">
+                {role}
+              </h1>
+              {summary && (
+                <p className="p1-hero-item mt-5 text-neutral-600 text-base sm:text-lg leading-relaxed max-w-xl">
+                  {summary}
+                </p>
+              )}
+              <div className="p1-hero-item mt-8 flex flex-wrap items-center gap-4">
+                <a
+                  href={email ? `mailto:${email}` : "#contact"}
+                  className="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-500 bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-800 transition-colors"
+                >
+                  Get in touch
+                  <ChevronRight size={18} className="text-emerald-400" />
+                </a>
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-2 text-black font-medium hover:underline"
+                >
+                  Download CV
+                  <Download size={18} />
+                </a>
+              </div>
+              <div className="p1-hero-item mt-10">
+                <p className="text-sm text-neutral-500 mb-3">Find me on</p>
+                <div className="flex items-center gap-3">
+                  {email && (
+                    <a href={`mailto:${email}`} className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors" aria-label="Email">
+                      <Mail size={18} />
+                    </a>
+                  )}
+                  {phone && (
+                    <a href={`tel:${phone}`} className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors" aria-label="Phone">
+                      <Phone size={18} />
+                    </a>
+                  )}
+                  <a href={linkedin || "https://linkedin.com"} target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white hover:opacity-90 transition-opacity" aria-label="LinkedIn">
+                    <Linkedin size={18} />
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div ref={heroRightRef} className="relative flex justify-center lg:justify-end">
+              <div className="relative">
+                <div className="absolute -top-4 -left-4 w-14 h-16 border-l-2 border-t-2 border-black rounded-tl-lg" aria-hidden />
+                <div className="relative w-56 h-72 sm:w-72 sm:h-96 rounded-xl border-2 border-black bg-neutral-100 flex items-center justify-center overflow-hidden">
+                  {data?.avatar || data?.profileImage ? (
+                    <img src={data.avatar || data.profileImage} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-6xl sm:text-7xl font-bold text-neutral-400 select-none">{initials}</span>
+                  )}
+                </div>
+                <div className="absolute -bottom-6 -right-6 w-40 h-40 sm:w-52 sm:h-52 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-emerald-500/90 -z-10" aria-hidden />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className="p1-section bg-neutral-50 border-y border-neutral-100">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6">About</h2>
+            <p className="text-neutral-600 text-base sm:text-lg leading-relaxed max-w-3xl">
+              {summary || "Professional with a focus on delivering results and continuous growth."}
+            </p>
+            {education && (
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-500 mb-2">Education</h3>
+                <p className="text-neutral-700">{education}</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {skills.length > 0 && (
+          <section id="skills" className="p1-section max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-8">Skills</h2>
+            <ul className="flex flex-wrap gap-3">
+              {skills.map((skill, i) => (
+                <li key={i}>
+                  <span className="inline-block rounded-full border-2 border-emerald-500 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm font-medium">
+                    {typeof skill === "string" ? skill : String(skill)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {expItems.length > 0 && (
+          <section id="experience" className="p1-section bg-neutral-50 border-y border-neutral-100">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-10">Experience</h2>
+              <ul className="space-y-10">
+                {expItems.map((item, i) => (
+                  <li key={i} className="border-l-2 border-emerald-500 pl-6">
+                    <h3 className="text-lg font-semibold text-black">{item.role}</h3>
+                    {item.bullets.length > 0 && (
+                      <ul className="mt-3 space-y-2 text-neutral-600 text-sm sm:text-base">
+                        {item.bullets.map((b, j) => (
+                          <li key={j} className="flex gap-2">
+                            <span className="text-emerald-500 shrink-0">•</span>
+                            <span>{typeof b === "string" ? b : String(b)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+
+        {projects.length > 0 && (
+          <section id="projects" className="p1-section max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-10">Projects</h2>
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.map((project, i) => (
+                <li key={i} className="rounded-xl border-2 border-neutral-200 bg-white p-6 hover:border-emerald-500 transition-colors">
+                  <p className="text-neutral-700 text-sm sm:text-base leading-relaxed">
+                    {typeof project === "string" ? project : String(project)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section id="contact" className="p1-section bg-neutral-900 text-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Let&apos;s work together</h2>
+            <p className="text-neutral-300 max-w-xl mb-10">
+              Have a project in mind or want to connect? Reach out via email or phone.
+            </p>
+            <div className="flex flex-wrap gap-6">
+              {email && (
+                <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-600 transition-colors">
+                  <Mail size={18} />
+                  {email}
+                </a>
+              )}
+              {phone && (
+                <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors">
+                  <Phone size={18} />
+                  {phone}
+                </a>
+              )}
+              {website && (
+                <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors">
+                  <ArrowUpRight size={18} />
+                  Website
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-neutral-200 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-neutral-500">
+          <p>© {new Date().getFullYear()} {name}. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            {NAV_LINKS.map(({ to, label }) => (
+              <a key={label} href={to} className="hover:text-black transition-colors">{label}</a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+const FULL_HTML_HEAD = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Website</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{font-family:system-ui,sans-serif;}</style>
+</head>
+<body class="bg-white text-neutral-900">
+  <div class="min-h-screen">`;
+
+const FULL_HTML_TAIL = `</div></body></html>`;
 
 export default function PortfolioDesignView() {
   const { id } = useParams();
@@ -156,6 +557,33 @@ export default function PortfolioDesignView() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deploying, setDeploying] = useState(false);
+  const portfolioContentRef = useRef(null);
+  const toast = useToast();
+
+  const handleDeploy = async () => {
+    if (!portfolioContentRef.current) return;
+    setDeploying(true);
+    try {
+      const content = portfolioContentRef.current.innerHTML;
+      const htmlContent = FULL_HTML_HEAD + content + FULL_HTML_TAIL;
+      const accessToken = localStorage.getItem("accessToken");
+      const { data: res } = await axios.post(
+        `${API_BASE}/deploy-portfolio`,
+        { htmlContent },
+        {
+          withCredentials: true,
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        }
+      );
+      const message = res?.message || "Portfolio deployed. View link on Dashboard.";
+      toast.success(message);
+    } catch (err) {
+      toast.error(err?.response?.data?.message ?? err?.message ?? "Deployment failed");
+    } finally {
+      setDeploying(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) {
@@ -196,8 +624,6 @@ export default function PortfolioDesignView() {
 
   const displayData = data || PLACEHOLDER_PORTFOLIO_DATA;
   const isPlaceholder = !data;
-  const firstName = displayData?.name?.split(/\s+/)[0] || "Portfolio";
-  const initials = displayData?.name?.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "P";
 
   if (loading || detailLoading) {
     return (
@@ -220,9 +646,9 @@ export default function PortfolioDesignView() {
             <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
               <Lock className="h-7 w-7 text-amber-600" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">Portfolio is premium</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-2">Project is premium</h1>
             <p className="text-neutral-600 text-sm sm:text-base mb-6">
-              Upgrade to view and use portfolio templates.
+              Upgrade to view and use project templates.
             </p>
             <Link
               to="/price"
@@ -250,7 +676,7 @@ export default function PortfolioDesignView() {
             to="/templates/portfoliodesign"
             className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium"
           >
-            <ArrowLeft size={18} /> Back to portfolio designs
+            <ArrowLeft size={18} /> Back to project designs
           </Link>
         </main>
         <AppFooter />
@@ -262,12 +688,12 @@ export default function PortfolioDesignView() {
   const isPortfolio2 = layout === "portfolio2";
 
   return (
-    <div className={`min-h-screen flex flex-col ${isPortfolio2 ? "bg-[#0a0a0a]" : "bg-white text-neutral-900"}`} id="home">
+    <div className={`min-h-screen flex flex-col ${isPortfolio2 ? "bg-[#050508] text-white" : "bg-white text-neutral-900"}`} id="home">
       {isPlaceholder && (
         <div className="print:hidden bg-amber-500/20 border-b border-amber-400/30 px-3 sm:px-4 py-2.5">
           <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-2 text-sm">
             <p className="text-amber-800">
-              Viewing with sample data. Sign in to use your own details and save your portfolio.
+              Viewing with sample data. Sign in to use your own details and save your project.
             </p>
             <div className="flex items-center gap-2">
               <Link
@@ -289,155 +715,31 @@ export default function PortfolioDesignView() {
       <div className="print:hidden fixed top-4 right-4 z-30 flex items-center gap-2">
         <Link
           to="/templates/portfoliodesign"
-          className={`inline-flex items-center gap-1.5 text-sm font-medium ${isPortfolio2 ? "text-white/80 hover:text-white" : "text-neutral-600 hover:text-black"}`}
+          className={`inline-flex items-center gap-1.5 text-sm font-medium ${isPortfolio2 ? "text-white/80 hover:text-cyan-400" : "text-neutral-600 hover:text-black"}`}
         >
           <ArrowLeft size={16} /> Back
         </Link>
         <button
           type="button"
-          onClick={() => window.print()}
-          className={`inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-sm font-medium ${isPortfolio2 ? "border-orange-500 bg-orange-600 text-white hover:bg-orange-500" : "border-emerald-500 bg-black text-white hover:bg-neutral-800"}`}
+          onClick={handleDeploy}
+          disabled={deploying}
+          className={`inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed ${
+            isPortfolio2
+              ? "border-cyan-400 bg-cyan-600 text-white hover:bg-cyan-500"
+              : "border-violet-500 bg-violet-600 text-white hover:bg-violet-500"
+          }`}
         >
-          <Download size={14} /> Download PDF
+          <Upload size={14} /> {deploying ? "Deploying…" : "Deploy to Vercel"}
         </button>
       </div>
 
-      <PortfolioHTMLDownload showDownloadHeader={false}>
+      <PortfolioHTMLDownload showDownloadHeader={false} portfolioRef={portfolioContentRef}>
         {isPortfolio2 ? (
           <Portfolio2Layout data={displayData} />
         ) : (
-        <div className="min-h-screen bg-white overflow-hidden">
-          <header className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-neutral-100">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-              <Link to="/" className="flex items-center gap-2">
-                <span
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-white text-sm font-bold bg-emerald-500"
-                >
-                  {firstName[0]?.toUpperCase() || "P"}
-                </span>
-                <span className="text-lg font-semibold text-black">{firstName}</span>
-              </Link>
-              <nav className="hidden sm:flex items-center gap-8">
-                {NAV_LINKS.map(({ to, label }) => (
-                  <a
-                    key={label}
-                    href={to}
-                    className={`text-sm font-medium transition-colors ${
-                      label === "Home"
-                        ? "text-black flex items-center gap-1.5"
-                        : "text-neutral-600 hover:text-black"
-                    }`}
-                  >
-                    {label === "Home" && (
-                      <span className="h-1.5 w-1.5 rounded-full shrink-0 bg-emerald-500" />
-                    )}
-                    {label}
-                  </a>
-                ))}
-              </nav>
-            </div>
-          </header>
-
-          <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-20">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="inline-block rounded-lg border-2 border-emerald-500 bg-black text-white px-4 py-2 mb-6 text-sm font-medium">
-                  Hi everyone 👋, I'm {displayData.name}
-                </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-black tracking-tight leading-tight">
-                  {displayData.role}
-                </h1>
-                {displayData.summary && (
-                  <p className="mt-4 text-neutral-600 text-base sm:text-lg leading-relaxed max-w-xl">
-                    {displayData.summary}
-                  </p>
-                )}
-                <div className="mt-8 flex flex-wrap items-center gap-4">
-                  <a
-                    href={displayData.email ? `mailto:${displayData.email}` : "#contact"}
-                    className="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-500 bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-800 transition-colors"
-                  >
-                    Get In Touch
-                    <ChevronRight size={18} className="text-emerald-400" />
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => window.print()}
-                    className="inline-flex items-center gap-2 text-black font-medium hover:underline"
-                  >
-                    Download CV
-                    <Download size={18} />
-                  </button>
-                </div>
-                <div className="mt-10">
-                  <p className="text-sm text-neutral-600 mb-3">Find me on:</p>
-                  <div className="flex items-center gap-3">
-                    {displayData.email && (
-                      <a
-                        href={`mailto:${displayData.email}`}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
-                        aria-label="Email"
-                      >
-                        <Mail size={18} />
-                      </a>
-                    )}
-                    {displayData.phone && (
-                      <a
-                        href={`tel:${displayData.phone}`}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-300 text-neutral-600 hover:border-emerald-500 hover:text-emerald-600 transition-colors"
-                        aria-label="Phone"
-                      >
-                        <Phone size={18} />
-                      </a>
-                    )}
-                    <a
-                      href="https://linkedin.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-10 w-10 items-center justify-center rounded-full text-white bg-emerald-500 hover:opacity-90 transition-opacity"
-                      aria-label="LinkedIn"
-                    >
-                      <Linkedin size={18} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="order-1 lg:order-2 relative flex justify-center lg:justify-end">
-                <div className="relative">
-                  <div
-                    className="absolute -top-4 -left-4 w-14 h-16 border-l-2 border-t-2 border-black rounded-tl-lg"
-                    aria-hidden
-                  />
-                  <div className="relative w-56 h-72 sm:w-64 sm:h-80 rounded-lg border-2 border-black bg-neutral-100 flex items-center justify-center overflow-hidden">
-                    <span className="text-6xl sm:text-7xl font-bold text-neutral-400 select-none">
-                      {initials}
-                    </span>
-                  </div>
-                  <div className="absolute -bottom-8 -right-8 w-40 h-40 sm:w-52 sm:h-52 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] bg-emerald-500 opacity-90 -z-10" />
-                  <div className="absolute left-1/2 bottom-0 -translate-x-1/2 -translate-y-12 flex flex-col items-center gap-2 lg:left-0 lg:top-1/2 lg:bottom-auto lg:-translate-x-16 lg:-translate-y-1/2">
-                    <div className="w-12 h-12 rounded-full border-2 border-neutral-300 flex items-center justify-center">
-                      <span className="text-neutral-400 text-xs font-medium">↓</span>
-                    </div>
-                    <p className="text-xs text-neutral-500 text-center max-w-[80px]">explore about me</p>
-                    <p className="text-xs text-neutral-500">scroll down</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <AppFooter />
-        </div>
+          <Portfolio1StaticLayout data={displayData} />
         )}
       </PortfolioHTMLDownload>
-
-      <style>{`
-        @media print {
-          body { background: #fff !important; }
-          .print\\:hidden { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }

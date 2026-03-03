@@ -2,7 +2,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FileText, LayoutTemplate, ChevronRight, ArrowLeft, Layers, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -42,16 +41,10 @@ export default function TemplateDesignModeSelect() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {size.width >= 768 ? (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <Particles particleColors={["#ffffff"]} particleCount={200} particleSpread={10} speed={0.1} particleBaseSize={100} moveParticlesOnHover alphaParticles={false} disableRotation={false} pixelRatio={1} />
-        </div>
-      )}
-      <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
+      <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+        <Particles particleColors={["#ffffff"]} particleCount={200} particleSpread={10} speed={0.1} particleBaseSize={100} moveParticlesOnHover alphaParticles={false} disableRotation={false} pixelRatio={1} />
+      </div>
+      <div className="absolute inset-0 z-1 bg-black/30" />
       <div className="relative z-10">
         <Topbar />
         <main className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-10 sm:py-14 md:py-20 min-h-[60vh] flex flex-col items-center justify-center">
@@ -65,7 +58,7 @@ export default function TemplateDesignModeSelect() {
               Choose template type
             </h1>
             <p className="mt-3 max-w-sm mx-auto text-sm text-zinc-400">
-              Use this design as a resume or portfolio. Both use your saved details.
+              Use this design as a resume or project. Both use your saved details.
             </p>
           </header>
 
@@ -95,12 +88,12 @@ export default function TemplateDesignModeSelect() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
                   <LayoutTemplate className="h-5 w-5" />
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
+                <h2 className="text-base sm:text-lg font-bold text-white">Project template</h2>
                 <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
-                  Use this design for your portfolio. Pick a layout and view or download.
+                  Use this design for your project. Pick a layout and view or download.
                 </p>
                 <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                  Open portfolio design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  Open project design <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </button>
             ) : (
@@ -114,9 +107,9 @@ export default function TemplateDesignModeSelect() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mb-3">
                   <LayoutTemplate className="h-5 w-5" />
                 </div>
-                <h2 className="text-base sm:text-lg font-bold text-white">Portfolio template</h2>
+                <h2 className="text-base sm:text-lg font-bold text-white">Project template</h2>
                 <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 leading-snug">
-                  Use this design for your portfolio. Pick a layout and view or download.
+                  Use this design for your project. Pick a layout and view or download.
                 </p>
                 <span className="mt-4 inline-flex items-center gap-1 text-xs sm:text-sm font-medium text-amber-400">
                   <Lock className="h-3.5 w-3.5" /> Upgrade to unlock

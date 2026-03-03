@@ -1,11 +1,12 @@
 import { Download } from "lucide-react";
 import { useRef } from "react";
 
-export default function PortfolioHTMLDownload({ children, showDownloadHeader = true }) {
-  const portfolioRef = useRef();
+export default function PortfolioHTMLDownload({ children, showDownloadHeader = true, portfolioRef: externalRef }) {
+  const internalRef = useRef();
+  const portfolioRef = externalRef != null ? externalRef : internalRef;
 
   const handleDownloadHTML = () => {
-    const content = portfolioRef.current.innerHTML;
+    const content = portfolioRef.current?.innerHTML;
 
     const fullHTML = `
 <!DOCTYPE html>
@@ -13,7 +14,7 @@ export default function PortfolioHTMLDownload({ children, showDownloadHeader = t
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio</title>
+  <title>Portfolio Website</title>
 
   <!-- Tailwind CDN for styling -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -43,12 +44,11 @@ export default function PortfolioHTMLDownload({ children, showDownloadHeader = t
     a.href = url;
     a.download = "portfolio.html";
     a.click();
-
     URL.revokeObjectURL(url);
   };
 
   if (!showDownloadHeader) {
-    return <div ref={portfolioRef}>{children}</div>;
+    return <div ref={portfolioRef} className="portfolio-content">{children}</div>;
   }
 
   return (

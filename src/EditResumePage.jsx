@@ -5,7 +5,6 @@ import { Sparkles, Save, Loader2, FileText, ChevronRight, ArrowLeft } from "luci
 import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
 import { setEditedResumeText } from "./slice/Resume.slice";
-import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -248,16 +247,10 @@ export default function EditResumePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {size.width >= 768 ? (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <Particles particleColors={["#ffffff"]} particleCount={200} particleSpread={10} speed={0.1} particleBaseSize={100} moveParticlesOnHover alphaParticles={false} disableRotation={false} pixelRatio={1} />
-        </div>
-      )}
-      <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
+      <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+        <Particles particleColors={["#ffffff"]} particleCount={200} particleSpread={10} speed={0.1} particleBaseSize={100} moveParticlesOnHover alphaParticles={false} disableRotation={false} pixelRatio={1} />
+      </div>
+      <div className="absolute inset-0 z-1 bg-black/30" />
       <div className="relative z-10 flex flex-col min-h-screen">
         <Topbar />
         <main className="flex-1 py-8 px-4 sm:px-6">
@@ -272,7 +265,7 @@ export default function EditResumePage() {
                 Edit your resume
               </h1>
               <p className="mt-2 text-sm text-zinc-400 max-w-lg mx-auto">
-                Edit the extracted text below, improve it with AI, and save. This text will be used for your resume and portfolio.
+                Edit the extracted text below, improve it with AI, and save. This text will be used for your resume and project.
               </p>
             </header>
 
@@ -327,7 +320,7 @@ export default function EditResumePage() {
                 to="/templates/portfoliodesign"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/25 bg-white/5 px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-white hover:bg-white/10"
               >
-                Choose portfolio design <ChevronRight className="h-4 w-4" />
+                Choose project design <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
 

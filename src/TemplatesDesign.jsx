@@ -2,8 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { Sparkles, Check, Eye, LayoutGrid, ArrowLeft, Layers, Lock } from "lucide-react";
-import LightPillar from "./LiquidEther.jsx";
+import { Sparkles, Eye, LayoutGrid, ArrowLeft, Layers, Lock } from "lucide-react";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -66,21 +65,14 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
         <div className="px-3 py-2.5 border-t border-white/10 bg-white/5 flex flex-col justify-center">
           <p className="text-white font-semibold text-xs truncate">{name}</p>
           <p className="text-zinc-500 text-[11px] mt-0.5 flex items-center gap-1">
-            <LayoutGrid className="h-2.5 w-2.5" /> Portfolio template
+            <LayoutGrid className="h-2.5 w-2.5" /> Project template
           </p>
         </div>
       </div>
-      <div className="px-2.5 py-2 border-t border-white/10 bg-white/5 flex gap-1.5">
-        <button
-          type="button"
-          onClick={() => onSelect?.(_id)}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-2 text-xs font-medium text-white hover:bg-emerald-500 active:scale-[0.98] transition-all"
-        >
-          <Check className="h-3.5 w-3.5" /> Use this template
-        </button>
+      <div className="px-2.5 py-2 border-t border-white/10 bg-white/5">
         <Link
           to={`/templates/portfoliodesign/${_id}`}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-emerald-400/50 hover:bg-white/5 transition-all"
+          className="flex w-full items-center justify-center gap-1 rounded-lg border border-white/25 px-2.5 py-2 text-xs font-medium text-zinc-300 hover:text-white hover:border-emerald-400/50 hover:bg-white/5 transition-all"
         >
           <Eye className="h-3.5 w-3.5" /> View full
         </Link>
@@ -134,8 +126,7 @@ export default function TemplatesDesignPage() {
     navigate("/upload");
   };
   const handleSelectApiTemplate = (templateId) => {
-    localStorage.setItem("selectedDesignTemplate", templateId);
-    navigate("/upload");
+    navigate(`/templates/portfoliodesign/${templateId}`);
   };
 
   if (!isPremium) {
@@ -149,9 +140,9 @@ export default function TemplatesDesignPage() {
               <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
                 <Lock className="h-7 w-7 text-amber-400" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Portfolio designs are premium</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Project designs are premium</h1>
               <p className="text-zinc-400 text-sm sm:text-base mb-6">
-                Upgrade to access portfolio templates and all premium features.
+                Upgrade to access project templates and all premium features.
               </p>
               <Link
                 to="/price"
@@ -172,25 +163,19 @@ export default function TemplatesDesignPage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {size.width >= 768 ? (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <Particles
-            particleColors={["#ffffff"]}
-            particleCount={200}
-            particleSpread={10}
-            speed={0.1}
-            particleBaseSize={100}
-            moveParticlesOnHover
-            alphaParticles={false}
-            disableRotation={false}
-            pixelRatio={1}
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+        <Particles
+          particleColors={["#ffffff"]}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={1}
+        />
+      </div>
 
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
@@ -206,7 +191,7 @@ export default function TemplatesDesignPage() {
               Choose a design
             </h1>
             <p className="mt-4 max-w-lg text-base sm:text-lg text-zinc-400 leading-relaxed">
-              Pick a layout for your portfolio. Each design uses your saved details—add them first if you haven’t.
+              Pick a layout for your project. Each design uses your saved details—add them first if you haven’t.
             </p>
           </header>
 
@@ -229,7 +214,7 @@ export default function TemplatesDesignPage() {
                 <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-4">
                   <Layers className="h-7 w-7 text-zinc-500" />
                 </div>
-                <p className="text-zinc-400 text-sm sm:text-base">No portfolio templates available yet.</p>
+                <p className="text-zinc-400 text-sm sm:text-base">No project templates available yet.</p>
                 <p className="text-zinc-500 text-sm mt-1">Check back later or try another category.</p>
               </div>
             )}

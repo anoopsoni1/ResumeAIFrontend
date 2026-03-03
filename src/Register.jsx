@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaFileMedical, FaUserPlus, FaEye, FaEyeSlash } from "react-icons/fa";
-import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
-import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import { useToast } from "./context/ToastContext";
@@ -92,27 +90,21 @@ export default function Register() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
-      {!isMobile ? (
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <LightPillar topColor="#5227FF" bottomColor="#FF9FFC" intensity={1} rotationSpeed={0.3} glowAmount={0.002} pillarWidth={3} pillarHeight={0.4} noiseIntensity={0.5} pillarRotation={25} interactive={false} mixBlendMode="screen" quality="high" />
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
-          <Particles
-            particleColors={["#ffffff"]}
-            particleCount={200}
-            particleSpread={10}
-            speed={0.1}
-            particleBaseSize={100}
-            moveParticlesOnHover
-            alphaParticles={false}
-            disableRotation={false}
-            pixelRatio={1}
-          />
-        </div>
-      )}
+      <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+        <Particles
+          particleColors={["#ffffff"]}
+          particleCount={200}
+          particleSpread={10}
+          speed={0.1}
+          particleBaseSize={100}
+          moveParticlesOnHover
+          alphaParticles={false}
+          disableRotation={false}
+          pixelRatio={1}
+        />
+      </div>
 
-      <div className={`absolute inset-0 z-1 ${isMobile ? "bg-black/30" : "bg-black/40"}`} />
+      <div className="absolute inset-0 z-1 bg-black/30" />
 
       <div className="relative z-10 flex flex-col min-h-screen">
         <AppHeader />

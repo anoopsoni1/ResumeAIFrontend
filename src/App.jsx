@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import LiquidEther from "./LiquidEther";
 import TextType from './TextType';
 import FloatingLines from './Lighting.jsx';
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import InstallPrompt from "./Install.jsx";
-import LightPillar from "./LiquidEther.jsx";
 import PrismaticBurst from "./Lighting.jsx";
 import Particles from "./Lighting.jsx";
 
@@ -26,7 +24,7 @@ function Hero() {
           className="w-full max-w-4xl mx-auto"
         >
           <TextType
-            text={["Land your dream job with AI-powered resumes", "ATS Optimized Resumes", "Create Stunning Portfolios in Minutes"]}
+            text={["Land your dream job with AI-powered resumes", "ATS Optimized Resumes", "Create Stunning Projects in Minutes"]}
             typingSpeed={85}
             pauseDuration={1500}
             showCursor
@@ -54,7 +52,7 @@ function Hero() {
             className="mt-6 max-w-2xl text-white text-lg mx-auto"
           >
             Optimize your resume with AI suggestions, beat ATS filters,
-            and build stunning portfolios in minutes.
+            and build stunning projects in minutes.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -101,42 +99,20 @@ useEffect(() => {
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
   
-{size.width>= 768 ? (<>
-  <div className="absolute inset-0 z-0 pointer-events-none">
-  <LightPillar
-    topColor="#5227FF"
-    bottomColor="#FF9FFC"
-    intensity={1}
-    rotationSpeed={0.3}
-    glowAmount={0.002}
-    pillarWidth={3}
-    pillarHeight={0.4}
-    noiseIntensity={0.5}
-    pillarRotation={25}
-    interactive={false}
-    mixBlendMode="screen"
-    quality="high"
-/>
-      </div>
-</>
-) : (
-
-  <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full  mix-blend-screen">
-
-<Particles
-    particleColors={["#ffffff"]}
-    particleCount={200}
-    particleSpread={10}
-    speed={0.1}
-    particleBaseSize={100}
-    moveParticlesOnHover
-    alphaParticles={false}
-    disableRotation={false}
-    pixelRatio={1}
-/>
+  <div className="absolute inset-0 z-0 pointer-events-none min-h-screen w-full mix-blend-screen">
+    <Particles
+      particleColors={["#ffffff"]}
+      particleCount={200}
+      particleSpread={10}
+      speed={0.1}
+      particleBaseSize={100}
+      moveParticlesOnHover
+      alphaParticles={false}
+      disableRotation={false}
+      pixelRatio={1}
+    />
   </div>
-)}
-      <div className={`absolute inset-0 z-1 ${size.width >= 768 ? 'bg-black/40' : 'bg-black/30'}`} />
+      <div className="absolute inset-0 z-1 bg-black/30" />
       <div className="relative z-10">
         <Navbar />
         <Hero />

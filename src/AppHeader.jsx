@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Link, NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaFileMedical } from "react-icons/fa";
@@ -105,6 +106,19 @@ export default function AppHeader({ onLogout }) {
     };
   }, []);
 
+  // Lock body scroll when mobile menu is open (small screens only)
+  useEffect(() => {
+    if (size.width >= 768) return;
+    if (open && !closing) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open, closing, size.width]);
+
   const closeMenu = () => {
     if (!open) return;
     setClosing(true);
@@ -172,87 +186,108 @@ export default function AppHeader({ onLogout }) {
 
         {size.width < 768 ? (
           <>
-            {(open || closing) && (
-              <div
-                className={`absolute right-0 top-0 w-full max-w-sm bg-black/95 backdrop-blur-xl rounded-2xl shadow-2xl z-10 border border-white/10 overflow-hidden transition-all duration-300 ease-out ${
-                  closing
-                    ? "translate-x-full opacity-0 scale-95"
-                    : "translate-x-0 opacity-100 scale-100"
-                }`}
-                style={{ transitionDuration: "300ms" }}
-              >
-                <ul className="py-2 text-white">
-                  <li className="flex items-center gap-3 px-4 py-3 justify-between border-b border-white/10">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-indigo-600 h-9 w-9 rounded-full flex items-center justify-center text-white">
-                        <FaFileMedical />
-                      </div>
-                      <span className="text-lg font-semibold">RESUME AI</span>
-                    </div>
-                    <button onClick={closeMenu} className="p-1 rounded-lg hover:bg-white/10 hover:scale-110 active:scale-95 transition-all duration-200" aria-label="Close menu">
-                      <RxCross2 color="red" size={28} />
-                    </button>
-                  </li>
-                  {MENU_ITEMS.map((item, index) => (
-                    <li
-                      key={item.to}
-                      className={`group transition-all duration-300 ease-out ${
-                        closing ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0"
-                      }`}
-                      style={{
-                        transitionDelay: closing ? "0ms" : `${40 + index * 35}ms`,
-                        transitionProperty: "opacity, transform",
-                      }}
-                    >
-                      <Link
-                        to={item.to}
-                        className="group flex items-center gap-3 px-4 py-3 hover:bg-white/10 hover:pl-5 active:bg-white/15 transition-all duration-200 border-l-2 border-transparent hover:border-indigo-500/50"
-                        onClick={closeMenu}
-                      >
-                        <item.icon size={20} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                  <li
-                    className={`transition-all duration-300 ease-out ${
-                      closing ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0"
+            {/* Portal overlay to body so fixed inset-0 covers viewport (header's backdrop-blur would otherwise trap it) */}
+            {(open || closing) &&
+              createPortal(
+                <div
+                  className="fixed inset-0 z-9999 md:hidden"
+                  aria-hidden
+                >
+                  <div
+                    className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+                      closing ? "opacity-0" : "opacity-100"
                     }`}
-                    style={{
-                      transitionDelay: closing ? "0ms" : `${40 + MENU_ITEMS.length * 35}ms`,
-                      transitionProperty: "opacity, transform",
-                    }}
+                    onClick={closeMenu}
+                  />
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-[min(300px,85vw)] max-w-full bg-black/98 backdrop-blur-xl border-r border-white/10 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+                      closing ? "-translate-x-full" : "translate-x-0"
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Navigation menu"
                   >
-                    {isLoggedIn ? (
-                      <button
-                        type="button"
-                        onClick={() => { logout(); closeMenu(); }}
-                        className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-white/10 w-full text-left transition-colors"
+                    <ul className="py-2 text-white flex-1 overflow-y-auto">
+                      <li className="flex items-center gap-3 px-4 py-3 justify-between border-b border-white/10 shrink-0">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="bg-indigo-600 h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0">
+                            <FaFileMedical />
+                          </div>
+                          <span className="text-lg font-semibold truncate">RESUME AI</span>
+                        </div>
+                        <button
+                          onClick={closeMenu}
+                          className="p-2 rounded-lg hover:bg-white/10 active:scale-95 transition-all duration-200 shrink-0"
+                          aria-label="Close menu"
+                        >
+                          <RxCross2 className="text-red-400 w-6 h-6" />
+                        </button>
+                      </li>
+                      {MENU_ITEMS.map((item, index) => (
+                        <li
+                          key={item.to}
+                          className={`group transition-all duration-300 ease-out ${
+                            closing ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0"
+                          }`}
+                          style={{
+                            transitionDelay: closing ? "0ms" : `${40 + index * 35}ms`,
+                            transitionProperty: "opacity, transform",
+                          }}
+                        >
+                          <Link
+                            to={item.to}
+                            className="group flex items-center gap-3 px-4 py-3.5 hover:bg-white/10 active:bg-white/15 transition-all duration-200 border-l-2 border-transparent hover:border-indigo-500/50"
+                            onClick={closeMenu}
+                          >
+                            <item.icon size={20} className="shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                      <li
+                        className={`mt-auto transition-all duration-300 ease-out ${
+                          closing ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0"
+                        }`}
+                        style={{
+                          transitionDelay: closing ? "0ms" : `${40 + MENU_ITEMS.length * 35}ms`,
+                          transitionProperty: "opacity, transform",
+                        }}
                       >
-                        <FaSignInAlt /> Logout
-                      </button>
-                    ) : (
-                      <Link
-                        to="/login"
-                        className="flex items-center gap-3 px-4 py-3 text-indigo-400 hover:text-indigo-300 hover:bg-white/10 transition-colors"
-                        onClick={closeMenu}
-                      >
-                        <FaSignInAlt /> Login
-                      </Link>
-                    )}
-                  </li>
-                </ul>
-              </div>
-            )}
+                        {isLoggedIn ? (
+                          <button
+                            type="button"
+                            onClick={() => { logout(); closeMenu(); }}
+                            className="flex items-center gap-3 px-4 py-3.5 text-red-400 hover:text-red-300 hover:bg-white/10 w-full text-left transition-colors"
+                          >
+                            <FaSignInAlt size={20} className="shrink-0" /> Logout
+                          </button>
+                        ) : (
+                          <Link
+                            to="/login"
+                            className="flex items-center gap-3 px-4 py-3.5 text-indigo-400 hover:text-indigo-300 hover:bg-white/10 transition-colors"
+                            onClick={closeMenu}
+                          >
+                            <FaSignInAlt size={20} className="shrink-0" /> Login
+                          </Link>
+                        )}
+                      </li>
+                    </ul>
+                  </div>
+                </div>,
+                document.body
+              )}
+            {/* When menu is open, hide hamburger so only drawer's X is visible; avoids two buttons in one bar */}
             <motion.button
               type="button"
-              className={`flex gap-3 text-zinc-200 p-1 rounded-lg hover:bg-white/5 ${open ? "rotate-90 scale-90 opacity-80" : ""}`}
+              className={`flex items-center justify-center text-zinc-200 p-2 rounded-lg hover:bg-white/5 active:bg-white/10 min-w-[44px] min-h-[44px] transition-opacity duration-200 ${open && !closing ? "opacity-0 pointer-events-none" : ""}`}
               onClick={() => (open ? closeMenu() : openMenu())}
               aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
               whileTap={{ scale: 0.92 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
-              <IoReorderThreeOutline size={40} />
+              <IoReorderThreeOutline size={28} />
             </motion.button>
           </>
         ) : (

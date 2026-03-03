@@ -33,6 +33,14 @@
   }
 }
 
+@keyframes loadingBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
 
 .animate-fadeIn {
   animation: fadeIn 2s ease-out;
@@ -47,6 +55,9 @@
   animation: scaleIn 0.3s ease-out;
 }
 
+.animate-loadingBar {
+  animation: loadingBar 1.5s ease-in-out infinite;
+}
 
 .font-orbitron {
   font-family: "Orbitron", sans-serif;
