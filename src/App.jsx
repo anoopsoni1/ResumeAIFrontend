@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate ,Link } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { clearUser } from "./slice/user.slice";
-import axios from "axios";
 import LiquidEther from "./LiquidEther";
 import TextType from './TextType';
 import FloatingLines from './Lighting.jsx';
@@ -15,24 +12,7 @@ import PrismaticBurst from "./Lighting.jsx";
 import Particles from "./Lighting.jsx";
 
 function Navbar() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
-  return <AppHeader onLogout={handleLogout} />;
+  return <AppHeader />;
 }
 
 function Hero() {

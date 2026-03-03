@@ -14,8 +14,8 @@ import { parseResume } from "./utils/parseResume.js";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user" ;
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 export default function EditResumePage() {
@@ -238,16 +238,6 @@ export default function EditResumePage() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API_BASE.replace("/api/v1/user", "")}/api/v1/user/logout`, {}, { withCredentials: true });
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   if (authChecking) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -269,7 +259,7 @@ export default function EditResumePage() {
       )}
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
         <main className="flex-1 py-8 px-4 sm:px-6">
           <div className="mx-auto max-w-4xl">
             <header className="mb-6 text-center">

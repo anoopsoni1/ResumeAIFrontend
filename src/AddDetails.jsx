@@ -299,20 +299,6 @@ export default function AddDetails() {
     navigate("/templates/design");
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${API_BASE}/api/v1/user/logout`,
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex flex-col">
@@ -327,7 +313,7 @@ export default function AddDetails() {
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      <AppHeader  onLogout={handleLogout} />
+      <AppHeader />
 
       <main className="flex-1 py-6 sm:py-8 px-4 sm:px-6  mx-auto w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">

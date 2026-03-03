@@ -9,7 +9,6 @@ import LiquidEther from './LiquidEther';
 import Particles from './Lighting.jsx';
 import LightPillar from './LiquidEther.jsx';
 import { LuDollarSign } from "react-icons/lu";
-import axios from "axios";
 import { clearUser } from "./slice/user.slice";
 import { parseResume } from "./utils/parseResume.js";
 import { detailLikeToForm } from "./utils/detailApi.js";
@@ -139,20 +138,6 @@ function Payal() {
     setLoading(false);
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
   useEffect(() => {
     const handleResize = () => {
       setSize({
@@ -195,7 +180,7 @@ function Payal() {
 
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? 'bg-black/40' : 'bg-black/30'}`} />
       <div className="relative z-10">
-        <AppHeader onLogout={handleLogout} />
+        <AppHeader />
       <div className="relative z-10">
       <div className="min-h-[90vh]  flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="flex items-center justify-center gap-4 w-full mb-8 sm:mb-12">

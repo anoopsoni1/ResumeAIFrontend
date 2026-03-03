@@ -1,8 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import axios from "axios";
-import { clearUser } from "./slice/user.slice";
 import { Sparkles, Check, Eye, LayoutGrid, ArrowLeft, Layers, Lock } from "lucide-react";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
@@ -12,8 +11,8 @@ import { useState, useEffect } from "react";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 function CardSkeleton() {
@@ -92,7 +91,6 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
 
 export default function TemplatesDesignPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userData);
   const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
@@ -131,20 +129,6 @@ export default function TemplatesDesignPage() {
     fetchPortfolioImages();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${API_BASE}/logout`,
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
   const handleSelectDesign = (designId) => {
     localStorage.setItem("selectedDesignTemplate", designId);
     navigate("/upload");
@@ -159,13 +143,7 @@ export default function TemplatesDesignPage() {
       <div className="relative min-h-screen overflow-hidden bg-black">
         <div className="absolute inset-0 z-0 bg-black/40" />
         <div className="relative z-10 min-h-screen flex flex-col">
-          <Topbar onLogout={async () => {
-            try {
-              await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
-              dispatch(clearUser());
-              navigate("/login");
-            } catch (e) { console.error(e); }
-          }} />
+          <Topbar />
           <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
             <div className="rounded-2xl border border-amber-500/30 bg-zinc-900/80 backdrop-blur-sm p-8 sm:p-10 max-w-md text-center">
               <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
@@ -216,7 +194,7 @@ export default function TemplatesDesignPage() {
 
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
 
         <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 md:py-20 min-h-[60vh]">
           <header className="mb-10 sm:mb-14 flex flex-col items-center text-center">

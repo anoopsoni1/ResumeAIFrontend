@@ -14,6 +14,7 @@ import { FaUser } from "react-icons/fa";
 import { FileText } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser, clearUser } from "./slice/user.slice";
+import { useLogout } from "./utils/authUtils";
 
 const MENU_ITEMS = [
   { to: "/", label: "Home", icon: FaHome },
@@ -38,6 +39,7 @@ const MENU_ANIM_DURATION_MS = 300;
 
 export default function AppHeader({ onLogout }) {
   const dispatch = useDispatch();
+  const logout = useLogout(); // Global logout: clears backend session, localStorage, Redux, redirects to /login
   const user = useSelector((state) => state.user.userData);
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -221,10 +223,10 @@ export default function AppHeader({ onLogout }) {
                       transitionProperty: "opacity, transform",
                     }}
                   >
-                    {isLoggedIn && typeof onLogout === "function" ? (
+                    {isLoggedIn ? (
                       <button
                         type="button"
-                        onClick={() => { onLogout(); closeMenu(); }}
+                        onClick={() => { logout(); closeMenu(); }}
                         className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-white/10 w-full text-left transition-colors"
                       >
                         <FaSignInAlt /> Logout
@@ -255,10 +257,10 @@ export default function AppHeader({ onLogout }) {
           </>
         ) : (
           <>
-            {isLoggedIn && typeof onLogout === "function" ? (
+            {isLoggedIn ? (
               <motion.button
                 type="button"
-                onClick={onLogout}
+                onClick={logout}
                 className="text-red-400 hover:text-red-300 font-medium px-3 py-1.5 rounded-lg hover:bg-red-500/10"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}

@@ -1,13 +1,12 @@
 import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, FileText, Printer, Download, Phone, Mail, MapPin, Linkedin, Award, Globe, User, GraduationCap, Briefcase, FolderOpen, ListChecks } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { getResumeContentForView } from "./utils/detailApi.js";
-import { clearUser } from "./slice/user.slice";
 import Resume2Layout from "./Resume2Layout";
+import Resume7Layout from "./Resume7Layout";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
@@ -36,8 +35,8 @@ const DOCUMENT_CLASS =
 const ONE_PAGE_WRAPPER_CLASS =
   "resume-one-page w-full max-h-[11in] min-h-[11in] print:max-h-[11in] print:min-h-0 print:h-[11in] overflow-hidden relative flex flex-col";
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 function parseExperienceEntry(entry) {
@@ -324,8 +323,6 @@ function Resume1Layout({ data }) {
 
 export default function ResumeDesignView() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [template, setTemplate] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -343,16 +340,6 @@ export default function ResumeDesignView() {
     const scale = Math.min(1, wrapperHeight / contentHeight);
     setFitScale(scale);
   }, [template, data, loading, detailLoading]);
-
-  const handleLogout = useCallback(async () => {
-    try {
-      await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (!id) {
@@ -396,7 +383,7 @@ export default function ResumeDesignView() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
         <main className="flex-1 flex items-center justify-center px-4">
           <p className="text-zinc-400">Loadingâ€¦</p>
         </main>
@@ -408,7 +395,7 @@ export default function ResumeDesignView() {
   if (error || !template) {
     return (
       <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
         <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
           <p className="text-amber-400">{error || "Template not found"}</p>
           <Link
@@ -500,6 +487,8 @@ export default function ResumeDesignView() {
           >
             {template?.name && (template.name.includes("1") || template.name.toLowerCase().includes("classic")) ? (
               <Resume1Layout data={displayData} />
+            ) : template?.name && template.name.includes("7") ? (
+              <Resume7Layout data={displayData} />
             ) : (
               <Resume2Layout data={displayData} />
             )}

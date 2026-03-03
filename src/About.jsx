@@ -15,29 +15,7 @@ import AppFooter from "./AppFooter";
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 function Topbar() {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      await axios.post(
-        `${API_BASE}/api/v1/user/logout`,
-        {},
-        {
-          withCredentials: true,
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        }
-      );
-      localStorage.removeItem("accessToken");
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
-  return <AppHeader onLogout={handleLogout} />;
+  return <AppHeader />;
 }
 
 export default function About() {

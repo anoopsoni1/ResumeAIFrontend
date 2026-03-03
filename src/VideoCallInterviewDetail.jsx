@@ -101,17 +101,6 @@ function VideoCallInterviewDetail() {
     return () => ctx.revert();
   }, [interview?._id, interview?.status]);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API_BASE}/api/v1/user/logout`, {}, { withCredentials: true, headers: getHeaders() });
-      localStorage.removeItem("accessToken");
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const formatDate = (d) => {
     if (!d) return "—";
     return new Date(d).toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" });
@@ -189,7 +178,7 @@ function VideoCallInterviewDetail() {
         </div>
       )}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <AppHeader onLogout={handleLogout} />
+        <AppHeader />
         <main className="flex-1 py-8 px-4">
           <div ref={mainRef} className="max-w-7xl mx-auto">
             <Link

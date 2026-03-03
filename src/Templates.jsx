@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { clearUser } from "./slice/user.slice";
 import { FileText, Layout, Lock, Sparkles } from "lucide-react";
 import LiquidEther from "./LiquidEther";
 import FloatingLines from "./Lighting";
@@ -43,8 +41,8 @@ const TEMPLATES = [
   },
 ];
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 const cardVariants = {
@@ -125,7 +123,6 @@ function TemplateCard({ template, onSelect, isLocked, index = 0 }) {
 
 export default function TemplatesPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userData);
   const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
@@ -138,20 +135,6 @@ export default function TemplatesPage() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
 
   const handleSelectTemplate = (templateId) => {
     navigate("/templates/design", { state: { templateId } });
@@ -181,7 +164,7 @@ export default function TemplatesPage() {
 
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
 
         <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 min-h-[60vh]">
           <motion.div

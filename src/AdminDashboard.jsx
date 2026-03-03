@@ -81,25 +81,6 @@ function AdminDashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      await axios.post(
-        `${API_BASE}/api/v1/user/logout`,
-        {},
-        {
-          withCredentials: true,
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        }
-      );
-      localStorage.removeItem("accessToken");
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
-
   useEffect(() => {
     if (!userData) {
       navigate("/login");
@@ -161,7 +142,7 @@ function AdminDashboard() {
       )}
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10 flex flex-col min-h-screen text-white">
-        <AppHeader onLogout={handleLogout} />
+        <AppHeader />
         <main className="flex-1 container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-white">Admin Dashboard</h1>
@@ -364,7 +345,7 @@ function AdminDashboard() {
         )}
         <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
         <div className="relative z-10 flex flex-col min-h-screen text-white">
-          <AppHeader onLogout={handleLogout} />
+          <AppHeader />
           <main className="flex-1 flex items-center justify-center px-4">
             <div className="text-center">
               <h1 className="text-2xl font-bold text-amber-500">Access Denied</h1>

@@ -1,9 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FileText, LayoutTemplate, ChevronRight, ArrowLeft, Layers, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import axios from "axios";
-import { clearUser } from "./slice/user.slice";
+import { useSelector } from "react-redux";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
@@ -11,14 +9,13 @@ import AppFooter from "./AppFooter";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 export default function TemplateDesignModeSelect() {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userData);
   const isPremium = !!user?.Premium;
   const templateId = location.state?.templateId || null;
@@ -33,16 +30,6 @@ export default function TemplateDesignModeSelect() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
 
   const handleResume = () => {
     navigate("/templates/resumedesign", { state: { templateId } });
@@ -66,7 +53,7 @@ export default function TemplateDesignModeSelect() {
       )}
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
         <main className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-10 sm:py-14 md:py-20 min-h-[60vh] flex flex-col items-center justify-center">
           <header className="mb-8 sm:mb-10 text-center">
             <div className="mb-4 flex justify-center">

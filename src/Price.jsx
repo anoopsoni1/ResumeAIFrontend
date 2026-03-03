@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
-import { clearUser } from "./slice/user.slice";
-import axios from "axios";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import LiquidEther from "./LiquidEther";
 import LightPillar from "./LiquidEther.jsx";
 import FloatingLines from "./Lighting";
@@ -50,22 +48,6 @@ function PricingSection() {
       height: window.innerHeight,
     });
     const [open, setOpen] = useState(false);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout",
-        {},
-        { withCredentials: true }
-      );
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };  
     useEffect(() => {
       const handleResize = () => {
         setSize({
@@ -104,7 +86,7 @@ function PricingSection() {
      )}
 
       <div className="relative  min-h-screen bg-black/70">
-        <AppHeader onLogout={handleLogout} />
+        <AppHeader />
 
         <section className="py-16 md:py-20  relative z-20">
           <div className="mx-auto max-w-6xl px-4 text-center">

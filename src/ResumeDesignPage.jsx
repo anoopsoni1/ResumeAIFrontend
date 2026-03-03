@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FileText, Eye, LayoutGrid, ArrowLeft, Layers, GitCompare, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
-import { clearUser } from "./slice/user.slice";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
@@ -11,8 +10,8 @@ import AppFooter from "./AppFooter";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
-function Topbar({ onLogout }) {
-  return <AppHeader onLogout={onLogout} />;
+function Topbar() {
+  return <AppHeader />;
 }
 
 function CardSkeleton() {
@@ -93,7 +92,6 @@ function ApiTemplatePreview({ template, onSelect, isLocked }) {
 
 export default function ResumeDesignPage() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const user = useSelector((state) => state.user.userData);
   const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
@@ -133,16 +131,6 @@ export default function ResumeDesignPage() {
     fetchResumeTemplates();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(`${API_BASE}/logout`, {}, { withCredentials: true });
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
-
   const handleUseResume = (selectedId) => {
     if (selectedId) {
       localStorage.setItem("selectedTemplate", selectedId);
@@ -167,7 +155,7 @@ export default function ResumeDesignPage() {
       )}
       <div className={`absolute inset-0 z-1 ${size.width >= 768 ? "bg-black/40" : "bg-black/30"}`} />
       <div className="relative z-10">
-        <Topbar onLogout={handleLogout} />
+        <Topbar />
         <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10 sm:py-14 md:py-20 min-h-[60vh]">
           <header className="mb-10 sm:mb-14 flex flex-col items-center text-center">
             <div className="mb-4 flex items-center gap-2 rounded-full bg-indigo-500/15 border border-indigo-400/20 px-4 py-2 text-indigo-300">

@@ -37,21 +37,6 @@ function Profile() {
     return { ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) };
   };
 
-  const handleLogout = async () => {
-    try {
-      await axios.post(
-        `${API_BASE}/api/v1/user/logout`,
-        {},
-        { withCredentials: true, headers: getAuthHeaders() }
-      );
-      localStorage.removeItem("accessToken");
-      dispatch(clearUser());
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
-
   // Auth: fetch profile and redirect if not logged in
   useEffect(() => {
     let cancelled = false;
@@ -160,7 +145,7 @@ function Profile() {
     <div className="relative min-h-screen overflow-hidden bg-black">
       {backgroundLayout}
       <div className="relative z-10 flex flex-col min-h-screen text-white">
-        <AppHeader onLogout={handleLogout} />
+        <AppHeader />
         <main className="flex-1 py-6 sm:py-8 px-4">
           <div className="mx-auto max-w-2xl">
             <Link
