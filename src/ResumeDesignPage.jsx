@@ -119,7 +119,7 @@ export default function ResumeDesignPage() {
         const { data } = await axios.get(`${API_BASE}/templates`, { params: { type: "resume" } });
         if (data?.success && Array.isArray(data?.data)) {
           const resumes = data.data.filter((t) => t.type !== "portfolio");
-          setResumeTemplates(resumes.slice(0, 1));
+          setResumeTemplates(resumes);
         } else {
           setResumeTemplates([]);
         }
@@ -144,8 +144,10 @@ export default function ResumeDesignPage() {
   };
 
   const handleUseResume = (selectedId) => {
-    if (selectedId) localStorage.setItem("selectedTemplate", selectedId);
-    navigate("/upload");
+    if (selectedId) {
+      localStorage.setItem("selectedTemplate", selectedId);
+      navigate(`/templates/resumedesign/${selectedId}`);
+    }
   };
 
   const handleSelectApiTemplate = (templateId) => {

@@ -1,12 +1,13 @@
-﻿import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
+import { useEffect, useState, useCallback, useRef, useLayoutEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
-import { ArrowLeft, FileText, Printer, Download, Phone, Mail, MapPin, Linkedin, Award, Globe } from "lucide-react";
+import { ArrowLeft, FileText, Printer, Download, Phone, Mail, MapPin, Linkedin, Award, Globe, User, GraduationCap, Briefcase, FolderOpen, ListChecks } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { getResumeContentForView } from "./utils/detailApi.js";
 import { clearUser } from "./slice/user.slice";
+import Resume2Layout from "./Resume2Layout";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
 
@@ -171,147 +172,155 @@ function SkillsBlock({ skills, variant = "list", theme = "zinc" }) {
 
 const RESUME2_SECTION_HEAD = "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-black pb-1 mb-2 border-b-2 border-orange-500";
 
-function Resume2Layout({ data }) {
+/** Resume 1: two-column classic (blue left with photo/contact/about/skills, white right with purple accent, education/experience/references). */
+function Resume1Layout({ data }) {
   const name = data?.name || "Your Name";
   const role = data?.role || "Your Role";
-  const location = data?.location || "";
-  const educationParsed = parseEducation(data?.education);
-  const achievements = (data?.experience?.flatMap((e) => parseExperienceEntry(e).bullets) || []).slice(0, 4);
-  const achievementsFromProjects = (data?.projects || []).slice(0, 4).map((p) => ({ title: (p || "").slice(0, 40), desc: (p || "").trim() }));
-  const hasAchievements = achievements.length > 0 || achievementsFromProjects.length > 0;
+  const summary = data?.summary || "";
   const skillsList = Array.isArray(data?.skills) ? data.skills.filter(Boolean) : [];
-  const skillsText = skillsList.join(", ");
+  const educationParsed = parseEducation(data?.education);
+  const experienceEntries = (data?.experience || []).map((e) => parseExperienceEntryDetailed(e));
 
   return (
-    <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row bg-neutral-50 print:bg-white`}>
-      {/* â€”â€”â€” Left column (wider): name, role, contact, summary, employment â€”â€”â€” */}
-      <div className="w-full md:w-[62%] print:w-[62%] min-h-0 p-4 sm:p-5 md:p-6 bg-white print:bg-white order-1 flex flex-col overflow-visible">
-        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-3 border-b border-neutral-200">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-black">{name}</h1>
-            <p className="text-sm text-black mt-0.5">{role}</p>
-            <div className="mt-2 space-y-0.5 text-xs sm:text-sm text-black">
-              {data?.phone && <p>{data.phone}</p>}
-              {location && <p>{location}</p>}
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm">
-            {data?.email && (
-              <a href={`mailto:${data.email}`} className="flex items-center gap-1.5 text-black hover:text-orange-600 break-all">
-                <Mail size={14} className="shrink-0 text-orange-500" />
-                {data.email}
-              </a>
-            )}
-            {data?.linkedin && (
-              <a href={data.linkedin.startsWith("http") ? data.linkedin : `https://${data.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-black hover:text-orange-600">
-                <Linkedin size={14} className="shrink-0 text-orange-500" />
-                {data.linkedin.replace(/^https?:\/\//i, "")}
-              </a>
-            )}
-          </div>
-        </header>
+    <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row overflow-visible`}>
+      {/* Left column: solid dark blue – name, title, CONTACT, ABOUT ME, # SKILLS (match reference) */}
+      <div className="w-full md:w-[36%] print:w-[36%] min-h-0 flex flex-col bg-[#1e3a5f] print:bg-[#1e3a5f] text-white overflow-visible">
+        {/* Header: name + title only, no diagonal/avatar */}
+        <div className="pt-6 pb-5 px-4 sm:px-5 border-b border-white/10">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">{name}</h1>
+          <p className="mt-1 text-sm text-zinc-300 font-medium">{role}</p>
+        </div>
 
-        {data?.summary && (
-          <section className="mt-4">
-            <h2 className={RESUME2_SECTION_HEAD}>Professional Summary</h2>
-            <p className="text-xs sm:text-sm text-black leading-relaxed">{data.summary}</p>
-          </section>
-        )}
-
-        {data?.experience?.length > 0 && (
-          <section className="mt-5">
-            <h2 className={RESUME2_SECTION_HEAD}>Employment History</h2>
-            <div className="space-y-4">
-              {data.experience.map((entry, i) => {
-                const { jobTitle, company, datesOrLocation, bullets } = parseExperienceEntryDetailed(entry);
-                return (
-                  <div key={i}>
-                    <p className="text-xs sm:text-sm font-bold text-black">{jobTitle || "Role"}</p>
-                    {company && (
-                      <a href="#" className="text-xs sm:text-sm text-orange-600 underline decoration-orange-600">{company}</a>
-                    )}
-                    {datesOrLocation && (
-                      <p className="text-[10px] sm:text-xs text-black mt-0.5">
-                        <span className="text-orange-600">{datesOrLocation.split("|")[0]?.trim() || datesOrLocation}</span>
-                        {datesOrLocation.includes("|") ? ` | ${datesOrLocation.split("|").slice(1).join("|").trim()}` : ""}
-                      </p>
-                    )}
-                    {bullets.length > 0 && (
-                      <ul className="mt-1.5 space-y-0.5 list-none pl-0 text-xs sm:text-sm text-black">
-                        {bullets.map((b, j) => (
-                          <li key={j} className="flex gap-2 leading-snug">
-                            <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-1.5" aria-hidden />
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
+        <div className="flex-1 px-4 sm:px-5 py-5 space-y-5">
+          <section>
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">Contact</h2>
+            <div className="space-y-2 text-sm text-zinc-200">
+              {data?.phone && (
+                <p className="flex items-center gap-2">
+                  <Phone size={14} className="shrink-0 text-white" /> {data.phone}
+                </p>
+              )}
+              {data?.email && (
+                <p className="flex items-center gap-2 break-all">
+                  <Mail size={14} className="shrink-0 text-white" /> {data.email}
+                </p>
+              )}
+              {(data?.location || data?.address) && (
+                <p className="flex items-center gap-2">
+                  <MapPin size={14} className="shrink-0 text-white" /> {data.location || data.address}
+                </p>
+              )}
             </div>
           </section>
-        )}
 
-        {/* Left column remaining space: Education + Language */}
-        {(data?.education || educationParsed) && (
-          <section className="mt-5">
-            <h2 className={RESUME2_SECTION_HEAD}>Education</h2>
-            {educationParsed ? (
-              <div>
-                <p className="text-xs font-bold text-black">{educationParsed.degree}</p>
-                <span className="text-xs text-orange-600">{educationParsed.institution}</span>
-                {educationParsed.dates && (
-                  <p className="text-[10px] text-black mt-0.5"><span className="text-orange-600">{educationParsed.dates}</span></p>
-                )}
-              </div>
+          {summary && (
+            <section>
+              <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">
+                <User size={14} className="shrink-0 text-white" /> About Me
+              </h2>
+              <p className="text-sm text-zinc-200 leading-relaxed">{summary}</p>
+            </section>
+          )}
+
+          <section>
+            <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">
+              <ListChecks size={14} className="shrink-0 text-white" /> Skills
+            </h2>
+            {skillsList.length > 0 ? (
+              <ul className="space-y-0.5 text-sm text-zinc-200 list-none pl-0">
+                {skillsList.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white shrink-0 mt-2" aria-hidden />
+                    <span className="leading-snug">{typeof s === "string" ? s : s?.label ?? ""}</span>
+                  </li>
+                ))}
+              </ul>
             ) : (
-              <p className="text-[10px] sm:text-xs text-black leading-snug whitespace-pre-wrap">{data.education}</p>
+              <p className="text-sm text-zinc-400 italic">Add your skills in your details.</p>
             )}
           </section>
-        )}
-        {data?.languageProficiency && (
-          <section className="mt-5">
-            <h2 className={RESUME2_SECTION_HEAD}>Language</h2>
-            <p className="text-[10px] sm:text-xs text-black leading-snug whitespace-pre-wrap">{data.languageProficiency}</p>
-          </section>
-        )}
+        </div>
       </div>
 
-      {/* â€”â€”â€” Right column: Projects, Skills â€”â€”â€” */}
-      <aside className="w-full md:w-[38%] print:w-[38%] md:min-w-[180px] print:min-w-0 p-4 sm:p-5 md:p-6 bg-neutral-50 print:bg-neutral-50/80 border-l border-neutral-200 order-2 flex flex-col overflow-visible">
-        {hasAchievements && (
-          <section className="mb-4">
-            <h2 className={RESUME2_SECTION_HEAD}>Projects</h2>
-            <div className="space-y-3">
-              {achievementsFromProjects.length > 0
-                ? achievementsFromProjects.map((a, i) => (
-                    <div key={i}>
-                      <p className="text-xs font-bold text-black">{a.title || "Achievement"}</p>
-                      <p className="text-[10px] sm:text-xs text-black mt-0.5 leading-snug">{a.desc}</p>
-                    </div>
-                  ))
-                : achievements.slice(0, 4).map((bullet, i) => (
-                    <div key={i}>
-                      <p className="text-[10px] sm:text-xs text-black leading-snug">{bullet}</p>
-                    </div>
-                  ))}
-            </div>
-          </section>
-        )}
+      {/* Right column: purple top line, education, experience, references */}
+      <div className="w-full md:w-[64%] print:w-[64%] min-h-0 flex flex-col bg-white print:bg-white overflow-visible relative">
+        <div className="h-1 bg-violet-600 print:bg-violet-600 shrink-0" aria-hidden />
 
-        {skillsList.length > 0 && (
-          <section className="mb-4">
-            <h2 className={RESUME2_SECTION_HEAD}>Skills</h2>
-            <p className="text-[10px] sm:text-xs text-black leading-relaxed">{skillsText}</p>
-          </section>
-        )}
+        <div className="flex-1 px-4 sm:px-6 py-4 space-y-5">
+          {(data?.education || educationParsed) && (
+            <section>
+              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 pb-1.5 mb-3 border-b border-zinc-300">
+                <GraduationCap size={14} className="shrink-0 text-[#1e3a5f]" /> Education
+              </h2>
+              <div className="space-y-4">
+                {educationParsed ? (
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
+                    <div>
+                      <p className="text-xs font-bold text-black">{educationParsed.degree}</p>
+                      <p className="text-xs text-zinc-700">{educationParsed.institution}</p>
+                    </div>
+                    {educationParsed.dates && (
+                      <span className="text-[10px] text-zinc-500 shrink-0 sm:mt-0 mt-0.5">{educationParsed.dates}</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-700 whitespace-pre-wrap leading-relaxed">{data.education}</p>
+                )}
+              </div>
+            </section>
+          )}
 
-      </aside>
+          {experienceEntries.length > 0 && (
+            <section>
+              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 pb-1.5 mb-3 border-b border-zinc-300">
+                <Briefcase size={14} className="shrink-0 text-[#1e3a5f]" /> Experience
+              </h2>
+              <div className="space-y-4">
+                {experienceEntries.map((entry, i) => (
+                  <div key={i} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-black">{entry.jobTitle || "Role"}</p>
+                      {entry.company && <p className="text-xs text-zinc-700">{entry.company}</p>}
+                      {entry.bullets.length > 0 && (
+                        <ul className="mt-1.5 space-y-0.5 list-none pl-0 text-xs text-zinc-700">
+                          {entry.bullets.map((b, j) => (
+                            <li key={j} className="flex gap-2 leading-snug">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] shrink-0 mt-1.5" aria-hidden />
+                              {b}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    {entry.datesOrLocation && (
+                      <span className="text-[10px] text-zinc-500 shrink-0 sm:mt-0 mt-0.5">{entry.datesOrLocation}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {(data?.projects?.length > 0) && (
+            <section>
+              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 pb-1.5 mb-3 border-b border-zinc-300">
+                <FolderOpen size={14} className="shrink-0 text-[#1e3a5f]" /> Projects
+              </h2>
+              <ul className="space-y-2 list-none pl-0">
+                {data.projects.filter(Boolean).map((project, i) => (
+                  <li key={i} className="flex gap-2 text-xs text-zinc-700 leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] shrink-0 mt-1.5" aria-hidden />
+                    <span className="whitespace-pre-wrap">{typeof project === "string" ? project : project?.title || project?.description || ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </div>
     </article>
   );
 }
-
 
 export default function ResumeDesignView() {
   const { id } = useParams();
@@ -489,7 +498,11 @@ export default function ResumeDesignView() {
               ...(fitScale < 1 ? { position: "absolute", top: 0, left: 0 } : { flex: 1 }),
             }}
           >
-            <Resume2Layout data={displayData} />
+            {template?.name && (template.name.includes("1") || template.name.toLowerCase().includes("classic")) ? (
+              <Resume1Layout data={displayData} />
+            ) : (
+              <Resume2Layout data={displayData} />
+            )}
             <footer className="resume-doc-footer mt-auto pt-2 text-center text-zinc-500 text-[10px] sm:text-xs print:text-[10px] print:text-zinc-600">
               Made by Resume AI
             </footer>
