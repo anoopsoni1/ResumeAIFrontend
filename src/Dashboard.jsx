@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo } from "react-icons/fi";
-import { MdAutoAwesome, MdWbSunny } from "react-icons/md";
+import { MdAutoAwesome } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import { clearUser, setUser } from "./slice/user.slice";
-import LiquidEther from "./LiquidEther";
-import FloatingLines from "./Lighting";
 import LightPillar from "./LiquidEther.jsx";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
@@ -92,11 +89,11 @@ function StatCards({ atsScore, optimizeCount }) {
   ];
 
   return (
-    <div className="mt-8 px-4  mx-auto">
+    <div className="mt-6 sm:mt-8 px-3 sm:px-4 max-w-8xl mx-auto w-full">
       <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4 px-1">
         Your stats
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {stats.map((item, i) => {
           const Card = item.link ? Link : "div";
           const cardProps = item.link ? { to: item.link } : {};
@@ -128,15 +125,15 @@ function StatCards({ atsScore, optimizeCount }) {
         })}
       </div>
 
-      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mt-10 mb-4 px-1">
+      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mt-8 sm:mt-10 mb-4 px-1">
         Quick actions
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {actions.map((item, i) => (
           <Link
             key={i}
             to={item.link}
-            className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200"
+            className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-6 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400 group-hover:border-amber-500/30 group-hover:text-amber-400/90 transition-colors">
               {item.icon}
@@ -282,8 +279,6 @@ export default function Dashboard() {
     return () => { cancelled = true; };
   }, [user]);
 
-  const [theme ] = useState("dark");
-
   if (authChecking) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -324,9 +319,9 @@ export default function Dashboard() {
       <div className="relative z-10 flex flex-col min-h-screen">
         <Topbar />
         {user ? (
-          <main className="flex-1 py-8 pb-12">
-            <div className="mx-auto px-4 ">
-              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8">
+          <main className="flex-1 py-6 sm:py-8 pb-10 sm:pb-12">
+            <div className="mx-auto px-3 sm:px-4 max-w-8xl w-full">
+              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-6 md:p-8">
                 <h2 className="text-xl sm:text-2xl font-bold text-white">
                   Welcome back,{" "}
                   <span className="text-amber-400">
@@ -339,7 +334,7 @@ export default function Dashboard() {
               </div>
 
               {user?.Premium ? (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-emerald-500/60 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-emerald-500/60 p-4 sm:p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-emerald-400">
@@ -351,14 +346,14 @@ export default function Dashboard() {
                     </div>
                     <Link
                       to="/dashboard/profile"
-                      className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors w-full sm:w-auto"
                     >
                       View profile
                     </Link>
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-4 sm:p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-amber-400">
@@ -368,16 +363,16 @@ export default function Dashboard() {
                         Upgrade to unlock premium templates, AI optimizations, and more.
                       </p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
                       <Link
                         to="/price"
-                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors w-full sm:w-auto"
                       >
                         Upgrade
                       </Link>
                       <Link
                         to="/dashboard/profile"
-                        className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
+                        className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors w-full sm:w-auto"
                       >
                         View profile
                       </Link>
@@ -388,7 +383,7 @@ export default function Dashboard() {
 
               {/* Up page link - only for admins (extra tools) */}
               {user?.isAdmin && (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-white">Extra tools</p>
@@ -398,7 +393,7 @@ export default function Dashboard() {
                     </div>
                     <Link
                       to="/up"
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors w-full sm:w-auto"
                     >
                       Open Up page →
                     </Link>
@@ -408,13 +403,13 @@ export default function Dashboard() {
 
               {/* Video call interviews - premium only */}
               {user?.Premium ? (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-amber-500/30 transition-colors">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-5 hover:border-amber-500/30 transition-colors">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400">
                         <FiVideo className="w-5 h-5" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-semibold text-white">
                           Video call interviews
                         </p>
@@ -425,14 +420,14 @@ export default function Dashboard() {
                     </div>
                     <Link
                       to="/dashboard/interviews"
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors w-full sm:w-auto shrink-0"
                     >
                       Open interviews →
                     </Link>
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-amber-500/60 p-4 sm:p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-amber-400/80">
@@ -449,7 +444,7 @@ export default function Dashboard() {
                     </div>
                     <Link
                       to="/price"
-                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                      className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors w-full sm:w-auto"
                     >
                       Upgrade to unlock →
                     </Link>
@@ -459,7 +454,7 @@ export default function Dashboard() {
 
               {/* Admin-only: All Users */}
               {user?.isAdmin && (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-indigo-500/60 p-5">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm border-l-4 border-l-indigo-500/60 p-4 sm:p-5">
                   <p className="text-sm font-semibold text-indigo-400">Admin</p>
                   <p className="mt-1 text-xs sm:text-sm text-slate-400 mb-4">
                     Manage users.

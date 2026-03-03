@@ -9,6 +9,7 @@ import { useToast } from "./context/ToastContext";
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 const DURATION_MINUTES = 15; // max time; user can end anytime
+const QUESTION_DURATION_SECONDS = 90; // 1.5 min per question, then auto-advance
 
 function AIInterviewCall() {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ function AIInterviewCall() {
   const [questionLoading, setQuestionLoading] = useState(false);
   const [questionsAsked, setQuestionsAsked] = useState([]);
   const [timeLeft, setTimeLeft] = useState(DURATION_MINUTES * 60);
+  const [questionTimeLeft, setQuestionTimeLeft] = useState(0); // 1.5 min per question, then next
   const [started, setStarted] = useState(false);
   const [ended, setEnded] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -123,11 +125,14 @@ function AIInterviewCall() {
       if (res.ok && json?.data?.question) {
         setQuestion(json.data.question);
         setQuestionsAsked((q) => [...q, json.data.question]);
+        setQuestionTimeLeft(QUESTION_DURATION_SECONDS);
       } else {
         setQuestion("Thank you. Do you have any questions for us?");
+        setQuestionTimeLeft(QUESTION_DURATION_SECONDS);
       }
     } catch {
       setQuestion("Tell me about yourself and your experience.");
+      setQuestionTimeLeft(QUESTION_DURATION_SECONDS);
     } finally {
       setQuestionLoading(false);
       setAdvancingQuestion(false);
@@ -513,6 +518,28 @@ function AIInterviewCall() {
     return () => clearInterval(t);
   }, [started, ended]);
 
+  // Per-question timer: 1.5 min then auto-advance to next question
+  useEffect(() => {
+    if (!started || ended) return;
+    const t = setInterval(() => {
+      setQuestionTimeLeft((prev) => {
+        if (prev > 0) return prev - 1;
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [started, ended]);
+
+  // When per-question timer hits 0, advance to next question (unless it's the thank-you message)
+  useEffect(() => {
+    if (!started || ended || questionLoading || advancingQuestion) return;
+    if (questionTimeLeft !== 0) return;
+    const isThankYou = question && String(question).includes("Thank you");
+    if (isThankYou) return;
+    handleNextQuestion();
+    setQuestionTimeLeft(-1); // prevent repeated triggers until next question loads
+  }, [questionTimeLeft, started, ended, questionLoading, advancingQuestion, question]);
+
   useEffect(() => {
     if (started && !ended && timeLeft === 0) {
       handleEndCall();
@@ -579,11 +606,13 @@ function AIInterviewCall() {
     const icon = el.querySelector(".start-icon");
     const title = el.querySelector(".start-title");
     const desc = el.querySelector(".start-desc");
+    const tips = el.querySelector(".start-tips");
     if (!icon || !title) return;
     const ctx = gsap.context(() => {
       gsap.from(icon, { scale: 0.5, opacity: 0, duration: 0.5, ease: "back.out(1.4)" });
       gsap.from(title, { y: 16, opacity: 0, duration: 0.4, delay: 0.1, ease: "power2.out" });
       if (desc) gsap.from(desc, { y: 12, opacity: 0, duration: 0.4, delay: 0.2, ease: "power2.out" });
+      if (tips) gsap.from(tips, { y: 12, opacity: 0, duration: 0.4, delay: 0.28, ease: "power2.out" });
     }, el);
     return () => ctx.revert();
   }, [interview?._id, started === false]);
@@ -593,11 +622,9 @@ function AIInterviewCall() {
     const el = callScreenRef.current;
     const header = el.querySelector(".call-header");
     const card = el.querySelector(".call-question-card");
-    const tips = el.querySelector(".call-tips");
     const ctx = gsap.context(() => {
       if (header) gsap.from(header, { y: -12, opacity: 0, duration: 0.35, ease: "power2.out" });
       if (card) gsap.from(card, { y: 16, opacity: 0, duration: 0.45, delay: 0.08, ease: "power2.out" });
-      if (tips) gsap.from(tips, { x: 20, opacity: 0, duration: 0.4, delay: 0.15, ease: "power2.out" });
     }, el);
     return () => ctx.revert();
   }, [started]);
@@ -639,6 +666,14 @@ function AIInterviewCall() {
           <p className="start-desc text-slate-400 text-center max-w-sm">
             Up to {DURATION_MINUTES} minutes max; you can end anytime. The AI will ask you questions. Your video and audio will be recorded and analyzed.
           </p>
+          <div className="start-tips w-full max-w-sm rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 text-left">
+            <h3 className="text-sm font-semibold text-indigo-300 mb-2">Tips</h3>
+            <ul className="text-sm text-slate-300 space-y-1.5">
+              <li>• Answer clearly and concisely.</li>
+              <li>• You have 1.5 minutes per question; use &quot;Next question&quot; when ready or wait for auto-advance.</li>
+              <li>• End anytime with the red phone button.</li>
+            </ul>
+          </div>
           <button
             onClick={startInterview}
             className="start-btn rounded-xl bg-indigo-600 px-6 py-3 text-white font-semibold hover:bg-indigo-500 transition hover:scale-[1.02] active:scale-[0.98]"
@@ -658,12 +693,13 @@ function AIInterviewCall() {
         <Link to={`/dashboard/interviews/${id}`} className="text-sm text-slate-400 hover:text-white transition">Exit</Link>
       </div>
 
-      <div className="flex-1 flex flex-col gap-4 p-4 min-h-0">
-        <div className="flex-1 flex flex-col sm:flex-row gap-4 min-h-0 min-w-0">
-          {/* AI Interviewer – equal half */}
-          <div className="call-question-card flex-1 min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 flex flex-col items-center justify-center p-6">
-            <div className="text-center w-full max-w-xl">
-              <div className="relative w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 flex flex-col gap-4">
+        <div className="flex flex-1 flex-col sm:flex-row gap-4 min-h-0 min-w-0 sm:min-h-0">
+          {/* AI Interviewer – on mobile: prominent card with scroll; on desktop: equal half */}
+          <div className="call-question-card flex flex-col rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 sm:flex-1 min-h-[280px] sm:min-h-0 shrink-0 sm:shrink overflow-y-auto">
+            <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center w-full max-w-xl mx-auto flex-1 min-h-0">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 flex items-center justify-center shrink-0">
                 {/* 360° ripple rings when AI is speaking */}
                 {aiSpeaking && (
                   <>
@@ -674,33 +710,38 @@ function AIInterviewCall() {
                     <div className="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ripple" style={{ animationDelay: "0.8s" }} />
                   </>
                 )}
-                {/* Person avatar – replaces message icon */}
+                {/* AI avatar – same size on mobile and desktop so AI is clearly visible */}
                 <div
-                  className={`relative w-24 h-24 rounded-full bg-linear-to-br from-indigo-500 via-slate-600 to-indigo-700 flex items-center justify-center shadow-xl transition-all duration-300 overflow-hidden ${
+                  className={`relative w-24 h-24 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-indigo-500 via-slate-600 to-indigo-700 flex items-center justify-center shadow-xl transition-all duration-300 overflow-hidden ring-2 ring-white/20 ${
                     aiSpeaking ? "scale-105 ring-4 ring-cyan-400/40 shadow-[0_0_50px_rgba(34,211,238,0.5)]" : "scale-100"
                   }`}
                 >
                   <FiUser className="w-12 h-12 text-white/95" strokeWidth={2} />
                 </div>
               </div>
-              <p className="text-slate-400 text-sm mb-2">AI Interviewer</p>
+              <p className="text-slate-400 text-sm font-medium mb-2">AI Interviewer</p>
               {questionLoading ? (
                 <p className="text-slate-500">Loading question…</p>
               ) : (
-                <p ref={questionTextRef} className="text-white text-lg mx-auto min-h-8">{question || "—"}</p>
+                <p ref={questionTextRef} className="text-white text-base sm:text-lg mx-auto min-h-8 leading-snug">{question || "—"}</p>
+              )}
+              {question && !questionLoading && questionTimeLeft >= 0 && (
+                <p className="mt-2 sm:mt-3 text-cyan-400 font-mono text-sm tabular-nums">
+                  Time for this question: {Math.floor(questionTimeLeft / 60)}:{(questionTimeLeft % 60).toString().padStart(2, "0")}
+                </p>
               )}
               <button
               onClick={handleNextQuestion}
               disabled={questionLoading || advancingQuestion}
-                className="mt-4 rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20 disabled:opacity-50 transition hover:scale-[1.02] active:scale-[0.98]"
+                className="mt-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50 transition hover:scale-[1.02] active:scale-[0.98] shrink-0 sm:bg-white/10 sm:hover:bg-white/20"
               >
                 Next question
               </button>
             </div>
           </div>
 
-          {/* User video – equal half, same space as AI */}
-          <div className="flex-1 min-h-[200px] sm:min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 relative flex items-center justify-center">
+          {/* User video – equal half on desktop; fixed min height on mobile */}
+          <div className="flex-1 min-h-[180px] sm:min-h-0 rounded-2xl overflow-hidden bg-slate-900/80 border border-white/5 relative flex items-center justify-center shrink-0 sm:shrink">
             <video
               ref={localVideoRef}
               autoPlay
@@ -722,14 +763,6 @@ function AIInterviewCall() {
             </div>
           </div>
         </div>
-
-        <div className="call-tips shrink-0 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4">
-          <h3 className="text-sm font-semibold text-indigo-300 mb-2">Tips</h3>
-          <ul className="text-sm text-slate-300 space-y-1">
-            <li>• Answer clearly and concisely.</li>
-            <li>• Use the &quot;Next question&quot; button when ready.</li>
-            <li>• End anytime with the red phone button; max {DURATION_MINUTES} min.</li>
-          </ul>
         </div>
       </div>
 
