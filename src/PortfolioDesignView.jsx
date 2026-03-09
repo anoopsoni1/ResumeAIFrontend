@@ -50,8 +50,17 @@ const NAV_LINKS_P2 = [
   { to: "#contact", label: "Contact" },
 ];
 
+const NAV_LINKS_P3 = [
+  { to: "#home", label: "Home" },
+  { to: "#about", label: "About" },
+  { to: "#skills", label: "Skills" },
+  { to: "#portfolio", label: "Projects" },
+  { to: "#contact", label: "Contact" },
+];
+
 function getLayoutType(template) {
   const n = (template?.name || "").toLowerCase();
+  if (n.includes("portfolio 3") || n.includes("portfolio3")) return "portfolio3";
   if (n.includes("portfolio 2") || n.includes("portfolio2")) return "portfolio2";
   return "portfolio1";
 }
@@ -280,6 +289,304 @@ function Portfolio2Layout({ data }) {
           <div className="flex gap-6">
             {NAV_LINKS_P2.map(({ to, label }) => (
               <a key={label} href={to} className="hover:text-cyan-400 transition-colors">{label}</a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/** Shining first letter of name with circle — hero focal; no 3D model. */
+function Portfolio3HeroLetter({ letter }) {
+  const letterRef = useRef(null);
+  const glowRef = useRef(null);
+  const circleRef = useRef(null);
+  useEffect(() => {
+    if (!letterRef.current || !glowRef.current || !circleRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(letterRef.current, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 1.2, ease: "back.out(1.5)", delay: 0.25 });
+      gsap.fromTo(circleRef.current, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 1.1, ease: "back.out(1.4)", delay: 0.35 });
+      gsap.fromTo(glowRef.current, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 1.4, ease: "power2.out", delay: 0.4 });
+      gsap.to(glowRef.current, {
+        opacity: 0.7,
+        scale: 1.15,
+        duration: 2.2,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+    });
+    return () => ctx.revert();
+  }, [letter]);
+  const firstChar = (letter || "Y").toString().toUpperCase().slice(0, 1);
+  return (
+    <div className="relative flex items-center justify-center w-full h-full min-h-[320px] lg:min-h-[540px] select-none overflow-hidden">
+      <div
+        ref={glowRef}
+        className="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] rounded-full opacity-50"
+        style={{
+          background: "radial-gradient(circle, rgba(139,92,246,0.5) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)",
+          filter: "blur(40px)",
+        }}
+        aria-hidden
+      />
+      <div
+        ref={circleRef}
+        className="relative flex items-center justify-center w-[14rem] h-[14rem] sm:w-[16rem] sm:h-[16rem] lg:w-[20rem] lg:h-[20rem] xl:w-[24rem] xl:h-[24rem] rounded-full border-[3px] sm:border-4 border-violet-500/80"
+        style={{
+          boxShadow: "0 0 40px rgba(139,92,246,0.4), 0 0 80px rgba(139,92,246,0.2), inset 0 0 60px rgba(139,92,246,0.08)",
+        }}
+      >
+        <span
+          ref={letterRef}
+          className="relative text-[8rem] sm:text-[9rem] lg:text-[12rem] xl:text-[14rem] font-black leading-none tracking-tighter"
+          style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            color: "rgba(255,255,255,0.98)",
+            textShadow: "0 0 30px rgba(139,92,246,0.8), 0 0 60px rgba(139,92,246,0.5), 0 0 100px rgba(139,92,246,0.3), 0 0 160px rgba(139,92,246,0.15)",
+            WebkitTextStroke: "1px rgba(139,92,246,0.3)",
+          }}
+        >
+          {firstChar}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Portfolio3Layout({ data }) {
+  const rootRef = useRef(null);
+  const heroLeftRef = useRef(null);
+  const heroSceneContainerRef = useRef(null);
+  const [navOpen, setNavOpen] = useState(false);
+  const name = data?.name || "Your Name";
+  const role = data?.role || "Your Role";
+  const summary = data?.summary || "Add a short summary. Sign in and add your details to see your own content here.";
+  const skills = Array.isArray(data?.skills) ? data.skills.filter(Boolean) : [];
+  const projects = Array.isArray(data?.projects) ? data.projects.filter(Boolean) : [];
+  const experience = Array.isArray(data?.experience) ? data.experience : [];
+  const email = data?.email || "";
+  const phone = data?.phone || "";
+  const linkedin = data?.linkedin || "";
+  const website = data?.website || "";
+  const firstName = name.split(/\s+/)[0] || name;
+  const displayName = name.trim() || "Your Name";
+  const initials = name.split(/\s+/).map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "Y";
+  const contactHref = email ? `mailto:${email}` : "#contact";
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      if (heroLeftRef.current) {
+        const els = heroLeftRef.current.querySelectorAll(".p3-hero-item");
+        gsap.fromTo(els, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, ease: "power3.out", delay: 0.2 });
+      }
+      if (heroSceneContainerRef.current) {
+        gsap.fromTo(heroSceneContainerRef.current, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 1, ease: "power3.out", delay: 0.4 });
+      }
+      gsap.utils.toArray(".p3-section").forEach((section) => {
+        gsap.fromTo(section, { opacity: 0, y: 60 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 85%", toggleActions: "play none none none" },
+        });
+        const cards = section.querySelectorAll(".p3-card");
+        if (cards.length) {
+          gsap.fromTo(cards, { opacity: 0, y: 28 }, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.06,
+            ease: "power2.out",
+            scrollTrigger: { trigger: section, start: "top 80%", toggleActions: "play none none none" },
+          });
+        }
+      });
+    }, rootRef.current);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={rootRef} className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      <header className="fixed top-0 left-0 right-0 z-20 border-b border-white/10 bg-black/90 backdrop-blur-sm">
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <motion.a
+            href="#home"
+            className="flex items-center gap-2"
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-violet-500/60 bg-violet-600 text-white text-sm font-bold shadow-lg shadow-violet-600/30" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+              {(firstName[0] || "Y").toUpperCase()}
+            </span>
+            <span className="text-lg font-semibold tracking-tight">
+              <span className="text-violet-500">{firstName}</span>
+              <span className="text-white">.</span>
+            </span>
+          </motion.a>
+          <ul className={`absolute sm:relative top-full left-0 right-0 sm:flex items-center gap-6 sm:gap-8 py-4 sm:py-0 bg-black sm:bg-transparent border-b sm:border-0 border-white/10 ${navOpen ? "flex flex-col" : "hidden"}`}>
+            {NAV_LINKS_P3.map((item, i) => (
+              <li key={item.label}>
+                <motion.a
+                  href={item.to}
+                  onClick={() => setNavOpen(false)}
+                  className="block py-2 text-sm font-medium text-white/90 hover:text-violet-500 transition-colors"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 + i * 0.04, duration: 0.35 }}
+                >
+                  {item.label}
+                </motion.a>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center gap-3">
+            <motion.a
+              href={contactHref}
+              className="hidden sm:inline-flex items-center justify-center rounded-md bg-violet-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white hover:bg-violet-500 transition-colors"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Contact now
+            </motion.a>
+            <button
+              type="button"
+              onClick={() => setNavOpen((o) => !o)}
+              className="sm:hidden flex flex-col gap-1.5 w-9 h-9 justify-center items-center rounded border border-white/20 text-white"
+              aria-label="Toggle menu"
+            >
+              <span className={`w-4 h-0.5 bg-current transition-transform ${navOpen ? "rotate-45 translate-y-1" : ""}`} />
+              <span className={`w-4 h-0.5 bg-current transition-opacity ${navOpen ? "opacity-0" : ""}`} />
+              <span className={`w-4 h-0.5 bg-current transition-transform ${navOpen ? "-rotate-45 -translate-y-1" : ""}`} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      <section id="home" className="relative min-h-screen flex flex-col lg:flex-row items-center pt-20 lg:pt-0">
+        <div ref={heroLeftRef} className="flex-1 order-2 lg:order-1 max-w-xl mx-auto lg:mx-0 px-4 sm:px-6 lg:pl-14 xl:pl-24 py-14 lg:py-28">
+          <p className="p3-hero-item text-violet-500 text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase mb-3">— {role}</p>
+          <h1 className="p3-hero-item text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.1] mb-5 tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+            {displayName}
+          </h1>
+          <p className="p3-hero-item text-white/80 text-base sm:text-lg max-w-lg mb-8 leading-relaxed">
+            {summary.slice(0, 80)}{summary.length > 80 ? "…" : ""}
+          </p>
+          <motion.a
+            href="#about"
+            className="p3-hero-item inline-flex items-center justify-center rounded-lg bg-violet-600 px-7 py-4 text-sm font-semibold uppercase tracking-widest text-white shadow-lg shadow-violet-600/30 hover:bg-violet-500 hover:shadow-violet-500/40 transition-all duration-300"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            View portfolio
+          </motion.a>
+          <div className="absolute bottom-8 left-6 sm:left-14 w-28 h-28 sm:w-36 sm:h-36 bg-violet-500/10 rounded-full blur-3xl" aria-hidden />
+        </div>
+        <div
+          ref={heroSceneContainerRef}
+          className="flex-1 order-1 lg:order-2 relative w-full min-h-[50vh] lg:min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-black to-violet-950/20"
+        >
+          <Portfolio3HeroLetter letter={firstName[0] || name[0]} />
+        </div>
+      </section>
+
+      <section id="about" className="p3-section relative py-20 sm:py-28 border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-8 tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+            About <span className="text-violet-500">me</span>
+          </h2>
+          <p className="text-white/80 text-base sm:text-lg lg:text-xl leading-relaxed max-w-3xl">{summary}</p>
+        </div>
+      </section>
+
+      <section id="skills" className="p3-section relative py-20 sm:py-28 bg-white/[0.03] border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-10 tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+            Skil<span className="text-violet-500">ls</span>
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {(skills.length ? skills : ["Web Development", "UI/UX Design", "Responsive Design"]).map((skill, i) => (
+              <div key={i} className="p3-card rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-violet-500/50 hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-950/20">
+                <p className="text-white font-medium">{typeof skill === "string" ? skill : String(skill)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="portfolio" className="p3-section relative py-20 sm:py-28 border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight"
+            style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+          >
+            Proj<span className="text-violet-500">ects</span>
+          </h2>
+          <p className="text-white/60 text-sm sm:text-base uppercase tracking-widest mb-12" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            What I&apos;ve built
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {(projects.length ? projects : ["Project One", "Project Two", "Project Three"]).slice(0, 6).map((project, i) => (
+              <div
+                key={i}
+                className="p3-card group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8 hover:border-violet-500/60 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-950/30 overflow-hidden"
+              >
+                <span
+                  className="absolute top-5 right-5 sm:top-6 sm:right-6 text-4xl sm:text-5xl font-black text-white/10 group-hover:text-violet-500/30 transition-colors"
+                  style={{ fontFamily: "'Bebas Neue', sans-serif" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="relative">
+                  <span className="inline-block text-violet-500 text-xs font-semibold uppercase tracking-[0.25em] mb-3" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    Project {i + 1}
+                  </span>
+                  <p className="text-white/95 text-base sm:text-lg leading-relaxed line-clamp-5 font-medium" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                    {typeof project === "string" ? project : String(project)}
+                  </p>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500/0 via-violet-500/50 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="contact" className="p3-section relative py-20 sm:py-28 bg-white/[0.03] border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
+            Cont<span className="text-violet-500">act</span>
+          </h2>
+          <p className="text-white/80 text-base sm:text-lg mb-10 max-w-xl">Have a project in mind or want to connect? Reach out via email or phone.</p>
+          <div className="flex flex-wrap gap-4">
+            {email && (
+              <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-medium text-white shadow-lg shadow-violet-600/25 hover:bg-violet-500 hover:shadow-violet-500/30 hover:scale-105 transition-all">
+                <Mail size={18} /> {email}
+              </a>
+            )}
+            {phone && (
+              <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 hover:scale-105 transition-all">
+                <Phone size={18} /> {phone}
+              </a>
+            )}
+            {linkedin && (
+              <a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 hover:scale-105 transition-all">
+                <Linkedin size={18} /> LinkedIn
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-white/10 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/50">
+          <p>© {new Date().getFullYear()} {displayName}. All rights reserved.</p>
+          <div className="flex gap-6">
+            {NAV_LINKS_P3.map(({ to, label }) => (
+              <a key={label} href={to} className="hover:text-violet-500 transition-colors">{label}</a>
             ))}
           </div>
         </div>
@@ -541,12 +848,48 @@ const FULL_HTML_HEAD = `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Portfolio Website</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <style>body{font-family:system-ui,sans-serif;}</style>
 </head>
 <body class="bg-white text-neutral-900">
   <div class="min-h-screen">`;
 
-const FULL_HTML_TAIL = `</div></body></html>`;
+const FULL_HTML_TAIL = `</div>
+  <script>
+    (function() {
+      if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+      gsap.registerPlugin(ScrollTrigger);
+      var heroItems = document.querySelectorAll(".p1-hero-item, .p2-hero-item, .p3-hero-item");
+      gsap.fromTo(heroItems, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08, ease: "power3.out", delay: 0.2 });
+      var sections = document.querySelectorAll(".p1-section, .p2-section, .p3-section");
+      sections.forEach(function(section) {
+        gsap.fromTo(section, { opacity: 0, y: 50 }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.75,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 88%", toggleActions: "play none none none" }
+        });
+        var cards = section.querySelectorAll(".p2-skill-card, .p2-project-card, .p3-card");
+        if (cards.length) {
+          gsap.fromTo(cards, { opacity: 0, y: 24 }, {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.06,
+            ease: "power2.out",
+            scrollTrigger: { trigger: section, start: "top 82%", toggleActions: "play none none none" }
+          });
+        }
+      });
+      var avatar = document.querySelector("[class*='rounded-full'][class*='border-']");
+      if (avatar && (avatar.classList.contains("border-cyan") || avatar.classList.contains("border-violet"))) {
+        gsap.fromTo(avatar, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.9, ease: "back.out(1.2)", delay: 0.3 });
+      }
+    })();
+  </script>
+</body></html>`;
 
 export default function PortfolioDesignView() {
   const { id } = useParams();
@@ -686,9 +1029,10 @@ export default function PortfolioDesignView() {
 
   const layout = getLayoutType(template);
   const isPortfolio2 = layout === "portfolio2";
+  const isPortfolio3 = layout === "portfolio3";
 
   return (
-    <div className={`min-h-screen flex flex-col ${isPortfolio2 ? "bg-[#050508] text-white" : "bg-white text-neutral-900"}`} id="home">
+    <div className={`min-h-screen flex flex-col ${isPortfolio3 ? "bg-black text-white" : isPortfolio2 ? "bg-[#050508] text-white" : "bg-white text-neutral-900"}`} id="home">
       {isPlaceholder && (
         <div className="print:hidden bg-amber-500/20 border-b border-amber-400/30 px-3 sm:px-4 py-2.5">
           <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-center sm:justify-between gap-2 text-sm">
@@ -715,7 +1059,9 @@ export default function PortfolioDesignView() {
       <div className="print:hidden fixed top-4 right-4 z-30 flex items-center gap-2">
         <Link
           to="/templates/portfoliodesign"
-          className={`inline-flex items-center gap-1.5 text-sm font-medium ${isPortfolio2 ? "text-white/80 hover:text-cyan-400" : "text-neutral-600 hover:text-black"}`}
+          className={`inline-flex items-center gap-1.5 text-sm font-medium ${
+            isPortfolio3 ? "text-white/80 hover:text-violet-400" : isPortfolio2 ? "text-white/80 hover:text-cyan-400" : "text-neutral-600 hover:text-black"
+          }`}
         >
           <ArrowLeft size={16} /> Back
         </Link>
@@ -724,9 +1070,11 @@ export default function PortfolioDesignView() {
           onClick={handleDeploy}
           disabled={deploying}
           className={`inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed ${
-            isPortfolio2
-              ? "border-cyan-400 bg-cyan-600 text-white hover:bg-cyan-500"
-              : "border-violet-500 bg-violet-600 text-white hover:bg-violet-500"
+            isPortfolio3
+              ? "border-violet-500 bg-violet-600 text-white hover:bg-violet-500"
+              : isPortfolio2
+                ? "border-cyan-400 bg-cyan-600 text-white hover:bg-cyan-500"
+                : "border-violet-500 bg-violet-600 text-white hover:bg-violet-500"
           }`}
         >
           <Upload size={14} /> {deploying ? "Deploying…" : "Deploy to Vercel"}
@@ -734,7 +1082,9 @@ export default function PortfolioDesignView() {
       </div>
 
       <PortfolioHTMLDownload showDownloadHeader={false} portfolioRef={portfolioContentRef}>
-        {isPortfolio2 ? (
+        {isPortfolio3 ? (
+          <Portfolio3Layout data={displayData} />
+        ) : isPortfolio2 ? (
           <Portfolio2Layout data={displayData} />
         ) : (
           <Portfolio1StaticLayout data={displayData} />

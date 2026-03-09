@@ -8,8 +8,9 @@ import { clearUser, setUser } from "./slice/user.slice";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { useToast } from "./context/ToastContext";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
 
 function Topbar() {
   return <AppHeader />;
@@ -171,6 +172,7 @@ export default function Dashboard() {
   const [deployments, setDeployments] = useState([]);
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const toast = useToast();
 
   useEffect(() => {
     const handleResize = () => {
@@ -329,9 +331,15 @@ export default function Dashboard() {
         credentials: "include",
         headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setDeployments((prev) => prev.filter((d) => d._id !== dep._id));
+        toast.success("Project deleted and removed from Vercel.");
+      } else {
+        toast.error(data?.message || "Failed to delete project.");
       }
+    } catch (err) {
+      toast.error(err?.message || "Failed to delete project.");
     } finally {
       setDeletingId(null);
     }
