@@ -41,6 +41,10 @@ import LiveInterviewCall from './LiveInterviewCall.jsx'
 import AIInterviewCall from './AIInterviewCall.jsx'
 import AddDetails from './AddDetails.jsx'
 import EditResumePage from './EditResumePage.jsx'
+import CareerRoadmapPage from './CareerRoadmapPage.jsx'
+import InterviewStartPage from './InterviewStartPage.jsx'
+import CodingInterviewPage from './CodingInterviewPage.jsx'
+import LeaderboardPage from './LeaderboardPage.jsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -151,6 +155,22 @@ const route = createBrowserRouter([
  {
   path: "/dashboard/interviews/:id/ai-call",
   element: <AIInterviewCall />,
+ },
+ {
+  path: "/career-roadmap",
+  element: <CareerRoadmapPage />,
+ },
+ {
+  path: "/coding-interview/start",
+  element: <InterviewStartPage />,
+ },
+ {
+  path: "/coding-interview",
+  element: <CodingInterviewPage />,
+ },
+ {
+  path: "/leaderboard",
+  element: <LeaderboardPage />,
  },
 
 ])

@@ -65,6 +65,25 @@ function getLayoutType(template) {
   return "portfolio1";
 }
 
+/** Framer Motion variants for scroll & stagger */
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  visible: (i = 0) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } }),
+};
+const fadeInView = {
+  hidden: { opacity: 0, y: 50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } },
+};
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+const cardHover = { scale: 1.02, y: -4 };
+const buttonTap = { scale: 0.98 };
+
 /** Portfolio 2: Dark teal/cyan theme — hero with glowing avatar, full sections, GSAP + motion. */
 function Portfolio2Layout({ data }) {
   const rootRef = useRef(null);
@@ -127,9 +146,14 @@ function Portfolio2Layout({ data }) {
   }, []);
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-[#050508] text-white overflow-x-hidden">
-      {/* Subtle gradient glow background */}
-      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(34,211,238,0.08)_0%,transparent_50%)]" aria-hidden />
+    <div ref={rootRef} className="relative min-h-screen bg-[#050508] text-white overflow-x-hidden">
+      {/* Portfolio 2 background: grid + cyan orbs + noise */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(34,211,238,0.12)_0%,transparent_50%)]" />
+        <motion.div className="deploy-bg-orb absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-cyan-500/15 blur-[130px]" animate={{ x: [0, 30, 0], opacity: [0.12, 0.2, 0.12] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="deploy-bg-orb absolute bottom-1/3 left-0 w-[400px] h-[400px] rounded-full bg-teal-500/10 blur-[100px]" animate={{ y: [0, -20, 0], opacity: [0.1, 0.18, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
+      </div>
 
       <header className="relative z-10 border-b border-white/5">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -167,26 +191,30 @@ function Portfolio2Layout({ data }) {
           <p className="p2-hero-item text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">And I&apos;m a {role}</p>
           <p className="p2-hero-item text-white/70 text-base sm:text-lg leading-relaxed max-w-xl mb-8">{summary}</p>
           <div className="p2-hero-item flex gap-4 mb-8">
-            {socials.map((s) => (
-              <a
+            {socials.map((s, i) => (
+              <motion.a
                 key={s.label}
                 href={s.href}
                 target={s.href.startsWith("http") ? "_blank" : undefined}
                 rel="noopener noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-cyan-400/80 text-white/90 transition-all duration-300 hover:border-cyan-400 hover:text-cyan-400 hover:scale-110"
+                className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-cyan-400/80 text-white/90 transition-colors duration-300 hover:border-cyan-400 hover:text-cyan-400"
                 style={{ boxShadow: "0 0 20px rgba(34,211,238,0.2)" }}
                 aria-label={s.label}
+                whileHover={{ scale: 1.15, boxShadow: "0 0 30px rgba(34,211,238,0.5)" }}
+                whileTap={buttonTap}
               >
                 <s.icon size={20} />
-              </a>
+              </motion.a>
             ))}
           </div>
-          <a
+          <motion.a
             href="#about"
-            className="p2-hero-item inline-flex items-center justify-center rounded-lg bg-cyan-500 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:bg-cyan-400 hover:shadow-lg hover:shadow-cyan-500/30 hover:scale-105"
+            className="p2-hero-item inline-flex items-center justify-center rounded-lg bg-cyan-500 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:bg-cyan-400 hover:shadow-lg hover:shadow-cyan-500/30"
+            whileHover={{ scale: 1.05 }}
+            whileTap={buttonTap}
           >
             Read more
-          </a>
+          </motion.a>
         </div>
 
         <div className="flex-1 flex justify-center lg:justify-end order-1 lg:order-2">
@@ -222,16 +250,19 @@ function Portfolio2Layout({ data }) {
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
             Skil<span className="text-cyan-400">ls</span>
           </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
             {(skills.length ? skills : ["Web Development", "UI/UX Design", "Responsive Design"]).slice(0, 6).map((skill, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="p2-skill-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1"
+                className="p2-skill-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-colors duration-300 overflow-hidden"
+                variants={fadeInView}
+                whileHover={cardHover}
+                whileTap={buttonTap}
               >
                 <p className="text-white font-medium">{typeof skill === "string" ? skill : String(skill)}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -241,16 +272,19 @@ function Portfolio2Layout({ data }) {
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
             Proj<span className="text-cyan-400">ect</span>
           </h2>
-          <div className="grid sm:grid-cols-2 gap-6">
+          <motion.div className="grid sm:grid-cols-2 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
             {(projects.length ? projects : ["Project One", "Project Two", "Project Three"]).slice(0, 4).map((project, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="p2-project-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                className="p2-project-card rounded-xl border border-white/10 bg-white/5 p-6 hover:border-cyan-400/50 transition-colors duration-300 overflow-hidden"
+                variants={fadeInView}
+                whileHover={cardHover}
+                whileTap={buttonTap}
               >
                 <p className="text-white/80 text-sm sm:text-base line-clamp-3">{typeof project === "string" ? project : String(project)}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -263,23 +297,23 @@ function Portfolio2Layout({ data }) {
           <p className="text-white/70 mb-10 max-w-xl">
             Have a project in mind or want to connect? Reach out via email or phone.
           </p>
-          <div className="flex flex-wrap gap-4">
+          <motion.div className="flex flex-wrap gap-4" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             {email && (
-              <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 text-sm font-medium text-white hover:bg-cyan-400 hover:scale-105 transition-all">
+              <motion.a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-3 text-sm font-medium text-white hover:bg-cyan-400 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Mail size={18} /> {email}
-              </a>
+              </motion.a>
             )}
             {phone && (
-              <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 hover:scale-105 transition-all">
+              <motion.a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Phone size={18} /> {phone}
-              </a>
+              </motion.a>
             )}
             {linkedin && (
-              <a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 hover:scale-105 transition-all">
+              <motion.a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-cyan-400/60 px-5 py-3 text-sm font-medium text-cyan-400 hover:bg-cyan-400/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Linkedin size={18} /> LinkedIn
-              </a>
+              </motion.a>
             )}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -321,7 +355,7 @@ function Portfolio3HeroLetter({ letter }) {
   }, [letter]);
   const firstChar = (letter || "Y").toString().toUpperCase().slice(0, 1);
   return (
-    <div className="relative flex items-center justify-center w-full h-full min-h-[320px] lg:min-h-[540px] select-none overflow-hidden">
+    <motion.div className="relative flex items-center justify-center w-full h-full min-h-[320px] lg:min-h-[540px] select-none overflow-hidden" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
       <div
         ref={glowRef}
         className="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] rounded-full opacity-50"
@@ -351,7 +385,7 @@ function Portfolio3HeroLetter({ letter }) {
           {firstChar}
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -409,8 +443,16 @@ function Portfolio3Layout({ data }) {
   }, []);
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-      <header className="fixed top-0 left-0 right-0 z-20 border-b border-white/10 bg-black/90 backdrop-blur-sm">
+    <div ref={rootRef} className="relative min-h-screen bg-black text-white overflow-x-hidden" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+      {/* Portfolio 3 background: mesh gradient + grid + violet orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,rgba(139,92,246,0.15)_0%,transparent_50%),radial-gradient(ellipse_80%_50%_at_80%_50%,rgba(139,92,246,0.08)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.04)_1px,transparent_1px)] bg-[size:56px_56px]" />
+        <motion.div className="deploy-bg-orb absolute top-0 left-1/2 w-[800px] h-[600px] rounded-full bg-violet-600/20 blur-[150px] -translate-x-1/2" animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.1, 1] }} transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="deploy-bg-orb absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-fuchsia-600/10 blur-[120px]" animate={{ x: [0, -40, 0], opacity: [0.08, 0.15, 0.08] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} />
+      </div>
+
+      <header className="fixed top-0 left-0 right-0 z-20 border-b border-white/10 bg-black/80 backdrop-blur-md">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <motion.a
             href="#home"
@@ -422,9 +464,8 @@ function Portfolio3Layout({ data }) {
             <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-violet-500/60 bg-violet-600 text-white text-sm font-bold shadow-lg shadow-violet-600/30" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
               {(firstName[0] || "Y").toUpperCase()}
             </span>
-            <span className="text-lg font-semibold tracking-tight">
-              <span className="text-violet-500">{firstName}</span>
-              <span className="text-white">.</span>
+            <span className="text-lg font-semibold tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>
+              <span className="text-violet-500">{displayName}</span>
             </span>
           </motion.a>
           <ul className={`absolute sm:relative top-full left-0 right-0 sm:flex items-center gap-6 sm:gap-8 py-4 sm:py-0 bg-black sm:bg-transparent border-b sm:border-0 border-white/10 ${navOpen ? "flex flex-col" : "hidden"}`}>
@@ -507,13 +548,13 @@ function Portfolio3Layout({ data }) {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-10 tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif" }}>
             Skil<span className="text-violet-500">ls</span>
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }}>
             {(skills.length ? skills : ["Web Development", "UI/UX Design", "Responsive Design"]).map((skill, i) => (
-              <div key={i} className="p3-card rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-violet-500/50 hover:bg-white/10 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-950/20">
+              <motion.div key={i} className="p3-card rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 hover:border-violet-500/50 hover:bg-white/10 transition-colors duration-300" variants={fadeInView} whileHover={cardHover} whileTap={buttonTap}>
                 <p className="text-white font-medium">{typeof skill === "string" ? skill : String(skill)}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -528,11 +569,14 @@ function Portfolio3Layout({ data }) {
           <p className="text-white/60 text-sm sm:text-base uppercase tracking-widest mb-12" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
             What I&apos;ve built
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <motion.div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
             {(projects.length ? projects : ["Project One", "Project Two", "Project Three"]).slice(0, 6).map((project, i) => (
-              <div
+              <motion.div
                 key={i}
-                className="p3-card group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8 hover:border-violet-500/60 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-violet-950/30 overflow-hidden"
+                className="p3-card group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 sm:p-8 hover:border-violet-500/60 hover:bg-white/10 transition-colors duration-300 overflow-hidden"
+                variants={fadeInView}
+                whileHover={{ ...cardHover, transition: { duration: 0.2 } }}
+                whileTap={buttonTap}
               >
                 <span
                   className="absolute top-5 right-5 sm:top-6 sm:right-6 text-4xl sm:text-5xl font-black text-white/10 group-hover:text-violet-500/30 transition-colors"
@@ -549,9 +593,9 @@ function Portfolio3Layout({ data }) {
                   </p>
                 </div>
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500/0 via-violet-500/50 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -561,23 +605,23 @@ function Portfolio3Layout({ data }) {
             Cont<span className="text-violet-500">act</span>
           </h2>
           <p className="text-white/80 text-base sm:text-lg mb-10 max-w-xl">Have a project in mind or want to connect? Reach out via email or phone.</p>
-          <div className="flex flex-wrap gap-4">
+          <motion.div className="flex flex-wrap gap-4" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             {email && (
-              <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-medium text-white shadow-lg shadow-violet-600/25 hover:bg-violet-500 hover:shadow-violet-500/30 hover:scale-105 transition-all">
+              <motion.a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-medium text-white shadow-lg shadow-violet-600/25 hover:bg-violet-500 hover:shadow-violet-500/30 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Mail size={18} /> {email}
-              </a>
+              </motion.a>
             )}
             {phone && (
-              <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 hover:scale-105 transition-all">
+              <motion.a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Phone size={18} /> {phone}
-              </a>
+              </motion.a>
             )}
             {linkedin && (
-              <a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 hover:scale-105 transition-all">
+              <motion.a href={linkedin.startsWith("http") ? linkedin : `https://${linkedin}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl border-2 border-violet-500/60 px-6 py-3.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                 <Linkedin size={18} /> LinkedIn
-              </a>
+              </motion.a>
             )}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -642,26 +686,33 @@ function Portfolio1StaticLayout({ data }) {
   }, []);
 
   return (
-    <div ref={rootRef} className="min-h-screen bg-white text-neutral-900" id="home">
-      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-neutral-100">
+    <div ref={rootRef} className="relative min-h-screen bg-white text-neutral-900 overflow-x-hidden" id="home">
+      {/* Portfolio 1 background: soft grid + emerald gradient orbs */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e5e5_1px,transparent_1px),linear-gradient(to_bottom,#e5e5e5_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black_70%,transparent_110%)]" />
+        <motion.div className="deploy-bg-orb absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-emerald-400/20 blur-[120px]" animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.25, 0.15] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="deploy-bg-orb absolute bottom-1/4 left-0 w-[400px] h-[400px] rounded-full bg-teal-400/15 blur-[100px]" animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.1, 0.2] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
+      </div>
+
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-neutral-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <a href="#home" className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold">
+          <motion.a href="#home" className="flex items-center gap-2" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
+            <motion.span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold" whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
               {firstName[0]?.toUpperCase() || "P"}
-            </span>
+            </motion.span>
             <span className="text-lg font-semibold text-black">{firstName}</span>
-          </a>
+          </motion.a>
           <nav className="hidden sm:flex items-center gap-8">
-            {NAV_LINKS.map(({ to, label }) => (
-              <a key={label} href={to} className="text-sm font-medium text-neutral-600 hover:text-black transition-colors">
-                {label}
-              </a>
+            {NAV_LINKS.map((item, i) => (
+              <motion.a key={item.label} href={item.to} className="text-sm font-medium text-neutral-600 hover:text-black transition-colors" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05, duration: 0.4 }}>
+                {item.label}
+              </motion.a>
             ))}
           </nav>
         </div>
       </header>
 
-      <main>
+      <main className="relative z-10">
         <section id="home" className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 lg:py-28">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div ref={heroLeftRef}>
@@ -677,20 +728,24 @@ function Portfolio1StaticLayout({ data }) {
                 </p>
               )}
               <div className="p1-hero-item mt-8 flex flex-wrap items-center gap-4">
-                <a
+                <motion.a
                   href={email ? `mailto:${email}` : "#contact"}
                   className="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-500 bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-800 transition-colors"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={buttonTap}
                 >
                   Get in touch
                   <ChevronRight size={18} className="text-emerald-400" />
-                </a>
-                <a
+                </motion.a>
+                <motion.a
                   href="#contact"
                   className="inline-flex items-center gap-2 text-black font-medium hover:underline"
+                  whileHover={{ x: 4 }}
+                  whileTap={buttonTap}
                 >
                   Download CV
                   <Download size={18} />
-                </a>
+                </motion.a>
               </div>
               <div className="p1-hero-item mt-10">
                 <p className="text-sm text-neutral-500 mb-3">Find me on</p>
@@ -727,9 +782,9 @@ function Portfolio1StaticLayout({ data }) {
           </div>
         </section>
 
-        <section id="about" className="p1-section bg-neutral-50 border-y border-neutral-100">
+        <section id="about" className="p1-section bg-neutral-50/80 border-y border-neutral-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6">About</h2>
+            <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-6" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>About</motion.h2>
             <p className="text-neutral-600 text-base sm:text-lg leading-relaxed max-w-3xl">
               {summary || "Professional with a focus on delivering results and continuous growth."}
             </p>
@@ -744,26 +799,26 @@ function Portfolio1StaticLayout({ data }) {
 
         {skills.length > 0 && (
           <section id="skills" className="p1-section max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-8">Skills</h2>
-            <ul className="flex flex-wrap gap-3">
+            <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-8" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5 }}>Skills</motion.h2>
+            <motion.ul className="flex flex-wrap gap-3" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-30px" }}>
               {skills.map((skill, i) => (
-                <li key={i}>
-                  <span className="inline-block rounded-full border-2 border-emerald-500 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm font-medium">
+                <motion.li key={i} variants={fadeUp}>
+                  <motion.span className="inline-block rounded-full border-2 border-emerald-500 bg-emerald-50 text-emerald-800 px-4 py-2 text-sm font-medium" whileHover={{ scale: 1.05, boxShadow: "0 4px 14px rgba(16,185,129,0.25)" }} whileTap={buttonTap}>
                     {typeof skill === "string" ? skill : String(skill)}
-                  </span>
-                </li>
+                  </motion.span>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </section>
         )}
 
         {expItems.length > 0 && (
-          <section id="experience" className="p1-section bg-neutral-50 border-y border-neutral-100">
+          <section id="experience" className="p1-section bg-neutral-50/80 border-y border-neutral-100">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-              <h2 className="text-2xl sm:text-3xl font-bold text-black mb-10">Experience</h2>
-              <ul className="space-y-10">
+              <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-10" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>Experience</motion.h2>
+              <motion.ul className="space-y-10" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
                 {expItems.map((item, i) => (
-                  <li key={i} className="border-l-2 border-emerald-500 pl-6">
+                  <motion.li key={i} className="border-l-2 border-emerald-500 pl-6" variants={fadeInView}>
                     <h3 className="text-lg font-semibold text-black">{item.role}</h3>
                     {item.bullets.length > 0 && (
                       <ul className="mt-3 space-y-2 text-neutral-600 text-sm sm:text-base">
@@ -775,54 +830,56 @@ function Portfolio1StaticLayout({ data }) {
                         ))}
                       </ul>
                     )}
-                  </li>
+                  </motion.li>
                 ))}
-              </ul>
+              </motion.ul>
             </div>
           </section>
         )}
 
         {projects.length > 0 && (
           <section id="projects" className="p1-section max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-            <h2 className="text-2xl sm:text-3xl font-bold text-black mb-10">Projects</h2>
-            <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-10" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>Projects</motion.h2>
+            <motion.ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
               {projects.map((project, i) => (
-                <li key={i} className="rounded-xl border-2 border-neutral-200 bg-white p-6 hover:border-emerald-500 transition-colors">
-                  <p className="text-neutral-700 text-sm sm:text-base leading-relaxed">
-                    {typeof project === "string" ? project : String(project)}
-                  </p>
-                </li>
+                <motion.li key={i} variants={fadeInView}>
+                  <motion.div className="rounded-xl border-2 border-neutral-200 bg-white p-6 hover:border-emerald-500 transition-colors h-full" whileHover={cardHover} whileTap={buttonTap}>
+                    <p className="text-neutral-700 text-sm sm:text-base leading-relaxed">
+                      {typeof project === "string" ? project : String(project)}
+                    </p>
+                  </motion.div>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
           </section>
         )}
 
         <section id="contact" className="p1-section bg-neutral-900 text-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6">Let&apos;s work together</h2>
-            <p className="text-neutral-300 max-w-xl mb-10">
+            <motion.h2 className="text-2xl sm:text-3xl font-bold mb-6" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>Let&apos;s work together</motion.h2>
+            <motion.p className="text-neutral-300 max-w-xl mb-10" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.1, duration: 0.5 }}>
               Have a project in mind or want to connect? Reach out via email or phone.
-            </p>
-            <div className="flex flex-wrap gap-6">
+            </motion.p>
+            <motion.div className="flex flex-wrap gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
               {email && (
-                <a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-600 transition-colors">
+                <motion.a href={`mailto:${email}`} className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-600 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                   <Mail size={18} />
                   {email}
-                </a>
+                </motion.a>
               )}
               {phone && (
-                <a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors">
+                <motion.a href={`tel:${phone}`} className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                   <Phone size={18} />
                   {phone}
-                </a>
+                </motion.a>
               )}
               {website && (
-                <a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors">
+                <motion.a href={website.startsWith("http") ? website : `https://${website}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 px-5 py-3 text-sm font-medium hover:bg-white/10 transition-colors" variants={fadeUp} whileHover={{ scale: 1.05 }} whileTap={buttonTap}>
                   <ArrowUpRight size={18} />
                   Website
-                </a>
+                </motion.a>
               )}
-            </div>
+            </motion.div>
           </div>
         </section>
       </main>
@@ -850,7 +907,13 @@ const FULL_HTML_HEAD = `<!DOCTYPE html>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <style>body{font-family:system-ui,sans-serif;}</style>
+  <style>
+    body{font-family:system-ui,sans-serif;}
+    .p2-skill-card,.p2-project-card,.p3-card,.p1-section .rounded-xl{transition:transform 0.25s ease,box-shadow 0.25s ease;}
+    .p2-skill-card:hover,.p2-project-card:hover,.p3-card:hover,.p1-section .rounded-xl:hover{transform:translateY(-4px);box-shadow:0 12px 24px -8px rgba(0,0,0,0.12);}
+    a[href^="mailto:"],a[href^="https"],button{transition:transform 0.2s ease,opacity 0.2s ease;}
+    a[href^="mailto:"]:hover,a[href^="https"]:hover,button:hover{transform:scale(1.02);opacity:0.95;}
+  </style>
 </head>
 <body class="bg-white text-neutral-900">
   <div class="min-h-screen">`;
@@ -887,6 +950,21 @@ const FULL_HTML_TAIL = `</div>
       if (avatar && (avatar.classList.contains("border-cyan") || avatar.classList.contains("border-violet"))) {
         gsap.fromTo(avatar, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.9, ease: "back.out(1.2)", delay: 0.3 });
       }
+      var orbs = document.querySelectorAll(".deploy-bg-orb");
+      orbs.forEach(function(orb, i) {
+        var d = 8 + (i % 5);
+        gsap.fromTo(orb, { opacity: 0.1, scale: 1, x: 0, y: 0 }, {
+          opacity: 0.22,
+          scale: 1.08,
+          x: i % 2 === 0 ? 25 : -20,
+          y: i % 3 === 0 ? -15 : 12,
+          duration: d,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+          transformOrigin: "50% 50%"
+        });
+      });
     })();
   </script>
 </body></html>`;

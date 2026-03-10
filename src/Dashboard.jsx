@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2 } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2, FiMap, FiCode, FiAward } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -85,6 +85,24 @@ function StatCards({ atsScore, optimizeCount }) {
       title: "Choose project design",
       desc: "Pick a template and view your project.",
       link: "/templates/portfoliodesign",
+    },
+    {
+      icon: <FiMap className="w-6 h-6" />,
+      title: "AI Career Roadmap",
+      desc: "Get a personalized learning roadmap for your career goal.",
+      link: "/career-roadmap",
+    },
+    {
+      icon: <FiCode className="w-6 h-6" />,
+      title: "Coding Interview",
+      desc: "Solve coding questions with live editor and AI feedback.",
+      link: "/coding-interview/start",
+    },
+    {
+      icon: <FiAward className="w-6 h-6" />,
+      title: "Leaderboard",
+      desc: "Top coders by interview score.",
+      link: "/leaderboard",
     },
   ];
 
