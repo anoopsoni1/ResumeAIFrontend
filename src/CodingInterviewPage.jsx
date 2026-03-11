@@ -36,6 +36,7 @@ export default function CodingInterviewPage() {
   const [activeRightTab, setActiveRightTab] = useState("output");
   const [authChecking, setAuthChecking] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [showInfoPage, setShowInfoPage] = useState(true);
 
   const question = questions[currentIndex] ?? null;
 
@@ -65,7 +66,15 @@ export default function CodingInterviewPage() {
           navigate("/login", { replace: true });
           return;
         }
-        if (res.ok) setAuthorized(true);
+        if (res.ok) {
+          const data = await res.json();
+          const user = data?.user ?? data;
+          if (!user?.Premium) {
+            navigate("/price", { replace: true });
+            return;
+          }
+          setAuthorized(true);
+        }
       } catch {
         if (!cancelled) navigate("/login", { replace: true });
       } finally {
@@ -76,9 +85,9 @@ export default function CodingInterviewPage() {
     return () => { cancelled = true; };
   }, [navigate]);
 
-  // Fetch 15 questions on load (only after authorized)
+  // Fetch 15 questions only after user clicks Start on info page (triggered by showInfoPage -> false)
   useEffect(() => {
-    if (!authorized || authChecking) return;
+    if (!authorized || authChecking || showInfoPage) return;
     let cancelled = false;
     async function fetchQuestions() {
       setLoadingQuestions(true);
@@ -107,7 +116,7 @@ export default function CodingInterviewPage() {
     }
     fetchQuestions();
     return () => { cancelled = true; };
-  }, [role, difficulty, authorized, authChecking]);
+  }, [role, difficulty, authorized, authChecking, showInfoPage]);
 
   // Persist code/language/runResult for current index when they change
   useEffect(() => {
@@ -157,13 +166,27 @@ export default function CodingInterviewPage() {
     navigate("/coding-interview/start", { replace: true });
   }, [questions, navigate]);
 
+  // Warn and save+quit when user leaves tab or closes page
   useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.hidden) saveAndQuit();
+    const onBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = "Leaving will save your progress and exit the interview.";
     };
+    const onVisibilityChange = () => {
+      if (document.hidden && questions.length > 0) {
+        const confirmed = window.confirm(
+          "Leaving this tab will save your progress and exit the interview. This is your last chance. Are you sure?"
+        );
+        if (confirmed) saveAndQuit();
+      }
+    };
+    document.addEventListener("beforeunload", onBeforeUnload);
     document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
-  }, [saveAndQuit]);
+    return () => {
+      document.removeEventListener("beforeunload", onBeforeUnload);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [saveAndQuit, questions.length]);
 
   const handleRunCode = async () => {
     if (!question?.testCases?.length) return;
@@ -290,8 +313,60 @@ export default function CodingInterviewPage() {
     );
   }
 
+  // Information / details page before interview starts
+  if (showInfoPage) {
+    return (
+      <div className="h-screen max-h-screen overflow-hidden bg-slate-950 flex flex-col fixed inset-0 w-full">
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-lg w-full rounded-2xl border border-white/10 bg-slate-900/80 backdrop-blur-sm p-8 shadow-xl">
+            <h2 className="text-xl font-bold text-white mb-2">Coding Interview</h2>
+            <p className="text-slate-400 text-sm mb-6">
+              {role} · {difficulty}
+            </p>
+            <ul className="space-y-3 text-sm text-slate-300 mb-8">
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 mt-0.5">•</span>
+                <span><strong className="text-white">{QUESTION_COUNT} questions</strong> — solve each in the code editor.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 mt-0.5">•</span>
+                <span><strong className="text-white">Full screen</strong> — interview runs in full screen.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 mt-0.5">•</span>
+                <span><strong className="text-white">Do not switch tab</strong> — leaving this tab will show a warning, then your progress will be saved and you will exit the interview.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-400 mt-0.5">•</span>
+                <span>Use <strong className="text-white">Run Code</strong> to test against cases; <strong className="text-white">Save</strong> to store your session (when logged in).</span>
+              </li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => setShowInfoPage(false)}
+              className="w-full rounded-xl bg-emerald-600 py-3.5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-500 transition-all flex items-center justify-center gap-2"
+            >
+              <FiPlay className="w-5 h-5" />
+              Start Interview
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen max-h-screen overflow-hidden bg-slate-950 flex flex-col fixed inset-0 w-full">
+      {/* Full-screen blur loader while questions are loading */}
+      {loadingQuestions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12 w-12 rounded-full border-4 border-amber-500/30 border-t-amber-400 animate-spin" />
+            <p className="text-white font-semibold">Loading {QUESTION_COUNT} questions…</p>
+            <p className="text-slate-400 text-sm">Please wait.</p>
+          </div>
+        </div>
+      )}
       <header className="shrink-0 border-b border-white/10 bg-slate-900/95 backdrop-blur-sm flex items-center justify-between px-4 py-3 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
           <Link

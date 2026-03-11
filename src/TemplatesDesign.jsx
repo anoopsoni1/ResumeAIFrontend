@@ -81,14 +81,51 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
   );
 }
 
+const PROFILE_API = "https://resumeaibackend-oqcl.onrender.com";
+
 export default function TemplatesDesignPage() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
+  const [premiumChecked, setPremiumChecked] = useState(false);
   const isPremium = !!user?.Premium;
   const [size, setSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkPremium() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+        const res = await fetch(`${PROFILE_API}/api/v1/user/profile`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        if (cancelled) return;
+        if (!res.ok && res.status === 401) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const profileUser = data?.user ?? data;
+          if (!profileUser?.Premium) {
+            navigate("/price", { replace: true });
+            return;
+          }
+        }
+      } catch {
+        if (!cancelled) navigate("/login", { replace: true });
+      } finally {
+        if (!cancelled) setPremiumChecked(true);
+      }
+    }
+    checkPremium();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   useEffect(() => {
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -129,33 +166,11 @@ export default function TemplatesDesignPage() {
     navigate(`/templates/portfoliodesign/${templateId}`);
   };
 
-  if (!isPremium) {
+  if (!premiumChecked) {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-black">
-        <div className="absolute inset-0 z-0 bg-black/40" />
-        <div className="relative z-10 min-h-screen flex flex-col">
-          <Topbar />
-          <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-            <div className="rounded-2xl border border-amber-500/30 bg-zinc-900/80 backdrop-blur-sm p-8 sm:p-10 max-w-md text-center">
-              <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-                <Lock className="h-7 w-7 text-amber-400" />
-              </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Project designs are premium</h1>
-              <p className="text-zinc-400 text-sm sm:text-base mb-6">
-                Upgrade to access project templates and all premium features.
-              </p>
-              <Link
-                to="/price"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-5 py-3 text-sm font-medium text-white hover:bg-amber-500 transition-all"
-              >
-                <Lock className="h-4 w-4" /> Upgrade to unlock
-              </Link>
-            </div>
-            <Link to="/templates/design" className="mt-6 text-zinc-400 hover:text-white text-sm">
-              <ArrowLeft className="inline h-4 w-4 mr-1" /> Back to template type
-            </Link>
-          </main>
-          <AppFooter />
+      <div className="relative min-h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm px-8 py-6 text-center">
+          <p className="text-white font-semibold">Checking access…</p>
         </div>
       </div>
     );

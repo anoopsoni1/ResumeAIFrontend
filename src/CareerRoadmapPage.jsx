@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -13,9 +14,45 @@ function Topbar() {
 }
 
 export default function CareerRoadmapPage() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [roadmap, setRoadmap] = useState(null);
+  const [premiumChecked, setPremiumChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkPremium() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        if (cancelled) return;
+        if (!res.ok && res.status === 401) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const user = data?.user ?? data;
+          if (!user?.Premium) {
+            navigate("/price", { replace: true });
+            return;
+          }
+        }
+      } catch {
+        if (!cancelled) navigate("/login", { replace: true });
+      } finally {
+        if (!cancelled) setPremiumChecked(true);
+      }
+    }
+    checkPremium();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const handleGenerate = async (payload) => {
     setLoading(true);
@@ -42,6 +79,16 @@ export default function CareerRoadmapPage() {
       setLoading(false);
     }
   };
+
+  if (!premiumChecked) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm px-8 py-6 text-center">
+          <p className="text-white font-semibold">Checking access…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">

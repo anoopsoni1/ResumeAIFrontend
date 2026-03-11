@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FiAward, FiCode, FiHome } from "react-icons/fi";
 import AppHeader from "./AppHeader";
@@ -9,11 +9,48 @@ import Particles from "./Lighting.jsx";
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
 
 export default function LeaderboardPage() {
+  const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [premiumChecked, setPremiumChecked] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    async function checkPremium() {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+        if (cancelled) return;
+        if (!res.ok && res.status === 401) {
+          navigate("/login", { replace: true });
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          const user = data?.user ?? data;
+          if (!user?.Premium) {
+            navigate("/price", { replace: true });
+            return;
+          }
+        }
+      } catch {
+        if (!cancelled) navigate("/login", { replace: true });
+      } finally {
+        if (!cancelled) setPremiumChecked(true);
+      }
+    }
+    checkPremium();
+    return () => { cancelled = true; };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!premiumChecked) return;
     let cancelled = false;
     async function fetchLeaderboard() {
       try {
@@ -33,7 +70,17 @@ export default function LeaderboardPage() {
     }
     fetchLeaderboard();
     return () => { cancelled = true; };
-  }, []);
+  }, [premiumChecked]);
+
+  if (!premiumChecked) {
+    return (
+      <div className="relative min-h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm px-8 py-6 text-center">
+          <p className="text-white font-semibold">Checking access…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">

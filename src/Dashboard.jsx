@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2, FiMap, FiCode, FiAward } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2, FiMap, FiCode, FiAward, FiLock } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +16,7 @@ function Topbar() {
   return <AppHeader />;
 }
 
-function StatCards({ atsScore, optimizeCount }) {
+function StatCards({ atsScore, optimizeCount, user }) {
   const hasAts = atsScore != null && typeof atsScore === "number";
   const atsDisplay = hasAts ? `${atsScore}%` : "—";
   const optimizeDisplay = optimizeCount != null && typeof optimizeCount === "number" ? String(optimizeCount) : "—";
@@ -83,26 +83,30 @@ function StatCards({ atsScore, optimizeCount }) {
     {
       icon: <FiGlobe className="w-6 h-6" />,
       title: "Choose project design",
-      desc: "Pick a template and view your project.",
-      link: "/templates/portfoliodesign",
+      desc: user?.Premium ? "Pick a template and view your project." : "Premium only — upgrade to unlock.",
+      link: user?.Premium ? "/templates/portfoliodesign" : "/price",
+      premiumOnly: true,
     },
     {
       icon: <FiMap className="w-6 h-6" />,
       title: "AI Career Roadmap",
-      desc: "Get a personalized learning roadmap for your career goal.",
-      link: "/career-roadmap",
+      desc: user?.Premium ? "Get a personalized learning roadmap for your career goal." : "Premium only — upgrade to unlock.",
+      link: user?.Premium ? "/career-roadmap" : "/price",
+      premiumOnly: true,
     },
     {
       icon: <FiCode className="w-6 h-6" />,
       title: "Coding Interview",
-      desc: "Solve coding questions with live editor and AI feedback.",
-      link: "/coding-interview/start",
+      desc: user?.Premium ? "Solve coding questions with live editor and AI feedback." : "Premium only — upgrade to unlock.",
+      link: user?.Premium ? "/coding-interview/start" : "/price",
+      premiumOnly: true,
     },
     {
       icon: <FiAward className="w-6 h-6" />,
       title: "Leaderboard",
-      desc: "Top coders by interview score.",
-      link: "/leaderboard",
+      desc: user?.Premium ? "Top coders by interview score." : "Premium only — upgrade to unlock.",
+      link: user?.Premium ? "/leaderboard" : "/price",
+      premiumOnly: true,
     },
   ];
 
@@ -151,10 +155,16 @@ function StatCards({ atsScore, optimizeCount }) {
           <Link
             key={i}
             to={item.link}
-            className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-6 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200"
+            className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-4 sm:p-6 hover:border-amber-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-200 relative"
           >
+            {item.premiumOnly && !user?.Premium && (
+              <span className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-xs font-semibold text-amber-400">
+                <FiLock className="w-3.5 h-3.5" />
+                Premium
+              </span>
+            )}
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400 group-hover:border-amber-500/30 group-hover:text-amber-400/90 transition-colors">
-              {item.icon}
+              {item.premiumOnly && !user?.Premium ? <FiLock className="w-6 h-6" /> : item.icon}
             </div>
             <h4 className="mt-4 text-base font-semibold text-white group-hover:text-amber-50/90 transition-colors">
               {item.title}
@@ -163,7 +173,7 @@ function StatCards({ atsScore, optimizeCount }) {
               {item.desc}
             </p>
             <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-400 group-hover:text-amber-400 group-hover:gap-2.5 transition-all">
-              Get Started
+              {item.premiumOnly && !user?.Premium ? "Upgrade to unlock" : "Get Started"}
               <span className="text-lg leading-none">→</span>
             </span>
           </Link>
@@ -647,7 +657,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <StatCards atsScore={atsScore} optimizeCount={optimizeCount} />
+            <StatCards atsScore={atsScore} optimizeCount={optimizeCount} user={user} />
           </main>
         ) : (
           <div className="flex-1 flex items-center justify-center px-4 text-center">

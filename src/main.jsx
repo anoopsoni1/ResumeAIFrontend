@@ -45,6 +45,7 @@ import CareerRoadmapPage from './CareerRoadmapPage.jsx'
 import InterviewStartPage from './InterviewStartPage.jsx'
 import CodingInterviewPage from './CodingInterviewPage.jsx'
 import LeaderboardPage from './LeaderboardPage.jsx'
+import AuthCallback from './AuthCallback.jsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -71,6 +72,10 @@ const route = createBrowserRouter([
  {
   path : "/login" ,
    element : <Login />
+ },
+ {
+  path : "/auth/callback" ,
+   element : <AuthCallback />
  },
  {
   path : "/register" ,

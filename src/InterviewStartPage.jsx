@@ -54,6 +54,14 @@ export default function InterviewStartPage() {
             return;
           }
         }
+        if (res.ok) {
+          const data = await res.json();
+          const user = data?.user ?? data;
+          if (!user?.Premium) {
+            navigate("/price", { replace: true });
+            return;
+          }
+        }
       } catch {
         if (!cancelled) navigate("/login", { replace: true });
       } finally {
