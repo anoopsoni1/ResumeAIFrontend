@@ -34,8 +34,6 @@ export default function CodingInterviewPage() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState(null);
   const [activeRightTab, setActiveRightTab] = useState("output");
-  const [authChecking, setAuthChecking] = useState(true);
-  const [authorized, setAuthorized] = useState(false);
   const [showInfoPage, setShowInfoPage] = useState(true);
 
   const question = questions[currentIndex] ?? null;
@@ -44,50 +42,9 @@ export default function CodingInterviewPage() {
     if (!searchParams.get("role")) navigate("/coding-interview/start", { replace: true });
   }, [searchParams, navigate]);
 
-  // Auth check: redirect to login if not authorized
-  useEffect(() => {
-    let cancelled = false;
-    async function checkAuth() {
-      setAuthChecking(true);
-      try {
-        const accessToken = localStorage.getItem("accessToken");
-        const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
-          method: "GET",
-          credentials: "include",
-          headers,
-        });
-        if (cancelled) return;
-        if (!res.ok && res.status === 401) {
-          navigate("/login", { replace: true });
-          return;
-        }
-        if (!accessToken && !res.ok) {
-          navigate("/login", { replace: true });
-          return;
-        }
-        if (res.ok) {
-          const data = await res.json();
-          const user = data?.user ?? data;
-          if (!user?.Premium) {
-            navigate("/price", { replace: true });
-            return;
-          }
-          setAuthorized(true);
-        }
-      } catch {
-        if (!cancelled) navigate("/login", { replace: true });
-      } finally {
-        if (!cancelled) setAuthChecking(false);
-      }
-    }
-    checkAuth();
-    return () => { cancelled = true; };
-  }, [navigate]);
-
   // Fetch 15 questions only after user clicks Start on info page (triggered by showInfoPage -> false)
   useEffect(() => {
-    if (!authorized || authChecking || showInfoPage) return;
+    if (showInfoPage) return;
     let cancelled = false;
     async function fetchQuestions() {
       setLoadingQuestions(true);
@@ -116,7 +73,7 @@ export default function CodingInterviewPage() {
     }
     fetchQuestions();
     return () => { cancelled = true; };
-  }, [role, difficulty, authorized, authChecking, showInfoPage]);
+  }, [role, difficulty, showInfoPage]);
 
   // Persist code/language/runResult for current index when they change
   useEffect(() => {
@@ -301,17 +258,6 @@ export default function CodingInterviewPage() {
     { id: "output", label: "Output" },
     { id: "feedback", label: "AI Feedback" },
   ];
-
-  if (authChecking || !authorized) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-slate-950">
-        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm px-8 py-6 text-center">
-          <p className="text-white font-semibold">Checking authorization…</p>
-          <p className="mt-1 text-sm text-slate-400">Please wait.</p>
-        </div>
-      </div>
-    );
-  }
 
   // Information / details page before interview starts
   if (showInfoPage) {

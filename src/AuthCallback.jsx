@@ -27,9 +27,11 @@ export default function AuthCallback() {
           // ignore invalid user payload
         }
       }
-      // Replace URL so token is not left in history
-      window.history.replaceState({}, "", "/dashboard");
-      navigate("/dashboard", { replace: true });
+      const returnUrl = sessionStorage.getItem("loginReturnUrl");
+      if (returnUrl) sessionStorage.removeItem("loginReturnUrl");
+      const target = returnUrl && returnUrl.startsWith("/") && !returnUrl.startsWith("//") && !returnUrl.startsWith("http") ? returnUrl : "/dashboard";
+      window.history.replaceState({}, "", target);
+      navigate(target, { replace: true });
       return;
     }
 

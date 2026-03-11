@@ -60,6 +60,16 @@ export default function Login() {
     }
   }, [searchParams, toast]);
 
+  // Persist return URL for post-login redirect (used by email login and Google callback)
+  useEffect(() => {
+    const from = searchParams.get("from");
+    if (from && typeof from === "string") {
+      const p = from.trim();
+      if (p.startsWith("/") && !p.startsWith("//") && !p.startsWith("http"))
+        sessionStorage.setItem("loginReturnUrl", p);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(t);
@@ -253,7 +263,11 @@ export default function Login() {
         dispatch(setUser(data.data.user));
       }
       toast.success("Welcome back! Redirecting…");
-      navigate("/dashboard");
+      const returnUrl = searchParams.get("from")?.trim();
+      const safePath = returnUrl && returnUrl.startsWith("/") && !returnUrl.startsWith("//") && !returnUrl.startsWith("http") ? returnUrl : null;
+      const target = safePath || sessionStorage.getItem("loginReturnUrl") || "/dashboard";
+      if (sessionStorage.getItem("loginReturnUrl")) sessionStorage.removeItem("loginReturnUrl");
+      navigate(target || "/dashboard");
     } catch (err) {
       toast.error(err?.message || "Login failed. Please try again.");
     } finally {

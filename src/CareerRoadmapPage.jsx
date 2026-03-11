@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
@@ -13,12 +13,22 @@ function Topbar() {
   return <AppHeader />;
 }
 
+function safeReturnPath(path) {
+  if (!path || typeof path !== "string") return null;
+  const p = path.trim();
+  if (p.startsWith("//") || p.startsWith("http")) return null;
+  return p.startsWith("/") ? p : `/${p}`;
+}
+
 export default function CareerRoadmapPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [roadmap, setRoadmap] = useState(null);
   const [premiumChecked, setPremiumChecked] = useState(false);
+
+  const returnPath = safeReturnPath(location.pathname) || "/career-roadmap";
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +43,7 @@ export default function CareerRoadmapPage() {
         });
         if (cancelled) return;
         if (!res.ok && res.status === 401) {
-          navigate("/login", { replace: true });
+          navigate(`/login?from=${encodeURIComponent(returnPath)}`, { replace: true });
           return;
         }
         if (res.ok) {
@@ -45,14 +55,14 @@ export default function CareerRoadmapPage() {
           }
         }
       } catch {
-        if (!cancelled) navigate("/login", { replace: true });
+        if (!cancelled) navigate(`/login?from=${encodeURIComponent(returnPath)}`, { replace: true });
       } finally {
         if (!cancelled) setPremiumChecked(true);
       }
     }
     checkPremium();
     return () => { cancelled = true; };
-  }, [navigate]);
+  }, [navigate, returnPath]);
 
   const handleGenerate = async (payload) => {
     setLoading(true);
