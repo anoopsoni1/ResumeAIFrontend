@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiPlay, FiCheck, FiX, FiArrowLeft, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import CodingEditor, { STARTER_CODE } from "./CodingEditor";
 
@@ -35,6 +35,28 @@ export default function CodingInterviewPage() {
   const [saveMessage, setSaveMessage] = useState(null);
   const [activeRightTab, setActiveRightTab] = useState("output");
   const [showInfoPage, setShowInfoPage] = useState(true);
+  const [showEndSummary, setShowEndSummary] = useState(false);
+  const hasShownTabWarningRef = useRef(false);
+
+  const handleEnterFullscreen = useCallback(async () => {
+    const el = document.documentElement;
+    try {
+      if (el.requestFullscreen) {
+        await el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        await el.webkitRequestFullscreen();
+      } else if (el.msRequestFullscreen) {
+        await el.msRequestFullscreen();
+      }
+    } catch (e) {
+      // ignore fullscreen errors; continue interview
+    }
+  }, []);
+
+  const handleStartInterview = useCallback(async () => {
+    await handleEnterFullscreen();
+    setShowInfoPage(false);
+  }, [handleEnterFullscreen]);
 
   const question = questions[currentIndex] ?? null;
 
@@ -123,7 +145,7 @@ export default function CodingInterviewPage() {
     navigate("/coding-interview/start", { replace: true });
   }, [questions, navigate]);
 
-  // Warn and save+quit when user leaves tab or closes page
+  // Warn once when user leaves tab, then next time auto save+quit. Always warn on unload.
   useEffect(() => {
     const onBeforeUnload = (e) => {
       e.preventDefault();
@@ -131,10 +153,14 @@ export default function CodingInterviewPage() {
     };
     const onVisibilityChange = () => {
       if (document.hidden && questions.length > 0) {
-        const confirmed = window.confirm(
-          "Leaving this tab will save your progress and exit the interview. This is your last chance. Are you sure?"
-        );
-        if (confirmed) saveAndQuit();
+        if (!hasShownTabWarningRef.current) {
+          hasShownTabWarningRef.current = true;
+          window.alert(
+            "Warning: If you leave this tab again, your progress will be saved and you will automatically exit the interview."
+          );
+          return;
+        }
+        saveAndQuit();
       }
     };
     document.addEventListener("beforeunload", onBeforeUnload);
@@ -259,6 +285,28 @@ export default function CodingInterviewPage() {
     { id: "feedback", label: "AI Feedback" },
   ];
 
+  // End-of-interview summary: attempted, correct, wrong (from run results)
+  const getSummaryStats = useCallback(() => {
+    let attempted = 0;
+    let correct = 0;
+    const perQuestion = [];
+    for (let i = 0; i < questions.length; i++) {
+      const r = runResultByIndexRef.current[i];
+      const total = r?.total ?? 0;
+      const passed = r?.passed ?? 0;
+      if (total > 0) {
+        attempted++;
+        if (passed === total) correct++;
+        perQuestion.push({ index: i + 1, title: questions[i]?.title, passed, total, status: passed === total ? "correct" : "wrong" });
+      } else {
+        perQuestion.push({ index: i + 1, title: questions[i]?.title, passed: 0, total: 0, status: "not-attempted" });
+      }
+    }
+    const wrong = attempted - correct;
+    const notAttempted = questions.length - attempted;
+    return { attempted, correct, wrong, notAttempted, total: questions.length, perQuestion };
+  }, [questions]);
+
   // Information / details page before interview starts
   if (showInfoPage) {
     return (
@@ -289,7 +337,7 @@ export default function CodingInterviewPage() {
             </ul>
             <button
               type="button"
-              onClick={() => setShowInfoPage(false)}
+              onClick={handleStartInterview}
               className="w-full rounded-xl bg-emerald-600 py-3.5 font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-500 transition-all flex items-center justify-center gap-2"
             >
               <FiPlay className="w-5 h-5" />
@@ -313,15 +361,89 @@ export default function CodingInterviewPage() {
           </div>
         </div>
       )}
+
+      {/* End of interview summary */}
+      {showEndSummary && questions.length > 0 && (() => {
+        const stats = getSummaryStats();
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
+            <div className="max-w-lg w-full rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-sm p-8 shadow-xl">
+              <h2 className="text-xl font-bold text-white mb-2">Interview Summary</h2>
+              <p className="text-slate-400 text-sm mb-6">
+                Here’s how you did in this session.
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-xl border border-white/10 bg-slate-800/50 p-3 text-center">
+                  <div className="text-2xl font-bold text-white tabular-nums">{stats.total}</div>
+                  <div className="text-xs text-slate-400 uppercase tracking-wider">Total</div>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-slate-800/50 p-3 text-center">
+                  <div className="text-2xl font-bold text-white tabular-nums">{stats.attempted}</div>
+                  <div className="text-xs text-slate-400 uppercase tracking-wider">Attempted</div>
+                </div>
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-center">
+                  <div className="text-2xl font-bold text-emerald-300 tabular-nums">{stats.correct}</div>
+                  <div className="text-xs text-emerald-400/80 uppercase tracking-wider">Correct</div>
+                </div>
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-center">
+                  <div className="text-2xl font-bold text-rose-300 tabular-nums">{stats.wrong}</div>
+                  <div className="text-xs text-rose-400/80 uppercase tracking-wider">Wrong</div>
+                </div>
+              </div>
+              {stats.notAttempted > 0 && (
+                <p className="text-slate-500 text-sm mb-4">
+                  {stats.notAttempted} question{stats.notAttempted !== 1 ? "s" : ""} not attempted.
+                </p>
+              )}
+              <div className="max-h-48 overflow-y-auto rounded-xl border border-white/10 bg-slate-800/30 p-3 space-y-1.5 mb-6">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Per question</div>
+                {stats.perQuestion.map((q) => (
+                  <div key={q.index} className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-500 w-6">#{q.index}</span>
+                    {q.status === "correct" && <FiCheck className="w-4 h-4 text-emerald-400 shrink-0" />}
+                    {q.status === "wrong" && <FiX className="w-4 h-4 text-rose-400 shrink-0" />}
+                    {q.status === "not-attempted" && <span className="w-4 h-4 shrink-0 rounded-full border border-slate-500" />}
+                    <span className="text-slate-300 truncate flex-1">{q.title || `Question ${q.index}`}</span>
+                    {q.total > 0 && (
+                      <span className={`text-xs tabular-nums ${q.status === "correct" ? "text-emerald-400" : "text-rose-400"}`}>
+                        {q.passed}/{q.total}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowEndSummary(false)}
+                  className="flex-1 rounded-xl border border-white/20 bg-slate-700/50 py-3 font-semibold text-slate-300 hover:bg-slate-600/50 hover:text-white transition-all"
+                >
+                  Continue Interview
+                </button>
+                <button
+                  type="button"
+                  onClick={() => saveAndQuit()}
+                  className="flex-1 rounded-xl bg-amber-600 py-3 font-semibold text-white hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
+                >
+                  <FiArrowLeft className="w-4 h-4" />
+                  Back to Start
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       <header className="shrink-0 border-b border-white/10 bg-slate-900/95 backdrop-blur-sm flex items-center justify-between px-4 py-3 shadow-lg shadow-black/20">
         <div className="flex items-center gap-3">
-          <Link
-            to="/coding-interview/start"
+          <button
+            type="button"
+            onClick={() => setShowEndSummary(true)}
             className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 hover:border-amber-500/30 transition-all"
           >
             <FiArrowLeft className="w-4 h-4" />
             Back
-          </Link>
+          </button>
           {questions.length > 0 && (
             <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-slate-800/50 px-2 py-1.5">
               <button

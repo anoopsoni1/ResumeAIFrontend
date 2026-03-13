@@ -5,7 +5,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowLeft, Mail, Phone, Download, ChevronRight, Linkedin, Lock, ArrowUpRight, Upload } from "lucide-react";
+import { ArrowLeft, Mail, Phone, Download, ChevronRight, Linkedin, Lock, ArrowUpRight, Upload, FolderOpen } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 import AppHeader from "./AppHeader";
@@ -149,7 +149,7 @@ function Portfolio2Layout({ data }) {
     <div ref={rootRef} className="relative min-h-screen bg-[#050508] text-white overflow-x-hidden">
       {/* Portfolio 2 background: grid + cyan orbs + noise */}
       <div className="fixed inset-0 pointer-events-none z-0" aria-hidden>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,211,238,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,211,238,0.03)_1px,transparent_1px)] bg-size-[64px_64px]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(34,211,238,0.12)_0%,transparent_50%)]" />
         <motion.div className="deploy-bg-orb absolute top-1/4 right-0 w-[500px] h-[500px] rounded-full bg-cyan-500/15 blur-[130px]" animate={{ x: [0, 30, 0], opacity: [0.12, 0.2, 0.12] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
         <motion.div className="deploy-bg-orb absolute bottom-1/3 left-0 w-[400px] h-[400px] rounded-full bg-teal-500/10 blur-[100px]" animate={{ y: [0, -20, 0], opacity: [0.1, 0.18, 0.1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
@@ -269,7 +269,8 @@ function Portfolio2Layout({ data }) {
       {/* Project (projects) */}
       <section id="portfolio" className="p2-section relative py-20 sm:py-28 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-10 flex items-center gap-3">
+            <FolderOpen size={28} className="shrink-0 text-cyan-400" />
             Proj<span className="text-cyan-400">ect</span>
           </h2>
           <motion.div className="grid sm:grid-cols-2 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
@@ -289,7 +290,7 @@ function Portfolio2Layout({ data }) {
       </section>
 
       {/* Contact */}
-      <section id="contact" className="p2-section relative py-20 sm:py-28 bg-white/[0.02] border-t border-white/5">
+      <section id="contact" className="p2-section relative py-20 sm:py-28 bg-white/2 border-t border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">
             Cont<span className="text-cyan-400">act</span>
@@ -358,7 +359,7 @@ function Portfolio3HeroLetter({ letter }) {
     <motion.div className="relative flex items-center justify-center w-full h-full min-h-[320px] lg:min-h-[540px] select-none overflow-hidden" animate={{ y: [0, -8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
       <div
         ref={glowRef}
-        className="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-[28rem] lg:h-[28rem] rounded-full opacity-50"
+        className="absolute w-64 h-64 sm:w-80 sm:h-80 lg:w-md lg:h-112 rounded-full opacity-50"
         style={{
           background: "radial-gradient(circle, rgba(139,92,246,0.5) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)",
           filter: "blur(40px)",
@@ -367,7 +368,7 @@ function Portfolio3HeroLetter({ letter }) {
       />
       <div
         ref={circleRef}
-        className="relative flex items-center justify-center w-[14rem] h-[14rem] sm:w-[16rem] sm:h-[16rem] lg:w-[20rem] lg:h-[20rem] xl:w-[24rem] xl:h-[24rem] rounded-full border-[3px] sm:border-4 border-violet-500/80"
+        className="relative flex items-center justify-center w-56 h-56 sm:w-md sm:h-md lg:w-md lg:h-md rounded-full border-[3px] sm:border-4 border-violet-500/80"
         style={{
           boxShadow: "0 0 40px rgba(139,92,246,0.4), 0 0 80px rgba(139,92,246,0.2), inset 0 0 60px rgba(139,92,246,0.08)",
         }}
@@ -561,9 +562,10 @@ function Portfolio3Layout({ data }) {
       <section id="portfolio" className="p3-section relative py-20 sm:py-28 border-t border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <h2
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight"
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight flex items-center gap-3"
             style={{ fontFamily: "'Bebas Neue', sans-serif" }}
           >
+            <FolderOpen size={32} className="shrink-0 text-violet-500" />
             Proj<span className="text-violet-500">ects</span>
           </h2>
           <p className="text-white/60 text-sm sm:text-base uppercase tracking-widest mb-12" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
@@ -839,7 +841,9 @@ function Portfolio1StaticLayout({ data }) {
 
         {projects.length > 0 && (
           <section id="projects" className="p1-section max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-            <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-10" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>Projects</motion.h2>
+            <motion.h2 className="text-2xl sm:text-3xl font-bold text-black mb-10 flex items-center gap-3" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+              <FolderOpen size={28} className="shrink-0 text-emerald-500" /> Projects
+            </motion.h2>
             <motion.ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-60px" }}>
               {projects.map((project, i) => (
                 <motion.li key={i} variants={fadeInView}>
@@ -913,7 +917,7 @@ const FULL_HTML_HEAD = `<!DOCTYPE html>
     .p2-skill-card:hover,.p2-project-card:hover,.p3-card:hover,.p1-section .rounded-xl:hover{transform:translateY(-4px);box-shadow:0 12px 24px -8px rgba(0,0,0,0.12);}
     a[href^="mailto:"],a[href^="https"],button{transition:transform 0.2s ease,opacity 0.2s ease;}
     a[href^="mailto:"]:hover,a[href^="https"]:hover,button:hover{transform:scale(1.02);opacity:0.95;}
-  </style>
+  </style> 
 </head>
 <body class="bg-white text-neutral-900">
   <div class="min-h-screen">`;

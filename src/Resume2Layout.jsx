@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, ExternalLink } from "lucide-react";
+import { Phone, Mail, MapPin, ExternalLink, FolderOpen } from "lucide-react";
 
 const DOCUMENT_CLASS =
   "resume-document w-full mx-auto bg-white text-black shadow-2xl rounded-none sm:rounded-lg overflow-visible print:shadow-none print:rounded-none flex-1 min-h-0 flex flex-col";
@@ -148,7 +148,9 @@ export default function Resume2Layout({ data }) {
 
           {projectsList.length > 0 && (
             <section className="mb-5">
-              <h2 className={SECTION_HEAD}>Projects</h2>
+              <h2 className={`flex items-center gap-2 ${SECTION_HEAD}`}>
+                <FolderOpen size={14} className="shrink-0 text-[#0f766e]" /> Projects
+              </h2>
               <ul className="space-y-3 list-none pl-0">
                 {projectsList.map((project, i) => (
                   <li key={i} className="text-xs text-zinc-700 leading-relaxed">

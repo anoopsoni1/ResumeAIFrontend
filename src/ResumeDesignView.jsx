@@ -6,6 +6,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { getResumeContentForView } from "./utils/detailApi.js";
 import Resume2Layout from "./Resume2Layout";
+import Resume3Layout from "./Resume3Layout";
 import Resume7Layout from "./Resume7Layout";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
@@ -27,6 +28,7 @@ const PLACEHOLDER_RESUME_DATA = {
   phone: "+1 234 567 8900",
   location: "City, Country",
   website: "www.example.com",
+  references: [],
 };
 
 const DOCUMENT_CLASS =
@@ -184,34 +186,25 @@ function Resume1Layout({ data }) {
     <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col md:flex-row print:flex-row overflow-visible`}>
       {/* Left column: solid dark blue – name, title, CONTACT, ABOUT ME, # SKILLS (match reference) */}
       <div className="w-full md:w-[36%] print:w-[36%] min-h-0 flex flex-col bg-[#1e3a5f] print:bg-[#1e3a5f] text-white overflow-visible">
-        {/* Header: name + title only, no diagonal/avatar */}
+        {/* Header: name + title + key contact */}
         <div className="pt-6 pb-5 px-4 sm:px-5 border-b border-white/10">
           <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">{name}</h1>
           <p className="mt-1 text-sm text-zinc-300 font-medium">{role}</p>
+          <div className="mt-2 space-y-1 text-xs text-zinc-200">
+            {data?.phone && (
+              <p className="flex items-center gap-2">
+                <Phone size={14} className="shrink-0 text-white" /> {data.phone}
+              </p>
+            )}
+            {data?.email && (
+              <p className="flex items-center gap-2 break-all">
+                <Mail size={14} className="shrink-0 text-white" /> {data.email}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 px-4 sm:px-5 py-5 space-y-5">
-          <section>
-            <h2 className="text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">Contact</h2>
-            <div className="space-y-2 text-sm text-zinc-200">
-              {data?.phone && (
-                <p className="flex items-center gap-2">
-                  <Phone size={14} className="shrink-0 text-white" /> {data.phone}
-                </p>
-              )}
-              {data?.email && (
-                <p className="flex items-center gap-2 break-all">
-                  <Mail size={14} className="shrink-0 text-white" /> {data.email}
-                </p>
-              )}
-              {(data?.location || data?.address) && (
-                <p className="flex items-center gap-2">
-                  <MapPin size={14} className="shrink-0 text-white" /> {data.location || data.address}
-                </p>
-              )}
-            </div>
-          </section>
-
           {summary && (
             <section>
               <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">
@@ -247,41 +240,41 @@ function Resume1Layout({ data }) {
 
         <div className="flex-1 px-4 sm:px-6 py-4 space-y-5">
           {(data?.education || educationParsed) && (
-            <section>
-              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 pb-1.5 mb-3 border-b border-zinc-300">
+            <section className="text-[11px]">
+              <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-zinc-800 pb-1 mb-2 border-b border-zinc-300">
                 <GraduationCap size={14} className="shrink-0 text-[#1e3a5f]" /> Education
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {educationParsed ? (
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
                     <div>
-                      <p className="text-xs font-bold text-black">{educationParsed.degree}</p>
-                      <p className="text-xs text-zinc-700">{educationParsed.institution}</p>
+                      <p className="text-[11px] font-bold text-black">{educationParsed.degree}</p>
+                      <p className="text-[11px] text-zinc-700">{educationParsed.institution}</p>
                     </div>
                     {educationParsed.dates && (
                       <span className="text-[10px] text-zinc-500 shrink-0 sm:mt-0 mt-0.5">{educationParsed.dates}</span>
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-zinc-700 whitespace-pre-wrap leading-relaxed">{data.education}</p>
+                  <p className="text-[11px] text-zinc-700 whitespace-pre-wrap leading-relaxed">{data.education}</p>
                 )}
               </div>
             </section>
           )}
 
           {experienceEntries.length > 0 && (
-            <section>
-              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-800 pb-1.5 mb-3 border-b border-zinc-300">
+            <section className="text-[11px]">
+              <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-zinc-800 pb-1 mb-2 border-b border-zinc-300">
                 <Briefcase size={14} className="shrink-0 text-[#1e3a5f]" /> Experience
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {experienceEntries.map((entry, i) => (
                   <div key={i} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-black">{entry.jobTitle || "Role"}</p>
-                      {entry.company && <p className="text-xs text-zinc-700">{entry.company}</p>}
+                      <p className="text-[11px] font-bold text-black">{entry.jobTitle || "Role"}</p>
+                      {entry.company && <p className="text-[11px] text-zinc-700">{entry.company}</p>}
                       {entry.bullets.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5 list-none pl-0 text-xs text-zinc-700">
+                        <ul className="mt-1 space-y-0.5 list-none pl-0 text-[11px] text-zinc-700">
                           {entry.bullets.map((b, j) => (
                             <li key={j} className="flex gap-2 leading-snug">
                               <span className="w-1.5 h-1.5 rounded-full bg-[#1e3a5f] shrink-0 mt-1.5" aria-hidden />
@@ -485,13 +478,17 @@ export default function ResumeDesignView() {
               ...(fitScale < 1 ? { position: "absolute", top: 0, left: 0 } : { flex: 1 }),
             }}
           >
-            {template?.name && (template.name.includes("1") || template.name.toLowerCase().includes("classic")) ? (
-              <Resume1Layout data={displayData} />
-            ) : template?.name && template.name.includes("7") ? (
-              <Resume7Layout data={displayData} />
-            ) : (
-              <Resume2Layout data={displayData} />
-            )}
+            {(() => {
+              const category = (template?.category || "").toString().trim().toLowerCase();
+              if (category === "classic") return <Resume1Layout data={displayData} />;
+              if (category === "minimal") return <Resume3Layout data={displayData} />;
+              if (category === "premium") return <Resume7Layout data={displayData} />;
+              if (category === "feature") return <Resume2Layout data={displayData} />;
+              if (template?.name && (template.name.includes("1") || template.name.toLowerCase().includes("classic"))) return <Resume1Layout data={displayData} />;
+              if (template?.name && template.name.includes("3")) return <Resume3Layout data={displayData} />;
+              if (template?.name && template.name.includes("7")) return <Resume7Layout data={displayData} />;
+              return <Resume3Layout data={displayData} />;
+            })()}
             <footer className="resume-doc-footer mt-auto pt-2 text-center text-zinc-500 text-[10px] sm:text-xs print:text-[10px] print:text-zinc-600">
               Made by Resume AI
             </footer>

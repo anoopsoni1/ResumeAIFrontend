@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, Linkedin } from "lucide-react";
+import { Phone, Mail, MapPin, Linkedin, FolderOpen } from "lucide-react";
 
 const DOCUMENT_CLASS =
   "resume-document w-full mx-auto bg-white text-black shadow-2xl rounded-none sm:rounded-lg overflow-visible print:shadow-none print:rounded-none flex-1 min-h-0 flex flex-col";
@@ -90,12 +90,21 @@ export default function Resume7Layout({ data }) {
       </header>
 
       <div className="w-full flex flex-col md:flex-row print:flex-row flex-1 min-h-0">
-        {/* Left column (wider): Professional Summary, Employment History */}
+        {/* Left column (wider): Professional Summary, Experience, Education */}
         <div className="w-full md:w-[60%] print:w-[60%] min-h-0 flex flex-col px-4 sm:px-6 py-5 border-b md:border-b-0 md:border-r border-zinc-200">
           {summary && (
             <section className="mb-5">
               <h2 className={SECTION_HEAD}>Professional Summary</h2>
               <p className={`text-xs ${TEXT_DARK} leading-relaxed`}>{summary}</p>
+            </section>
+          )}
+
+          {skillsList.length > 0 && (
+            <section className="mb-5">
+              <h2 className={SECTION_HEAD}>Skills</h2>
+              <p className={`text-xs ${TEXT_DARK} leading-relaxed`}>
+                {skillsList.map((s) => (typeof s === "string" ? s : s?.label ?? "")).join(", ")}
+              </p>
             </section>
           )}
 
@@ -137,36 +146,6 @@ export default function Resume7Layout({ data }) {
               </div>
             </section>
           )}
-        </div>
-
-        {/* Right column: Projects, Skills, Education, Courses, Passions */}
-        <div className="w-full md:w-[40%] print:w-[40%] min-h-0 flex flex-col px-4 sm:px-5 py-5 bg-white">
-          {projectsList.length > 0 && (
-            <section className="mb-5">
-              <h2 className={SECTION_HEAD}>Projects</h2>
-              <div className="space-y-3">
-                {projectsList.map((project, i) => (
-                  <div key={i}>
-                    <p className={`text-xs font-bold ${TEXT_DARK}`}>
-                      {typeof project === "string" ? project : project?.title || project?.description || "Achievement"}
-                    </p>
-                    {(typeof project === "object" ? project?.description : null) && (
-                      <p className={`text-xs ${TEXT_DARK} mt-0.5 leading-relaxed`}>{project.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {skillsList.length > 0 && (
-            <section className="mb-5">
-              <h2 className={SECTION_HEAD}>Skills</h2>
-              <p className={`text-xs ${TEXT_DARK} leading-relaxed`}>
-                {skillsList.map((s) => (typeof s === "string" ? s : s?.label ?? "")).join(", ")}
-              </p>
-            </section>
-          )}
 
           {(data?.education || educationParsed) && (
             <section className="mb-5">
@@ -200,6 +179,29 @@ export default function Resume7Layout({ data }) {
                 ) : (
                   <p className={`text-xs ${TEXT_DARK} whitespace-pre-wrap`}>{data.education}</p>
                 )}
+              </div>
+            </section>
+          )}
+        </div>
+
+        {/* Right column: Projects, Courses, Passions */}
+        <div className="w-full md:w-[40%] print:w-[40%] min-h-0 flex flex-col px-4 sm:px-5 py-5 bg-white">
+          {projectsList.length > 0 && (
+            <section className="mb-5">
+              <h2 className={`flex items-center gap-2 ${SECTION_HEAD}`}>
+                <FolderOpen size={14} className="shrink-0 text-orange-500" /> Projects
+              </h2>
+              <div className="space-y-3">
+                {projectsList.map((project, i) => (
+                  <div key={i}>
+                    <p className={`text-xs font-bold ${TEXT_DARK}`}>
+                      {typeof project === "string" ? project : project?.title || project?.description || "Achievement"}
+                    </p>
+                    {(typeof project === "object" ? project?.description : null) && (
+                      <p className={`text-xs ${TEXT_DARK} mt-0.5 leading-relaxed`}>{project.description}</p>
+                    )}
+                  </div>
+                ))}
               </div>
             </section>
           )}
