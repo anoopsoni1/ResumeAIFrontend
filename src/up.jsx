@@ -22,13 +22,12 @@ export async function fetchTemplateById(id) {
   return json.data;
 }
 
-/** POST create template (name + image file + type: "resume" | "portfolio", category: classic|minimal|premium|feature) */
-export async function createTemplate(name, imageFile, type = "resume", category = "classic") {
+/** POST create template (name + image file + type: "resume" | "portfolio") */
+export async function createTemplate(name, imageFile, type = "resume") {
   const formData = new FormData();
   formData.append("name", name);
   formData.append("image", imageFile);
   formData.append("type", type === "portfolio" ? "portfolio" : "resume");
-  formData.append("category", category);
   const res = await fetch(TEMPLATES_API, {
     method: "POST",
     body: formData,
@@ -56,7 +55,6 @@ export default function UpPage() {
   const [createName, setCreateName] = useState("");
   const [createFile, setCreateFile] = useState(null);
   const [createType, setCreateType] = useState("resume");
-  const [createCategory, setCreateCategory] = useState("classic");
   const [size, setSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 768,
     height: typeof window !== "undefined" ? window.innerHeight : 1024,
@@ -96,7 +94,7 @@ export default function UpPage() {
     setError("");
     setLoading(true);
     try {
-      await createTemplate(createName.trim(), createFile, createType, createCategory);
+      await createTemplate(createName.trim(), createFile, createType);
       setCreateName("");
       setCreateFile(null);
       if (document.getElementById("create-image")) {
@@ -185,19 +183,6 @@ export default function UpPage() {
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-zinc-400 text-sm">Category</span>
-            <select
-              value={createCategory}
-              onChange={(e) => setCreateCategory(e.target.value)}
-              className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-white w-40"
-            >
-              <option value="classic">Classic</option>
-              <option value="minimal">Minimal</option>
-              <option value="premium">Premium</option>
-              <option value="feature">Feature</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1">
             <span className="text-zinc-400 text-sm">Image</span>
             <input
               id="create-image"
@@ -245,9 +230,7 @@ export default function UpPage() {
                   )}
                   <div className="p-3">
                     <p className="font-medium">{t.name}</p>
-                    <p className="text-zinc-400 text-xs">
-                      {t.type === "portfolio" ? "Portfolio" : "Resume"} · {(t.category || "classic").toString().charAt(0).toUpperCase() + (t.category || "classic").toString().slice(1)}
-                    </p>
+                    <p className="text-zinc-400 text-xs">{t.type === "portfolio" ? "Portfolio" : "Resume"}</p>
                     <p className="text-zinc-500 text-xs truncate">{t.image}</p>
                   </div>
                 </button>

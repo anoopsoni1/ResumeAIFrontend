@@ -6,7 +6,7 @@ const DOCUMENT_CLASS =
 const TEXT_DARK = "text-[#333]";
 /** Section heading: bold uppercase dark grey with thin orange underline */
 const SECTION_HEAD =
-  "text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#333] pb-1 mb-2 border-b-2 border-orange-500";
+  "text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[#333] pb-1 mb-2 border-b-2 border-orange-500";
 
 function parseExperienceEntryDetailed(entry) {
   const lines = (entry || "")
