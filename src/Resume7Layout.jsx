@@ -59,7 +59,7 @@ export default function Resume7Layout({ data }) {
       {/* Header: name + title left; phone & location stacked below; email & LinkedIn right (orange icons) aligned with name */}
       <header className="w-full flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-2 sm:gap-4 px-4 sm:px-6 pt-5 pb-4 border-b border-zinc-200">
         <div className="flex flex-col gap-0.5">
-          <h1 className={`text-xl sm:text-2xl font-bold ${TEXT_DARK} tracking-tight`}>{name}</h1>
+          <h1 className={`text-2xl sm:text-3xl font-bold ${TEXT_DARK} tracking-tight`}>{name}</h1>
           <p className={`text-sm font-normal ${TEXT_DARK}`}>{role}</p>
           <div className="flex flex-col gap-0.5 mt-1 text-xs text-[#333]">
             {data?.phone && (

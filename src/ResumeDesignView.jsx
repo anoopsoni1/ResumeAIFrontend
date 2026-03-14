@@ -186,7 +186,7 @@ function Resume1Layout({ data }) {
       <div className="w-full md:w-[36%] print:w-[36%] min-h-0 flex flex-col bg-[#1e3a5f] print:bg-[#1e3a5f] text-white overflow-visible">
         {/* Header: name + title + contact directly below */}
         <div className="pt-6 pb-4 px-4 sm:px-5 border-b border-white/10">
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">{name}</h1>
+          <h1 className="text-2xl sm:text-2xl font-bold text-white tracking-tight leading-tight">{name}</h1>
           <p className="mt-1 text-sm text-zinc-300 font-medium">{role}</p>
           <div className="mt-2.5 space-y-1.5 text-sm text-zinc-200">
             {data?.phone && (
@@ -207,13 +207,13 @@ function Resume1Layout({ data }) {
           </div>
         </div>
 
-        <div className="flex-1 px-4 sm:px-5 py-5 space-y-5">
+        <div className="flex-1 px-4 sm:px-5 pt-3 pb-5 space-y-4">
           {summary && (
             <section>
-              <h2 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-white mb-2.5">
+              <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white mb-2">
                 <User size={14} className="shrink-0 text-white" /> About Me
               </h2>
-              <p className="text-sm text-zinc-200 leading-relaxed">{summary}</p>
+              <p className="text-xs text-zinc-200 leading-snug">{summary}</p>
             </section>
           )}
 
@@ -469,9 +469,9 @@ export default function ResumeDesignView() {
         </div>
       </div>
 
-      {/* Resume: strict one page (11in); content scales to fit */}
-      <main className="flex-1 py-4 sm:py-6 px-3 sm:px-4 overflow-auto">
-        <div ref={wrapperRef} className={ONE_PAGE_WRAPPER_CLASS}>
+      {/* Resume: strict one page (11in); content scales to fit. On mobile, minimal side padding so download fills page. */}
+      <main className="flex-1 py-4 sm:py-6 px-1 sm:px-4 overflow-auto print:p-0">
+        <div ref={wrapperRef} className={`${ONE_PAGE_WRAPPER_CLASS} print:max-w-none`}>
           <div
             ref={contentRef}
             className="resume-content-fit w-full origin-top-left flex flex-col min-h-0"
@@ -495,21 +495,35 @@ export default function ResumeDesignView() {
         </div>
       </main>
 
-      {/* Print / PDF: one page only (11in). Turn off "Headers and footers" in Print dialog to hide date. */}
+      {/* Print / PDF: full page, no margins. Turn off "Headers and footers" in Print dialog to hide date. */}
       <style>{`
         @page { size: letter; margin: 0; }
         @media print {
-          body { background: #fff !important; }
+          html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; width: 100% !important; }
           .print\\:hidden { display: none !important; }
+          main {
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
           .resume-one-page {
+            width: 100% !important;
+            max-width: 100% !important;
             height: 11in !important;
             max-height: 11in !important;
             min-height: 11in !important;
             overflow: hidden !important;
             page-break-after: avoid !important;
             page-break-inside: avoid !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           .resume-content-fit {
+            width: 100% !important;
+            max-width: 100% !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -517,7 +531,11 @@ export default function ResumeDesignView() {
             box-shadow: none !important;
             height: 100% !important;
             max-height: 11in !important;
+            max-width: 100% !important;
+            width: 100% !important;
             overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -525,7 +543,6 @@ export default function ResumeDesignView() {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          main { background: transparent !important; padding: 0 !important; overflow: visible !important; }
         }
       `}</style>
       <AppFooter  />

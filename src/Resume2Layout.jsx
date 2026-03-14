@@ -44,7 +44,7 @@ export default function Resume2Layout({ data }) {
     <article className={`${DOCUMENT_CLASS} max-w-4xl flex flex-col overflow-visible bg-[#fafaf9] print:bg-[#fafaf9] border border-zinc-200 print:border-zinc-300`}>
       <div className="w-full flex flex-row flex-wrap items-start justify-between gap-4 px-4 sm:px-6 pt-5 pb-4 border-b border-zinc-200">
         <div>
-          <h1 className={`text-xl sm:text-2xl font-bold ${TEAL} tracking-tight`}>{name}</h1>
+          <h1 className={`text-2xl sm:text-3xl font-bold ${TEAL} tracking-tight`}>{name}</h1>
           <p className="text-sm text-zinc-600 mt-0.5">{role}</p>
         </div>
         <div className="space-y-1.5 text-xs text-zinc-700 text-right">
