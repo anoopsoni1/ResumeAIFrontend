@@ -6,6 +6,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { getResumeContentForView } from "./utils/detailApi.js";
 import Resume2Layout from "./Resume2Layout";
+import Resume3Layout from "./Resume3Layout";
 import Resume7Layout from "./Resume7Layout";
 
 const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
@@ -483,6 +484,8 @@ export default function ResumeDesignView() {
           >
             {template?.name && (template.name.includes("1") || template.name.toLowerCase().includes("classic")) ? (
               <Resume1Layout data={displayData} />
+            ) : template?.name && template.name.includes("3") ? (
+              <Resume3Layout data={displayData} />
             ) : template?.name && template.name.includes("7") ? (
               <Resume7Layout data={displayData} />
             ) : (

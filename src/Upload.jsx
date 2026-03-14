@@ -254,7 +254,7 @@ function Payal() {
           className="w-full max-w-5xl rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-2xl shadow-2xl shadow-black/40 p-5 sm:p-8"
         >
           <form onSubmit={handleUpload} className="space-y-5">
-            <label className="block">
+            <label className="block cursor-pointer">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -278,7 +278,11 @@ function Payal() {
                       : "border-white/20 hover:border-amber-500/50 hover:bg-white/5"
                   }
                 `}
-                onClick={() => user && fileInputRef.current?.click()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (file) return;
+                  if (user) fileInputRef.current?.click();
+                }}
               >
                 {file ? (
                   <>

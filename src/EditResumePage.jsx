@@ -162,6 +162,13 @@ export default function EditResumePage() {
       setText(edited);
       localStorage.setItem("EditedResumeText", edited);
       dispatch(setEditedResumeText({ ...data, data: { ...responseData, editedText: edited } }));
+      if (token()) {
+        fetch(`${API_BASE}/increment-optimize`, {
+          method: "POST",
+          credentials: "include",
+          headers: { Authorization: `Bearer ${token()}` },
+        }).catch(() => {});
+      }
     } catch (err) {
       setError(err?.message || "AI improvement failed");
     } finally {
