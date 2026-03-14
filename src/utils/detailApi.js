@@ -5,7 +5,7 @@
  * Returns data in the same shape as parseResume() for use in ResumeDesignView, Portfolio, PortfolioDesignView.
  */
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "../config.js";
 
 /** Form shape used by Add Details page (for localStorage "addDetailsForm") */
 const INITIAL_FORM = {

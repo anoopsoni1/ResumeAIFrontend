@@ -9,7 +9,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import { useToast } from "./context/ToastContext";
 
-const API_BASE =  "https://resumeaibackend-oqcl.onrender.com" ;
+import { API_BASE, API_BASE_URL } from "./config.js";
 
 const container = {
   hidden: { opacity: 0 },
@@ -103,7 +103,7 @@ export default function Login() {
     }
     setForgotLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/forgot-password`, {
+      const res = await fetch(`${API_BASE}/forgot-password`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -129,7 +129,7 @@ export default function Login() {
     if (!forgotEmail?.trim() || resendCooldown > 0 || forgotLoading) return;
     setForgotLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/forgot-password`, {
+      const res = await fetch(`${API_BASE}/forgot-password`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ export default function Login() {
     }
     setForgotLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/verify-forgot-otp`, {
+      const res = await fetch(`${API_BASE}/verify-forgot-otp`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -195,7 +195,7 @@ export default function Login() {
     }
     setForgotLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/reset-password`, {
+      const res = await fetch(`${API_BASE}/reset-password`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -241,7 +241,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/login`, {
+      const res = await fetch(`${API_BASE}/login`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -402,7 +402,7 @@ export default function Login() {
                 </motion.div>
                 <motion.a
                   variants={item}
-                  href={`${API_BASE}/api/v1/auth/google`}
+                  href={`${API_BASE_URL}/api/v1/auth/google`}
                   className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-white/10 border border-white/20 text-white font-medium hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-black transition-all duration-200 active:scale-[0.98]"
                   whileTap={{ scale: 0.98 }}
                 >

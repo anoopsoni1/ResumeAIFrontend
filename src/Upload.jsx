@@ -10,6 +10,7 @@ import { parseResume } from "./utils/parseResume.js";
 import { detailLikeToForm } from "./utils/detailApi.js";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
+import { API_BASE } from "./config.js";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -144,7 +145,7 @@ function Payal() {
       const headers = {};
       if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
-      const res = await fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/upload", {
+      const res = await fetch(`${API_BASE}/upload`, {
         method: "POST",
         credentials: "include", 
         headers,

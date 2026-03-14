@@ -16,6 +16,7 @@ import { FileText } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser, clearUser } from "./slice/user.slice";
 import { useLogout } from "./utils/authUtils";
+import { API_BASE } from "./config.js";
 
 const MENU_ITEMS = [
   { to: "/", label: "Home", icon: FaHome },
@@ -67,7 +68,7 @@ export default function AppHeader({ onLogout }) {
       return;
     }
     let cancelled = false;
-    fetch("https://resumeaibackend-oqcl.onrender.com/api/v1/user/profile", {
+    fetch(`${API_BASE}/profile`, {
       method: "GET",
       credentials: "include",
       headers: { Authorization: `Bearer ${token}` },

@@ -10,7 +10,7 @@ import Particles from "./Lighting.jsx";
 // Socket.IO from CDN (index.html) as window.io – no npm package required
 const getSocketIO = () => (typeof window !== "undefined" ? window.io : null);
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
+import { API_BASE, API_BASE_URL } from "./config.js";
 const ICE_SERVERS = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
@@ -83,7 +83,7 @@ function LiveInterviewCall() {
     async function checkAuth() {
       setAuthChecking(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -113,7 +113,7 @@ function LiveInterviewCall() {
     async function fetchInterview() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+        const res = await fetch(`${API_BASE}/interviews/${id}`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -141,7 +141,7 @@ function LiveInterviewCall() {
       setCallState("error");
       return;
     }
-    let socket = io(API_BASE, {
+    let socket = io(API_BASE_URL, {
       withCredentials: true,
       transports: ["websocket", "polling"],
       reconnectionAttempts: 5,
@@ -164,7 +164,7 @@ function LiveInterviewCall() {
         localStreamRef.current = stream;
         if (localVideoRef.current) localVideoRef.current.srcObject = stream;
 
-        await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+        await fetch(`${API_BASE}/interviews/${id}`, {
           method: "PUT",
           credentials: "include",
           headers: { "Content-Type": "application/json", ...getHeaders() },
@@ -283,7 +283,7 @@ function LiveInterviewCall() {
   const handleEndCall = async () => {
     endCall();
     try {
-      await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+      await fetch(`${API_BASE}/interviews/${id}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...getHeaders() },

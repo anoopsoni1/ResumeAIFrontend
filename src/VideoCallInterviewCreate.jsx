@@ -10,11 +10,13 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
+import { API_BASE } from "./config.js";
+import { useToast } from "./context/ToastContext";
 
 function VideoCallInterviewCreate() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const toast = useToast();
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [authChecking, setAuthChecking] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -42,7 +44,7 @@ function VideoCallInterviewCreate() {
     async function checkAuth() {
       setAuthChecking(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -84,7 +86,7 @@ function VideoCallInterviewCreate() {
     }
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/interviews`, {
+      const res = await fetch(`${API_BASE}/interviews`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...getHeaders() },
@@ -96,7 +98,9 @@ function VideoCallInterviewCreate() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data?.message || data?.error || "Failed to create interview.");
+        const msg = data?.message || data?.error || "Failed to create interview.";
+        setError(msg);
+        if (res.status === 429) toast.error(msg);
         return;
       }
       const newId = data?.data?._id;

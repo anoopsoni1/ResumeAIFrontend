@@ -9,7 +9,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE ="https://resumeaibackend-oqcl.onrender.com"
+import { API_BASE } from "./config.js";
 
 function VideoCallInterviews() {
   const dispatch = useDispatch();
@@ -39,7 +39,7 @@ function VideoCallInterviews() {
     async function checkAuth() {
       setAuthChecking(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -70,7 +70,7 @@ function VideoCallInterviews() {
     async function fetchInterviews() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/interviews`, {
+        const res = await fetch(`${API_BASE}/interviews`, {
           credentials: "include",
           headers: getHeaders(),
         });

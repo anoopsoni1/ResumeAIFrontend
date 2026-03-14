@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import Particles from "./Lighting.jsx";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
-const TEMPLATES_API = `${API_BASE}/api/v1/user/templates`;
+import { API_BASE } from "./config.js";
+const TEMPLATES_API = `${API_BASE}/templates`;
 
 // ——— API calls for template.controller.js ———
 

@@ -17,7 +17,7 @@ import AppFooter from "./AppFooter";
 import { useToast } from "./context/ToastContext";
 
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "./config.js";
 
 function buildResumeText(form) {
   const lines = [];

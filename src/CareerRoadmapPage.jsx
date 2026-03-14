@@ -7,7 +7,8 @@ import CareerRoadmapForm from "./CareerRoadmapForm";
 import RoadmapResult from "./RoadmapResult";
 import Particles from "./Lighting.jsx";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
+import { useToast } from "./context/ToastContext";
 
 function Topbar() {
   return <AppHeader />;
@@ -23,6 +24,7 @@ function safeReturnPath(path) {
 export default function CareerRoadmapPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [roadmap, setRoadmap] = useState(null);
@@ -36,7 +38,7 @@ export default function CareerRoadmapPage() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,
@@ -69,15 +71,26 @@ export default function CareerRoadmapPage() {
     setError(null);
     setRoadmap(null);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/generate-roadmap`, {
+      const accessToken = localStorage.getItem("accessToken");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      };
+      const res = await fetch(`${API_BASE}/generate-roadmap`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        headers,
         body: JSON.stringify(payload),
       });
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json?.message || "Failed to generate roadmap");
+        const message =
+          res.status === 429
+            ? json?.message || json?.error || "Daily limit reached (15 suggestions per day). Try again tomorrow."
+            : json?.message || "Failed to generate roadmap";
+        setError(message);
+        if (res.status === 429) toast.error(message);
         return;
       }
 
@@ -132,6 +145,7 @@ export default function CareerRoadmapPage() {
               </h1>
               <p className="mt-2 text-sm text-slate-400">
                 Enter your goal and current skills to get a personalized learning roadmap.
+                Premium: up to 15 suggestions per day.
               </p>
             </motion.div>
 

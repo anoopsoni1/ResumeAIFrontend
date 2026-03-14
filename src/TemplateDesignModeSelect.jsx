@@ -6,7 +6,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "./config.js";
 
 function Topbar() {
   return <AppHeader />;

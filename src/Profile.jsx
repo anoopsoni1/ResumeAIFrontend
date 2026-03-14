@@ -9,7 +9,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { useNavigate, Link } from "react-router-dom";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 function Profile() {
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ function Profile() {
     async function checkAuth() {
       setAuthChecking(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           credentials: "include",
           headers: getAuthHeaders(),
         });
@@ -76,7 +76,7 @@ function Profile() {
     }
     setUpdateLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+      const res = await fetch(`${API_BASE}/profile`, {
         method: "PATCH",
         credentials: "include",
         headers: {

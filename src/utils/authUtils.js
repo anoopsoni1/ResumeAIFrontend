@@ -3,8 +3,9 @@ import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { clearUser } from "../slice/user.slice";
+import { API_BASE } from "../config.js";
 
-const LOGOUT_URL = "https://resumeaibackend-oqcl.onrender.com/api/v1/user/logout";
+const LOGOUT_URL = `${API_BASE}/logout`;
 
 /**
  * Performs full logout: backend call, clear localStorage (accessToken + user), clear Redux.

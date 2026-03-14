@@ -14,7 +14,7 @@ import PortfolioHTMLDownload from "./Download";
 import { getResumeContentForView } from "./utils/detailApi.js";
 import { useToast } from "./context/ToastContext";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "./config.js";
 
 /** Placeholder data so logged-out users can still view portfolio template */
 const PLACEHOLDER_PORTFOLIO_DATA = {

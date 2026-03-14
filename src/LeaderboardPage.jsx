@@ -6,7 +6,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import Particles from "./Lighting.jsx";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 export default function LeaderboardPage() {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,
@@ -54,7 +54,7 @@ export default function LeaderboardPage() {
     let cancelled = false;
     async function fetchLeaderboard() {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/leaderboard?limit=50`);
+        const res = await fetch(`${API_BASE}/leaderboard?limit=50`);
         const json = await res.json();
         if (cancelled) return;
         if (!res.ok) {

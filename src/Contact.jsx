@@ -8,7 +8,7 @@ import { Send, Sparkles } from "lucide-react";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 const fadeUp = { initial: { opacity: 0, y: 28 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5 } };
 const stagger = { animate: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
@@ -52,7 +52,7 @@ export default function Contact() {
     setSubmitting(true);
     setStatus({ type: "", text: "" });
     try {
-      await axios.post(`${API_BASE}/api/v1/user/mail`, form);
+      await axios.post(`${API_BASE}/mail`, form);
       setStatus({ type: "success", text: "Thanks! We'll get back to you within 24 hours." });
       setForm({ name: "", email: "", phone: "", message: "" });
     } catch (error) {

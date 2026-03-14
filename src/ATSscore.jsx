@@ -9,7 +9,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 function getScoreTier(score) {
   if (score >= 80) return { label: "Excellent", color: "emerald", bg: "bg-emerald-500/20", text: "text-emerald-400", ring: "ring-emerald-400/50" };
@@ -69,7 +69,7 @@ function AtsChecker() {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,
@@ -112,7 +112,7 @@ function AtsChecker() {
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       };
 
-      const res = await fetch(`${API_BASE}/api/v1/user/atscheck`, {
+      const res = await fetch(`${API_BASE}/atscheck`, {
         method: "POST",
         credentials: "include",
         headers,
@@ -135,7 +135,7 @@ function AtsChecker() {
       // Save or update ATS score in backend (upsert: create on first time, update on retry)
       const score = resultData?.score;
       if (typeof score === "number") {
-        const saveRes = await fetch(`${API_BASE}/api/v1/user/create-atsscore`, {
+        const saveRes = await fetch(`${API_BASE}/create-atsscore`, {
           method: "POST",
           credentials: "include",
           headers: {

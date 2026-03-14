@@ -6,7 +6,7 @@ import { FiMic, FiMicOff, FiVideo, FiPhoneOff, FiUser } from "react-icons/fi";
 import gsap from "gsap";
 import { useToast } from "./context/ToastContext";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
+import { API_BASE } from "./config.js";
 
 const DURATION_MINUTES = 15; // max time; user can end anytime
 const QUESTION_DURATION_SECONDS = 90; // 1.5 min per question, then auto-advance
@@ -67,7 +67,7 @@ function AIInterviewCall() {
     async function checkAuth() {
       setAuthChecking(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -94,7 +94,7 @@ function AIInterviewCall() {
     async function fetchInterview() {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+        const res = await fetch(`${API_BASE}/interviews/${id}`, {
           credentials: "include",
           headers: getHeaders(),
         });
@@ -115,7 +115,7 @@ function AIInterviewCall() {
   const fetchNextQuestion = async () => {
     setQuestionLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/interviews/${id}/ai-question`, {
+      const res = await fetch(`${API_BASE}/interviews/${id}/ai-question`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...getHeaders() },
@@ -181,7 +181,7 @@ function AIInterviewCall() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
 
-      await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+      await fetch(`${API_BASE}/interviews/${id}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...getHeaders() },
@@ -219,7 +219,7 @@ function AIInterviewCall() {
               const formData = new FormData();
               formData.append("recording", file);
               // Do not set Content-Type: browser must set multipart/form-data with boundary
-              const uploadRes = await fetch(`${API_BASE}/api/v1/user/interviews/${id}/upload-recording`, {
+              const uploadRes = await fetch(`${API_BASE}/interviews/${id}/upload-recording`, {
                 method: "POST",
                 credentials: "include",
                 headers: { ...getHeaders() },
@@ -246,7 +246,7 @@ function AIInterviewCall() {
           if (!uploadedRecording) {
             payload.status = "ended";
           }
-          await fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+          await fetch(`${API_BASE}/interviews/${id}`, {
             method: "PUT",
             credentials: "include",
             headers: { "Content-Type": "application/json", ...getHeaders() },
@@ -568,7 +568,7 @@ function AIInterviewCall() {
       }, 300);
     } else {
       setUploading(true);
-      fetch(`${API_BASE}/api/v1/user/interviews/${id}`, {
+      fetch(`${API_BASE}/interviews/${id}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json", ...getHeaders() },

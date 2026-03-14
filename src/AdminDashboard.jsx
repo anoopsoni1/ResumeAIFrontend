@@ -5,9 +5,9 @@ import { clearUser } from "./slice/user.slice";
 import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
-import { Users, Sparkles, FileText, TrendingUp } from "lucide-react";
+import { Users, Sparkles, FileText, TrendingUp, Download, Video, Code2, Map } from "lucide-react";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 // Build registration counts by day (last 10 days)
 function useRegistrationsByDay(users) {
@@ -45,18 +45,6 @@ function useOptimizeChartData(users) {
   }, [users]);
 }
 
-// Top users by resume count
-function useResumeChartData(users) {
-  return useMemo(() => {
-    if (!users?.length) return [];
-    return users
-      .filter((u) => (u.resumeCount ?? 0) > 0)
-      .map((u) => ({ name: u.FirstName ? `${u.FirstName} ${u.LastName || ""}`.trim() || u.email : u.email, count: u.resumeCount ?? 0, email: u.email }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
-  }, [users]);
-}
-
 function AdminDashboard() {
   const { userData } = useSelector((state) => state.user);
   const dispatch = useDispatch();
@@ -68,10 +56,13 @@ function AdminDashboard() {
 
   const registrationsByDay = useRegistrationsByDay(users);
   const optimizeChartData = useOptimizeChartData(users);
-  const resumeChartData = useResumeChartData(users);
   const totalOptimizes = useMemo(() => users.reduce((s, u) => s + (u.optimizeCount ?? 0), 0), [users]);
   const totalResumes = useMemo(() => users.reduce((s, u) => s + (u.resumeCount ?? 0), 0), [users]);
+  const totalDownloads = useMemo(() => users.reduce((s, u) => s + (u.downloadCount ?? u.resumesDownloadedToday ?? 0), 0), [users]);
   const usersWhoUsedAi = useMemo(() => users.filter((u) => (u.optimizeCount ?? 0) > 0).length, [users]);
+  const totalLiveInterviewsToday = useMemo(() => users.reduce((s, u) => s + (u.liveInterviewsToday ?? 0), 0), [users]);
+  const totalCodingInterviewsToday = useMemo(() => users.reduce((s, u) => s + (u.codingInterviewsToday ?? 0), 0), [users]);
+  const totalRoadmapSuggestionsToday = useMemo(() => users.reduce((s, u) => s + (u.roadmapSuggestionsToday ?? 0), 0), [users]);
 
   useEffect(() => {
     const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
@@ -93,7 +84,7 @@ function AdminDashboard() {
     const fetchUsers = async () => {
       try {
         const accessToken = localStorage.getItem("accessToken");
-        const res = await fetch(`${API_BASE}/api/v1/user/get-all-users`, {
+        const res = await fetch(`${API_BASE}/get-all-users`, {
           credentials: "include",
           headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
         });
@@ -210,6 +201,54 @@ function AdminDashboard() {
                   </div>
                 </div>
               </div>
+              <div className="rounded-xl border border-rose-500/30 bg-linear-to-br from-rose-500/10 to-slate-900/80 p-4 sm:p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-slate-400 text-sm font-medium">Resume Downloads</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white mt-0.5">{totalDownloads}</p>
+                    <p className="text-xs text-slate-500 mt-1">Today</p>
+                  </div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-rose-500/20 flex items-center justify-center">
+                    <Download className="w-5 h-5 sm:w-6 sm:h-6 text-rose-400" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-indigo-500/30 bg-linear-to-br from-indigo-500/10 to-slate-900/80 p-4 sm:p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-slate-400 text-sm font-medium">Live Interviews</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white mt-0.5">{totalLiveInterviewsToday}</p>
+                    <p className="text-xs text-slate-500 mt-1">Today</p>
+                  </div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+                    <Video className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-sky-500/30 bg-linear-to-br from-sky-500/10 to-slate-900/80 p-4 sm:p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-slate-400 text-sm font-medium">Coding Interviews</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white mt-0.5">{totalCodingInterviewsToday}</p>
+                    <p className="text-xs text-slate-500 mt-1">Today</p>
+                  </div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-sky-500/20 flex items-center justify-center">
+                    <Code2 className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-teal-500/30 bg-linear-to-br from-teal-500/10 to-slate-900/80 p-4 sm:p-5 backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-slate-400 text-sm font-medium">Career Suggestions</p>
+                    <p className="text-xl sm:text-2xl font-bold text-white mt-0.5">{totalRoadmapSuggestionsToday}</p>
+                    <p className="text-xs text-slate-500 mt-1">Today</p>
+                  </div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-xl bg-teal-500/20 flex items-center justify-center">
+                    <Map className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400" />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Charts row */}
@@ -276,38 +315,6 @@ function AdminDashboard() {
                     <div className="h-32 flex items-center justify-center text-slate-500 text-sm">No AI optimize usage yet</div>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {/* Resumes per user */}
-            <div className="rounded-2xl border border-slate-700/50 bg-slate-900/50 overflow-hidden mb-6 sm:mb-8 min-w-0">
-              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-700/50">
-                <h2 className="text-base sm:text-lg font-semibold text-white">Resumes Created per User</h2>
-                <p className="text-xs sm:text-sm text-slate-400 mt-0.5">How many times each user created/saved a resume (top 10)</p>
-              </div>
-              <div className="p-3 sm:p-5">
-                {resumeChartData.length ? (
-                  <div className="space-y-3">
-                    {resumeChartData.map((u, i) => {
-                      const max = Math.max(1, ...resumeChartData.map((x) => x.count));
-                      const w = (u.count / max) * 100;
-                      return (
-                        <div key={u.email + i} className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <span className="text-slate-300 text-xs sm:text-sm w-16 sm:w-24 min-w-0 truncate shrink-0" title={u.email}>{u.name}</span>
-                          <div className="flex-1 min-w-0 h-5 sm:h-6 rounded-full bg-slate-700/50 overflow-hidden">
-                            <div
-                              className="h-full rounded-full bg-linear-to-r from-amber-600 to-amber-400 transition-all duration-500"
-                              style={{ width: `${w}%`, minWidth: "8px" }}
-                            />
-                          </div>
-                          <span className="text-amber-400 font-medium text-xs sm:text-sm w-6 sm:w-8 text-right shrink-0">{u.count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="h-32 flex items-center justify-center text-slate-500 text-sm">No resume data yet</div>
-                )}
               </div>
             </div>
           </>

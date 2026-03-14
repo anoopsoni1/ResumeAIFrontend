@@ -7,7 +7,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import { useToast } from "./context/ToastContext";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 const initialForm = {
   FirstName: "",
@@ -64,7 +64,7 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/register`, {
+      const res = await fetch(`${API_BASE}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

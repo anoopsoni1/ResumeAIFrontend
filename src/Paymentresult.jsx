@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearUser, setUser } from "./slice/user.slice";
 import Particles from "./Lighting.jsx";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 const statusConfig = {
   success: {
@@ -67,7 +67,7 @@ function PaymentResult() {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,
@@ -108,7 +108,7 @@ function PaymentResult() {
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         };
 
-        const res = await fetch(`${API_BASE}/api/v1/user/verify-payment`, {
+        const res = await fetch(`${API_BASE}/verify-payment`, {
           method: "POST",
           credentials: "include",
           headers,
@@ -123,7 +123,7 @@ function PaymentResult() {
           setStatus(data[0].payment_status || "Unknown");
 
      if (data[0].payment_status?.toLowerCase() === "success") {
-      const premiumRes = await fetch(`${API_BASE}/api/v1/user/make-premium`, {
+      const premiumRes = await fetch(`${API_BASE}/make-premium`, {
         method: "POST",
         credentials: "include",
         headers: {

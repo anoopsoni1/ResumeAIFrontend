@@ -3,12 +3,15 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { FiPlay, FiCheck, FiX, FiArrowLeft, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import CodingEditor, { STARTER_CODE } from "./CodingEditor";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
+import { useToast } from "./context/ToastContext";
+
 const QUESTION_COUNT = 15;
 
 export default function CodingInterviewPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const role = searchParams.get("role") || "Frontend Developer";
   const difficulty = searchParams.get("difficulty") || "Beginner";
 
@@ -72,7 +75,7 @@ export default function CodingInterviewPage() {
       setLoadingQuestions(true);
       setQuestionError(null);
       try {
-        const res = await fetch(`${API_BASE}/api/v1/user/interview-questions`, {
+        const res = await fetch(`${API_BASE}/interview-questions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ role, difficulty, count: QUESTION_COUNT }),
@@ -135,15 +138,19 @@ export default function CodingInterviewPage() {
     }));
     if (token && attempts.length > 0) {
       try {
-        await fetch(`${API_BASE}/api/v1/user/coding-interview`, {
+        const res = await fetch(`${API_BASE}/coding-interview`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ attempts, status: "submitted" }),
         });
+        if (res.status === 429) {
+          const json = await res.json().catch(() => ({}));
+          toast.error(json?.message || json?.error || "Daily coding interview limit reached (5/day). Try again tomorrow.");
+        }
       } catch (_) {}
     }
     navigate("/coding-interview/start", { replace: true });
-  }, [questions, navigate]);
+  }, [questions, navigate, toast]);
 
   // Warn once when user leaves tab, then next time auto save+quit. Always warn on unload.
   useEffect(() => {
@@ -177,7 +184,7 @@ export default function CodingInterviewPage() {
     setRunResult(null);
     setActiveRightTab("output");
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/run-code`, {
+      const res = await fetch(`${API_BASE}/run-code`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -201,7 +208,7 @@ export default function CodingInterviewPage() {
     setAiReview(null);
     setActiveRightTab("feedback");
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/code-review`, {
+      const res = await fetch(`${API_BASE}/code-review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -224,7 +231,7 @@ export default function CodingInterviewPage() {
     setFollowUpQuestionText(null);
     setActiveRightTab("feedback");
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/follow-up`, {
+      const res = await fetch(`${API_BASE}/follow-up`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -262,7 +269,7 @@ export default function CodingInterviewPage() {
       totalTests: runResultByIndexRef.current[i]?.total ?? 0,
     }));
     try {
-      const res = await fetch(`${API_BASE}/api/v1/user/coding-interview`, {
+      const res = await fetch(`${API_BASE}/coding-interview`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -272,7 +279,11 @@ export default function CodingInterviewPage() {
       });
       const json = await res.json();
       if (res.ok) setSaveMessage("Session saved.");
-      else setSaveMessage(json?.message || "Save failed.");
+      else {
+        const msg = json?.message || json?.error || "Save failed.";
+        setSaveMessage(msg);
+        if (res.status === 429) toast.error(msg);
+      }
     } catch (e) {
       setSaveMessage(e?.message || "Save failed.");
     } finally {

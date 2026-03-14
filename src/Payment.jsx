@@ -10,7 +10,7 @@ import Particles from "./Lighting.jsx";
 import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com"
+import { API_BASE } from "./config.js";
 
 const PAYMENT_AMOUNT = 100;
 
@@ -47,7 +47,7 @@ export default function Payment() {
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("accessToken");
-      const res = await fetch(`${API_BASE}/api/v1/user/payment`, {
+      const res = await fetch(`${API_BASE}/payment`, {
         method: "POST",
         credentials: "include",
         headers: {

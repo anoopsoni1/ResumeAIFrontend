@@ -9,7 +9,7 @@ import Resume2Layout from "./Resume2Layout";
 import Resume3Layout from "./Resume3Layout";
 import Resume7Layout from "./Resume7Layout";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "./config.js";
 
 /** Placeholder data so logged-out users can still view template designs */
 const PLACEHOLDER_RESUME_DATA = {
@@ -374,7 +374,17 @@ export default function ResumeDesignView() {
     return () => { cancelled = true; };
   }, []);
 
-  const handlePrint = useCallback(() => window.print(), []);
+  const handlePrint = useCallback(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      fetch(`${API_BASE}/record-resume-download`, {
+        method: "POST",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
+    window.print();
+  }, []);
 
   const isLoading = loading || detailLoading;
   if (isLoading) {

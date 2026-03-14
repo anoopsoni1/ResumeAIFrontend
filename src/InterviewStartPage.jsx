@@ -6,7 +6,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import Particles from "./Lighting.jsx";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com";
+import { API_BASE } from "./config.js";
 
 const ROLES = [
   { id: "Frontend Developer", label: "Frontend Developer" },
@@ -42,7 +42,7 @@ export default function InterviewStartPage() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
-        const res = await fetch(`${API_BASE}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,

@@ -11,7 +11,7 @@ import AppFooter from "./AppFooter";
 import { buildResumeTextFromDetail, parsedToDetailPayload } from "./utils/detailApi.js";
 import { parseResume } from "./utils/parseResume.js";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user" ;
+import { API_BASE } from "./config.js";
 
 function Topbar() {
   return <AppHeader />;

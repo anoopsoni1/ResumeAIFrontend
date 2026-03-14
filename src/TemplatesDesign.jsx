@@ -8,7 +8,7 @@ import AppHeader from "./AppHeader";
 import AppFooter from "./AppFooter";
 import { useState, useEffect } from "react";
 
-const API_BASE = "https://resumeaibackend-oqcl.onrender.com/api/v1/user";
+import { API_BASE } from "./config.js";
 
 function Topbar() {
   return <AppHeader />;
@@ -81,8 +81,6 @@ function ApiTemplatePreview({ template, onSelect, index = 0 }) {
   );
 }
 
-const PROFILE_API = "https://resumeaibackend-oqcl.onrender.com";
-
 export default function TemplatesDesignPage() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user.userData);
@@ -99,7 +97,7 @@ export default function TemplatesDesignPage() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         const headers = accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
-        const res = await fetch(`${PROFILE_API}/api/v1/user/profile`, {
+        const res = await fetch(`${API_BASE}/profile`, {
           method: "GET",
           credentials: "include",
           headers,
