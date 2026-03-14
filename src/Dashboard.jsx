@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2, FiMap, FiCode, FiAward, FiLock, FiDownload } from "react-icons/fi";
+import { FiGlobe, FiZap, FiTarget, FiUsers, FiVideo, FiTrash2, FiMap, FiCode, FiAward, FiLock } from "react-icons/fi";
 import { MdAutoAwesome } from "react-icons/md";
 import { AiOutlineFileText } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,11 +16,10 @@ function Topbar() {
   return <AppHeader />;
 }
 
-function StatCards({ atsScore, optimizeCount, downloadCount, user }) {
+function StatCards({ atsScore, optimizeCount, user }) {
   const hasAts = atsScore != null && typeof atsScore === "number";
   const atsDisplay = hasAts ? `${atsScore}%` : "—";
   const optimizeDisplay = optimizeCount != null && typeof optimizeCount === "number" ? String(optimizeCount) : "—";
-  const downloadDisplay = downloadCount != null && typeof downloadCount === "number" ? String(downloadCount) : "—";
   const atsColor = hasAts
     ? atsScore >= 70
       ? "text-emerald-400"
@@ -52,14 +51,6 @@ function StatCards({ atsScore, optimizeCount, downloadCount, user }) {
       value: optimizeDisplay,
       sub: optimizeDisplay !== "—" ? "Times used" : "Not used yet",
       link: "/edit-resume",
-      valueClass: "text-white",
-    },
-    {
-      icon: <FiDownload className="w-5 h-5" />,
-      label: "Resume Downloads",
-      value: downloadDisplay,
-      sub: downloadDisplay !== "—" ? "Today" : "Download/print as PDF",
-      link: "/templates/resumedesign",
       valueClass: "text-white",
     },
   ];
@@ -206,7 +197,6 @@ export default function Dashboard() {
   const [authChecking, setAuthChecking] = useState(true);
   const [atsScore, setAtsScore] = useState(null);
   const [optimizeCount, setOptimizeCount] = useState(null);
-  const [downloadCount, setDownloadCount] = useState(null);
   const [deployments, setDeployments] = useState([]);
   const [copiedUrl, setCopiedUrl] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -318,35 +308,6 @@ export default function Dashboard() {
       }
     }
     fetchOptimize();
-    return () => { cancelled = true; };
-  }, [user]);
-
-  // Fetch resume stats (downloads today) for dashboard when user is logged in
-  useEffect(() => {
-    if (!user) {
-      setDownloadCount(null);
-      return;
-    }
-    let cancelled = false;
-    async function fetchResumeStats() {
-      try {
-        const accessToken = localStorage.getItem("accessToken");
-        const res = await fetch(`${API_BASE}/get-resume-stats`, {
-          credentials: "include",
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-        });
-        const json = await res.json().catch(() => ({}));
-        if (cancelled) return;
-        if (res.ok && json?.data != null && typeof json.data.resumesDownloadedToday === "number") {
-          setDownloadCount(json.data.resumesDownloadedToday);
-        } else {
-          setDownloadCount(null);
-        }
-      } catch {
-        if (!cancelled) setDownloadCount(null);
-      }
-    }
-    fetchResumeStats();
     return () => { cancelled = true; };
   }, [user]);
 
@@ -696,7 +657,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            <StatCards atsScore={atsScore} optimizeCount={optimizeCount} downloadCount={downloadCount} user={user} />
+            <StatCards atsScore={atsScore} optimizeCount={optimizeCount} user={user} />
           </main>
         ) : (
           <div className="flex-1 flex items-center justify-center px-4 text-center">
