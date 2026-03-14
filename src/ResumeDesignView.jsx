@@ -469,7 +469,7 @@ export default function ResumeDesignView() {
         </div>
       </div>
 
-      {/* Resume: strict one page (11in); content scales to fit. On mobile, minimal side padding so download fills page. */}
+      {/* Resume: strict one page (11in). On screen content scales to fit; PDF/print is same on mobile and laptop (letter, desktop layout). */}
       <main className="flex-1 py-4 sm:py-6 px-1 sm:px-4 overflow-auto print:p-0">
         <div ref={wrapperRef} className={`${ONE_PAGE_WRAPPER_CLASS} print:max-w-none`}>
           <div
@@ -495,7 +495,7 @@ export default function ResumeDesignView() {
         </div>
       </main>
 
-      {/* Print / PDF: full page, no margins. Turn off "Headers and footers" in Print dialog to hide date. */}
+      {/* Print / PDF: same output on mobile and laptop (letter, one page). Turn off "Headers and footers" in Print dialog to hide date. */}
       <style>{`
         @page { size: letter; margin: 0; }
         @media print {
@@ -521,9 +521,14 @@ export default function ResumeDesignView() {
             margin: 0 !important;
             padding: 0 !important;
           }
+          /* Force same PDF on mobile and laptop: no viewport scaling in print */
           .resume-content-fit {
+            transform: none !important;
             width: 100% !important;
             max-width: 100% !important;
+            position: relative !important;
+            left: auto !important;
+            top: auto !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
