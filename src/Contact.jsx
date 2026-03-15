@@ -24,8 +24,8 @@ const CONTACT_CARDS = [
   {
     icon: HiPhone,
     title: "Phone",
-    value: "+1 (555) 123-4567",
-    href: "tel:+15551234567",
+    value: "+91 9981872498",
+    href: "tel:+91 9981872498",
     delay: 0.05,
   },
   {
@@ -99,7 +99,7 @@ export default function Contact() {
                 <HiChat className="w-4 h-4" /> We reply within 24 hours
               </motion.span>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight">
-                Get in <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Touch</span>
+                Get in <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Touch</span>
               </h1>
               <p className="mt-4 text-slate-400 text-base sm:text-lg max-w-xl mx-auto">
                 Have a question or feedback? Drop us a line—we’d love to hear from you.
@@ -136,7 +136,7 @@ export default function Contact() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <div className="rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-6 sm:p-8 lg:p-10 shadow-2xl shadow-black/30">
+              <div className="rounded-2xl border border-white/10 bg-white/6 backdrop-blur-xl p-6 sm:p-8 lg:p-10 shadow-2xl shadow-black/30">
                 <div className="flex items-center gap-2 mb-6">
                   <Sparkles className="w-5 h-5 text-amber-400" />
                   <h2 className="text-xl font-semibold text-white">Send a message</h2>
@@ -203,7 +203,7 @@ export default function Contact() {
                   <motion.button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-3.5 text-white font-semibold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/30 disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-amber-500 to-orange-500 px-8 py-3.5 text-white font-semibold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/30 disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98]"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >

@@ -41,6 +41,23 @@ export default function CodingInterviewPage() {
   const [showEndSummary, setShowEndSummary] = useState(false);
   const hasShownTabWarningRef = useRef(false);
 
+  // Resizable panel widths (px). Question | Code | Output
+  const [questionWidth, setQuestionWidth] = useState(400);
+  const [rightPanelWidth, setRightPanelWidth] = useState(360);
+  const [resizing, setResizing] = useState(null); // "left" | "right" | null
+  const containerRef = useRef(null);
+  const QUESTION_MIN = 280;
+  const QUESTION_MAX = 560;
+  const RIGHT_MIN = 280;
+  const RIGHT_MAX = 500;
+  const [isLg, setIsLg] = useState(typeof window !== "undefined" && window.innerWidth >= 1024);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const onMatch = (e) => setIsLg(e.matches);
+    mql.addEventListener("change", onMatch);
+    return () => mql.removeEventListener("change", onMatch);
+  }, []);
+
   const handleEnterFullscreen = useCallback(async () => {
     const el = document.documentElement;
     try {
@@ -124,6 +141,36 @@ export default function CodingInterviewPage() {
     setFollowUpQuestionText(null);
     setFollowUpHistory([]);
   }, [currentIndex, questions]);
+
+  // Resize panels: drag left or right handle
+  useEffect(() => {
+    if (!resizing) return;
+    const container = containerRef.current;
+    if (!container) return;
+    const onMove = (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const total = rect.width;
+      if (resizing === "left") {
+        const w = Math.max(QUESTION_MIN, Math.min(QUESTION_MAX, x));
+        setQuestionWidth(w);
+      } else {
+        const w = Math.max(RIGHT_MIN, Math.min(RIGHT_MAX, rect.right - e.clientX));
+        setRightPanelWidth(w);
+      }
+    };
+    const onUp = () => setResizing(null);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [resizing]);
 
   // Tab visibility: save and quit when user switches tab
   const saveAndQuit = useCallback(async () => {
@@ -490,15 +537,21 @@ export default function CodingInterviewPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
-        {/* Left: Question */}
-        <div className="w-full lg:w-[380px] shrink-0 border-b lg:border-b-0 lg:border-r border-white/10 flex flex-col min-h-0 bg-slate-900/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-white/10 bg-slate-800/30">
+      <div
+        ref={containerRef}
+        className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden"
+      >
+        {/* Left: Question (resizable) */}
+        <div
+          className="hidden lg:flex flex-col min-h-0 bg-slate-900/50 overflow-hidden border-b lg:border-b-0 lg:border-r border-white/10 shrink-0"
+          style={{ width: questionWidth }}
+        >
+          <div className="px-4 py-3 border-b border-white/10 bg-slate-800/30 shrink-0">
             <h2 className="text-xs font-bold text-amber-400 uppercase tracking-widest">
               Problem
             </h2>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-5">
             {loadingQuestions && (
               <div className="flex items-center gap-2 text-slate-400">
                 <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
@@ -512,7 +565,7 @@ export default function CodingInterviewPage() {
             )}
             {question && !loadingQuestions && (
               <>
-                <h3 className="text-base font-bold text-white leading-snug">{question.title}</h3>
+                <h3 className="text-lg font-bold text-white leading-snug">{question.title}</h3>
                 {(question.dataStructure || question.algorithm) && (
                   <div className="flex flex-wrap gap-2">
                     {question.dataStructure && (
@@ -527,38 +580,101 @@ export default function CodingInterviewPage() {
                     )}
                   </div>
                 )}
-                <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{question.description}</p>
+                <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{question.description}</div>
                 {question.examples?.length > 0 && (
-                  <div className="rounded-xl border border-white/10 bg-slate-800/40 p-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Examples</h4>
-                    <ul className="space-y-2">
+                  <div className="rounded-xl border border-white/10 bg-slate-800/40 p-4">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Examples</h4>
+                    <div className="space-y-4">
                       {question.examples.map((ex, i) => (
-                        <li key={i} className="rounded-lg bg-slate-800/60 p-2.5 text-xs text-slate-300 font-mono border border-white/5">
-                          <span className="text-slate-500 font-sans">Input:</span> {ex.input}
-                          <br />
-                          <span className="text-slate-500 font-sans">Output:</span> {ex.output}
-                        </li>
+                        <div key={i} className="rounded-lg bg-slate-800/60 p-3 text-sm border border-white/5 space-y-1.5">
+                          <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Example {i + 1}</p>
+                          <p className="text-slate-200 font-mono text-xs break-all">
+                            <span className="text-slate-500 font-sans">Input: </span>{ex.input}
+                          </p>
+                          <p className="text-slate-200 font-mono text-xs break-all">
+                            <span className="text-slate-500 font-sans">Output: </span>{ex.output}
+                          </p>
+                          {ex.explanation && (
+                            <p className="text-slate-400 text-xs italic mt-1.5">
+                              <span className="text-slate-500 font-sans">Explanation: </span>{ex.explanation}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {question.constraints?.length > 0 && (
+                  <div className="rounded-xl border border-white/10 bg-slate-800/40 p-4">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Constraints</h4>
+                    <ul className="list-disc list-inside text-slate-400 text-sm space-y-1.5">
+                      {question.constraints.map((c, i) => (
+                        <li key={i} className="leading-relaxed">{c}</li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {question.constraints?.length > 0 && (
-                  <div className="rounded-xl border border-white/10 bg-slate-800/40 p-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Constraints</h4>
-                    <ul className="list-disc list-inside text-slate-400 text-sm space-y-1">
-                      {question.constraints.map((c, i) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                    </ul>
-                  </div>
+                {question.testCases?.length > 0 && (
+                  <p className="text-slate-500 text-xs">
+                    {question.testCases.length} test case{question.testCases.length !== 1 ? "s" : ""} — use <strong className="text-amber-400/90">Run Code</strong> to check your solution.
+                  </p>
                 )}
               </>
             )}
           </div>
         </div>
 
-        {/* Center: Editor */}
-        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-900/30">
+        {/* Resize handle: Question | Code (desktop only) */}
+        <div
+          role="separator"
+          aria-label="Resize question panel"
+          onMouseDown={(e) => { e.preventDefault(); setResizing("left"); }}
+          className={`hidden lg:block w-1.5 shrink-0 bg-slate-700/50 hover:bg-amber-500/40 transition-colors cursor-col-resize ${resizing === "left" ? "bg-amber-500/50" : ""}`}
+        />
+
+        {/* Center: Editor + mobile question */}
+        <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-900/30 shrink">
+          {/* Mobile: collapsible question panel (same content as left sidebar) */}
+          <div className="lg:hidden shrink-0 border-b border-white/10 bg-slate-900/50">
+            <details className="group">
+              <summary className="px-4 py-3 border-b border-white/10 bg-slate-800/30 text-xs font-bold text-amber-400 uppercase tracking-widest cursor-pointer list-none flex items-center justify-between">
+                Problem
+                <span className="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div className="max-h-64 overflow-y-auto scrollbar-hide p-4 space-y-4">
+                {question && (
+                  <>
+                    <h3 className="text-base font-bold text-white">{question.title}</h3>
+                    {(question.dataStructure || question.algorithm) && (
+                      <div className="flex flex-wrap gap-2">
+                        {question.dataStructure && <span className="rounded-md bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-xs text-amber-300">{question.dataStructure}</span>}
+                        {question.algorithm && <span className="rounded-md bg-indigo-500/20 border border-indigo-500/40 px-2 py-0.5 text-xs text-indigo-300">{question.algorithm}</span>}
+                      </div>
+                    )}
+                    <p className="text-slate-300 text-sm whitespace-pre-wrap">{question.description}</p>
+                    {question.examples?.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase">Examples</h4>
+                        {question.examples.map((ex, i) => (
+                          <div key={i} className="rounded-lg bg-slate-800/60 p-2 text-xs text-slate-300">
+                            <p><span className="text-slate-500">Input:</span> {ex.input}</p>
+                            <p><span className="text-slate-500">Output:</span> {ex.output}</p>
+                            {ex.explanation && <p className="italic text-slate-400 mt-1">{ex.explanation}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {question.constraints?.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-1">Constraints</h4>
+                        <ul className="list-disc list-inside text-slate-400 text-xs space-y-0.5">{question.constraints.map((c, j) => <li key={j}>{c}</li>)}</ul>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </details>
+          </div>
           <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-white/10 bg-slate-800/40 shrink-0">
             <button
               type="button"
@@ -610,8 +726,19 @@ export default function CodingInterviewPage() {
           </div>
         </div>
 
-        {/* Right: Output / Feedback */}
-        <div className="w-full lg:w-[340px] shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col min-h-0 bg-slate-900/50 overflow-hidden">
+        {/* Resize handle: Code | Output */}
+        <div
+          role="separator"
+          aria-label="Resize output panel"
+          onMouseDown={(e) => { e.preventDefault(); setResizing("right"); }}
+          className={`hidden lg:block w-1.5 shrink-0 bg-slate-700/50 hover:bg-amber-500/40 transition-colors cursor-col-resize ${resizing === "right" ? "bg-amber-500/50" : ""}`}
+        />
+
+        {/* Right: Output / Feedback (resizable) */}
+        <div
+          className="w-full lg:shrink-0 border-t lg:border-t-0 lg:border-l border-white/10 flex flex-col min-h-0 bg-slate-900/50 overflow-hidden"
+          style={isLg ? { width: rightPanelWidth } : undefined}
+        >
           <div className="flex border-b border-white/10 bg-slate-800/30">
             {rightTabs.map((tab) => (
               <button
@@ -628,7 +755,7 @@ export default function CodingInterviewPage() {
               </button>
             ))}
           </div>
-          <div className="flex-1 overflow-y-auto p-4 text-sm">
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-4 text-sm">
             {activeRightTab === "output" && (
               <div className="space-y-4">
                 {runResult == null && (

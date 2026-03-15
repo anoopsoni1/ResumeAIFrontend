@@ -84,6 +84,15 @@
   font-family: "Space Grotesk", sans-serif;
 }
 
+/* Hide scrollbar but keep scroll (coding interview panels) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* === CODE / TERMINAL === */
 .font-jetbrains {
   font-family: "JetBrains Mono", monospace;
