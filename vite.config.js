@@ -14,8 +14,8 @@ export default defineConfig({
       },
       registerType: 'autoUpdate',
       manifest: {
-        name: 'ResumeAI - AI Resume Builder & Optimizer',
-        short_name: 'Resume AI',
+        name: 'Intervexa - AI Resume Builder & Optimizer',
+        short_name: 'Intervexa',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',

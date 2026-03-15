@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, X } from "lucide-react";
 
-const STORAGE_KEY = "resumeai_pwa_dismissed";
+const STORAGE_KEY = "intervexa_pwa_dismissed";
 
 const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -64,7 +64,7 @@ const InstallPrompt = () => {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-white">Install ResumeAI</p>
+                <p className="font-semibold text-white">Install Intervexa</p>
                 <p className="mt-0.5 text-sm text-slate-300">
                   Add to your home screen for quick access and a smoother experience.
                 </p>

@@ -211,7 +211,7 @@ function VideoCallInterviewDetail() {
                   )}
                 <div className="flex items-center gap-2 text-slate-300">
                   <FiUser className="w-4 h-4 text-slate-500" />
-                  <span>Recruiter: ResumeAI</span>
+                  <span>Recruiter: Intervexa</span>
                 </div>
                   {cand && (
                     <div className="flex items-center gap-2 text-slate-300">

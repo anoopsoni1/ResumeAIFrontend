@@ -152,7 +152,7 @@ export default function AppHeader({ onLogout }) {
             <FaFileMedical className="text-white" />
           </motion.div>
           <span className="text-lg font-semibold text-white transition-colors duration-200 group-hover:text-indigo-200">
-            RESUME AI
+            INTERVEXA
           </span>
         </Link>
 
@@ -215,7 +215,7 @@ export default function AppHeader({ onLogout }) {
                           <div className="bg-indigo-600 h-9 w-9 rounded-full flex items-center justify-center text-white shrink-0">
                             <FaFileMedical />
                           </div>
-                          <span className="text-lg font-semibold truncate">RESUME AI</span>
+                          <span className="text-lg font-semibold truncate">INTERVEXA</span>
                         </div>
                         <button
                           onClick={closeMenu}

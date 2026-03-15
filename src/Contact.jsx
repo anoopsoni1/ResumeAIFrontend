@@ -17,8 +17,8 @@ const CONTACT_CARDS = [
   {
     icon: HiMail,
     title: "Email",
-    value: "support@resumeai.com",
-    href: "mailto:support@resumeai.com",
+    value: "support@intervexa.com",
+    href: "mailto:support@intervexa.com",
     delay: 0,
   },
   {
@@ -226,8 +226,8 @@ export default function Contact() {
               transition={{ delay: 0.5 }}
             >
               Prefer email?{" "}
-              <a href="mailto:support@resumeai.com" className="text-amber-400 hover:text-amber-300 font-medium">
-                support@resumeai.com
+              <a href="mailto:support@intervexa.com" className="text-amber-400 hover:text-amber-300 font-medium">
+                support@intervexa.com
               </a>
             </motion.p>
           </div>

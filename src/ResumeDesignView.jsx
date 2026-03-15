@@ -502,7 +502,7 @@ export default function ResumeDesignView() {
               <Resume2Layout data={displayData} />
             )}
             <footer className="resume-doc-footer mt-auto pt-2 text-center text-zinc-500 text-[10px] sm:text-xs print:text-[10px] print:text-zinc-600">
-              Made by Resume AI
+              Made by Intervexa
             </footer>
           </div>
         </div>

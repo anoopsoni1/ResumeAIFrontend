@@ -412,7 +412,7 @@ function Payal() {
                   variants={fadeUp}
                   className="text-amber-400/90 text-sm font-semibold uppercase tracking-wider mb-3"
                 >
-                  Why ResumeAI
+                  Why Intervexa
                 </motion.p>
                 <motion.h2
                   variants={fadeUp}

@@ -185,7 +185,7 @@ function VideoCallInterviews() {
                           </span>
                           <span className="flex items-center gap-1">
                             <FiUser className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                            Recruiter: ResumeAI
+                            Recruiter: Intervexa
                           </span>
                           {(iv.candidateId && (iv.candidateId.FirstName || iv.candidateId.email)) && (
                             <span className="flex items-center gap-1 min-w-0">

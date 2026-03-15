@@ -85,7 +85,7 @@ export default function About() {
                 <Sparkles className="w-4 h-4" /> Built for job seekers
               </motion.span>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight">
-                About <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Resume AI</span>
+                About <span className="bg-linear-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">Intervexa</span>
               </h1>
               <p className="mt-5 text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
                 We help job seekers land more interviews with AI-optimized resumes
@@ -108,7 +108,7 @@ export default function About() {
                 Our Mission
               </h2>
               <p className="text-slate-400 text-sm sm:text-base leading-relaxed max-w-3xl">
-                Resume AI was built to level the playing field. Applicant tracking
+                Intervexa was built to level the playing field. Applicant tracking
                 systems reject countless qualified candidates before a human ever
                 sees their resume. We combine AI analysis, ATS scoring, and
                 professional templates so you can create a resume that gets past

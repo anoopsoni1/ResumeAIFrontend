@@ -139,7 +139,7 @@ export default function Register() {
                 <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
                   Create account
                 </h1>
-                <p className="text-zinc-400 text-sm mt-1">Join Resume AI to get started</p>
+                <p className="text-zinc-400 text-sm mt-1">Join Intervexa to get started</p>
               </motion.div>
 
               <motion.div variants={item} className="space-y-4">

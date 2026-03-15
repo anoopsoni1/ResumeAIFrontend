@@ -663,7 +663,7 @@ export default function Dashboard() {
           <div className="flex-1 flex items-center justify-center px-4 text-center">
             <div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white">
-                Welcome to ResumeAI Dashboard
+                Welcome to Intervexa Dashboard
               </h1>
               <p className="mt-4 text-sm sm:text-lg text-amber-500">
                 Please log in to access your dashboard.
